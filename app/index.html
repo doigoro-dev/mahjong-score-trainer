@@ -147,6 +147,12 @@ Ver1.1 問題管理情報
       font-weight: 800;
     }
 
+    .timer-value {
+      min-width: 5ch;
+      text-align: center;
+      font-variant-numeric: tabular-nums;
+    }
+
     .stage {
       --tile-size: clamp(16px, calc((100vw - 150px) / 14), 74px);
       --tile-gap: clamp(1px, 0.45vw, 6px);
@@ -6955,6 +6961,9 @@ Ver1.1 問題管理情報
     let answerShown = false;
     let currentMode = MODE_NORMAL;
     let sessionVariations = {};
+    let timerIntervalId = null;
+    let timerStartedAt = 0;
+    let elapsedMilliseconds = 0;
 
     function svgElement(name, attributes = {}) {
       const element = document.createElementNS(SVG_NS, name);
@@ -7575,6 +7584,75 @@ Ver1.1 問題管理情報
       return card;
     }
 
+    function createTimerInfoCard() {
+      const card = document.createElement("div");
+      card.className = "info-card";
+
+      const label = document.createElement("span");
+      label.className = "info-label";
+      label.textContent = "経過時間";
+
+      const value = document.createElement("span");
+      value.id = "timerDisplay";
+      value.className = "info-value timer-value";
+      value.dataset.testid = "timer-display";
+      value.textContent = "00:00";
+
+      card.append(label, value);
+
+      return card;
+      }
+
+    function formatElapsedTime(milliseconds) {
+      const totalSeconds = Math.floor(milliseconds / 1000);
+      const minutes = Math.floor(totalSeconds / 60);
+      const seconds = totalSeconds % 60;
+
+      return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+      }
+
+    function updateTimerDisplay() {
+      const timerDisplay = document.getElementById("timerDisplay");
+
+      if (!timerDisplay) {
+      return;
+      }
+
+      timerDisplay.textContent = formatElapsedTime(elapsedMilliseconds);
+      }
+
+    function clearTimerInterval() {
+      if (timerIntervalId === null) {
+      return;
+      }
+
+      window.clearInterval(timerIntervalId);
+      timerIntervalId = null;
+      }
+
+    function startTimer() {
+      clearTimerInterval();
+
+      elapsedMilliseconds = 0;
+      timerStartedAt = Date.now();
+      updateTimerDisplay();
+
+      timerIntervalId = window.setInterval(() => {
+      elapsedMilliseconds = Date.now() - timerStartedAt;
+      updateTimerDisplay();
+      }, 250);
+      }
+
+    function stopTimer() {
+      if (timerIntervalId === null) {
+      return;
+      }
+
+      elapsedMilliseconds = Date.now() - timerStartedAt;
+      clearTimerInterval();
+      updateTimerDisplay();
+      }
+
     function createAnswerItem(label, value) {
       const item = document.createElement("div");
       item.className = "answer-item";
@@ -8032,7 +8110,8 @@ Ver1.1 問題管理情報
       document.getElementById("questionInfo").replaceChildren(
         createInfoCard("和了方法", WIN_TYPE_LABELS[question.winType]),
         createInfoCard("場風", WIND_LABELS[question.roundWind]),
-        createInfoCard("自風", WIND_LABELS[question.seatWind])
+        createInfoCard("自風", WIND_LABELS[question.seatWind]),
+        createTimerInfoCard()
       );
 
       const conditionPanel = document.getElementById("additionalConditionPanel");
@@ -8065,12 +8144,16 @@ Ver1.1 問題管理情報
       document.getElementById("showAnswerButton").hidden = false;
       document.getElementById("nextQuestionButton").hidden = true;
       document.getElementById("thinkingMessage").hidden = false;
+
+      startTimer();
     }
 
     function showAnswer() {
       if (!currentQuestion) {
         return;
       }
+
+      stopTimer();
 
       const answer = getActiveAnswer(currentQuestion);
       const yakuText = answer.yaku
