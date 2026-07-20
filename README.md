@@ -14,7 +14,7 @@
 
 GitHub Pagesで公開しています。
 
-https://<GitHubユーザー名>.github.io/mahjong-score-trainer/
+https://doigoro-dev.github.io/mahjong-score-trainer/
 
 ---
 
