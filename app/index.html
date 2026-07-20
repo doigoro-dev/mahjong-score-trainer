@@ -244,6 +244,90 @@ Ver1.1 問題管理情報
       border: 1px dashed #cbd5e1;
     }
 
+    .score-response-panel {
+      margin: 20px 0 0;
+      padding: 16px;
+      border-radius: 12px;
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+    }
+
+    .score-response-title {
+      margin: 0 0 12px;
+      text-align: center;
+      color: #334155;
+      font-size: 1rem;
+    }
+
+    .score-input-row {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .score-input-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .score-input-group label {
+      font-weight: 700;
+      color: #475569;
+    }
+
+    .score-input {
+      width: 130px;
+      border: 1px solid #94a3b8;
+      border-radius: 9px;
+      padding: 10px 12px;
+      font: inherit;
+      font-variant-numeric: tabular-nums;
+      text-align: right;
+      background: #ffffff;
+    }
+
+    .score-input:focus {
+      outline: 3px solid rgba(37, 99, 235, 0.18);
+      border-color: #2563eb;
+    }
+
+    .score-input-error {
+      min-height: 1.5em;
+      margin: 10px 0 0;
+      text-align: center;
+      color: #b91c1c;
+      font-weight: 700;
+    }
+
+    .grading-result {
+      margin-bottom: 16px;
+      padding: 14px;
+      border-radius: 12px;
+      text-align: center;
+      font-weight: 800;
+    }
+
+    .grading-result.correct {
+      color: #166534;
+      background: #dcfce7;
+      border: 1px solid #86efac;
+    }
+
+    .grading-result.incorrect {
+      color: #991b1b;
+      background: #fee2e2;
+      border: 1px solid #fca5a5;
+    }
+
+    .grading-result-detail {
+      display: block;
+      margin-top: 6px;
+      font-weight: 600;
+    }
+
     .button-row {
       display: flex;
       justify-content: center;
@@ -495,12 +579,18 @@ Ver1.1 問題管理情報
     </section>
 
     <div id="thinkingMessage" class="thinking-message" data-testid="thinking-message">
-      役・翻・符・点数を計算してから、「答えを見る」を押してください。
+      役・翻・符を脳内で計算し、実戦と同じように最終点数を入力してください。
     </div>
+
+    <section id="scoreResponsePanel" class="score-response-panel" aria-label="点数回答" data-testid="score-response-panel">
+      <h2 class="score-response-title">点数を入力</h2>
+      <div id="scoreInputContainer" class="score-input-row" data-testid="score-input-container"></div>
+      <p id="scoreInputError" class="score-input-error" aria-live="polite" data-testid="score-input-error"></p>
+    </section>
 
     <div class="button-row">
       <button id="showAnswerButton" class="button button-primary" type="button" data-testid="show-answer">
-        答えを見る
+        採点する
       </button>
 
       <button id="nextQuestionButton" class="button button-secondary" type="button" hidden data-testid="next-question">
@@ -512,6 +602,7 @@ Ver1.1 問題管理情報
     </div>
 
     <section id="answerPanel" class="answer-panel" hidden data-testid="answer-panel">
+      <div id="gradingResult" class="grading-result" aria-live="polite" data-testid="grading-result"></div>
       <h2>正解</h2>
       <div id="answerGrid" class="answer-grid" data-testid="answer-grid"></div>
       <div id="answerExplanation" class="explanation" data-testid="answer-explanation"></div>
@@ -6964,6 +7055,7 @@ Ver1.1 問題管理情報
     let timerIntervalId = null;
     let timerStartedAt = 0;
     let elapsedMilliseconds = 0;
+    let submittedAnswer = null;
 
     function svgElement(name, attributes = {}) {
       const element = document.createElementNS(SVG_NS, name);
@@ -8026,7 +8118,8 @@ Ver1.1 問題管理情報
         currentQuestionIndex,
         answerShown,
         currentMode,
-        sessionVariations
+        sessionVariations,
+        submittedAnswer
       };
 
       try {
@@ -8072,6 +8165,15 @@ Ver1.1 問題管理情報
           state.sessionVariations && typeof state.sessionVariations === "object"
             ? state.sessionVariations
             : {};
+        submittedAnswer =
+          state.submittedAnswer && typeof state.submittedAnswer === "object"
+            ? state.submittedAnswer
+            : null;
+
+        if (answerShown && !submittedAnswer) {
+          answerShown = false;
+        }
+
         return true;
       } catch (error) {
         console.warn("保存済みセッションを読み込めませんでした。", error);
@@ -8083,6 +8185,7 @@ Ver1.1 問題管理情報
       sessionOrder = shuffleArray(questions.map(question => question.id));
       currentQuestionIndex = 0;
       answerShown = false;
+      submittedAnswer = null;
       createSessionVariations();
       saveSessionState();
     }
@@ -8090,6 +8193,201 @@ Ver1.1 問題管理情報
     function getCurrentSessionQuestion() {
       const questionId = sessionOrder[currentQuestionIndex];
       return questions.find(question => question.id === questionId) || null;
+    }
+
+    function createScoreInput(id, labelText) {
+      const group = document.createElement("div");
+      group.className = "score-input-group";
+
+      const label = document.createElement("label");
+      label.htmlFor = id;
+      label.textContent = labelText;
+
+      const input = document.createElement("input");
+      input.id = id;
+      input.className = "score-input";
+      input.type = "number";
+      input.inputMode = "numeric";
+      input.min = "0";
+      input.step = "100";
+      input.autocomplete = "off";
+      input.dataset.testid = id;
+
+      const unit = document.createElement("span");
+      unit.textContent = "点";
+
+      group.append(label, input, unit);
+      return group;
+    }
+
+    function displayScoreInputs(question) {
+      const container = document.getElementById("scoreInputContainer");
+      document.getElementById("scoreInputError").textContent = "";
+      container.replaceChildren();
+
+      if (question.winType === "ron") {
+        container.append(createScoreInput("ronScoreInput", "申告点数"));
+        return;
+      }
+
+      if (question.seatWind === "east") {
+        container.append(
+          createScoreInput("dealerTsumoScoreInput", "各自の支払い")
+        );
+
+        const allLabel = document.createElement("strong");
+        allLabel.textContent = "オール";
+        container.append(allLabel);
+        return;
+      }
+
+      container.append(
+        createScoreInput("childPaymentInput", "子の支払い"),
+        createScoreInput("dealerPaymentInput", "親の支払い")
+      );
+    }
+
+    function readPositiveInteger(inputId) {
+      const input = document.getElementById(inputId);
+      if (!input || input.value.trim() === "") {
+        return null;
+      }
+
+      const value = Number(input.value);
+      return Number.isInteger(value) && value > 0 ? value : null;
+    }
+
+    function getSubmittedScore(question) {
+      if (question.winType === "ron") {
+        const score = readPositiveInteger("ronScoreInput");
+        return score === null ? null : { type: "ron", score };
+      }
+
+      if (question.seatWind === "east") {
+        const allPayment = readPositiveInteger("dealerTsumoScoreInput");
+        return allPayment === null
+          ? null
+          : { type: "dealerTsumo", allPayment };
+      }
+
+      const childPayment = readPositiveInteger("childPaymentInput");
+      const dealerPayment = readPositiveInteger("dealerPaymentInput");
+
+      return childPayment === null || dealerPayment === null
+        ? null
+        : { type: "childTsumo", childPayment, dealerPayment };
+    }
+
+    function getExpectedScore(question, answer) {
+      const values = (answer.score.pointText.match(/\d+/g) || []).map(Number);
+
+      if (question.winType === "ron") {
+        return { type: "ron", score: values[0] };
+      }
+
+      if (question.seatWind === "east") {
+        return { type: "dealerTsumo", allPayment: values[0] };
+      }
+
+      return {
+        type: "childTsumo",
+        childPayment: values[0],
+        dealerPayment: values[1]
+      };
+    }
+
+    function isScoreCorrect(submitted, expected) {
+      if (!submitted || submitted.type !== expected.type) {
+        return false;
+      }
+
+      if (expected.type === "ron") {
+        return submitted.score === expected.score;
+      }
+
+      if (expected.type === "dealerTsumo") {
+        return submitted.allPayment === expected.allPayment;
+      }
+
+      return (
+        submitted.childPayment === expected.childPayment &&
+        submitted.dealerPayment === expected.dealerPayment
+      );
+    }
+
+    function formatScoreResponse(response) {
+      if (response.type === "ron") {
+        return `${response.score}点`;
+      }
+
+      if (response.type === "dealerTsumo") {
+        return `${response.allPayment}点オール`;
+      }
+
+      return `${response.childPayment}点／${response.dealerPayment}点`;
+    }
+
+    function renderAnswer(submitted) {
+      const answer = getActiveAnswer(currentQuestion);
+      const expected = getExpectedScore(currentQuestion, answer);
+      const correct = isScoreCorrect(submitted, expected);
+      const yakuText = answer.yaku
+        .map(yaku => `${yaku.name} ${yaku.han}翻`)
+        .join("、");
+
+      const gradingResult = document.getElementById("gradingResult");
+      gradingResult.className =
+        `grading-result ${correct ? "correct" : "incorrect"}`;
+      gradingResult.replaceChildren();
+
+      const resultText = document.createElement("span");
+      resultText.textContent = correct ? "○ 正解！" : "× 不正解";
+
+      const detail = document.createElement("span");
+      detail.className = "grading-result-detail";
+      detail.textContent = correct
+        ? `あなたの回答：${formatScoreResponse(submitted)}`
+        : `あなたの回答：${formatScoreResponse(submitted)}　正解：${formatScoreResponse(expected)}`;
+
+      gradingResult.append(resultText, detail);
+
+      document.getElementById("answerGrid").replaceChildren(
+        createAnswerItem("役", yakuText),
+        createAnswerItem("翻", `${answer.totalHan}翻`),
+        createAnswerItem("符", `${answer.fu}符`),
+        createAnswerItem("点数区分", answer.score.category),
+        createAnswerItem("点数", answer.score.pointText)
+      );
+
+      const explanation = document.getElementById("answerExplanation");
+      explanation.replaceChildren();
+
+      const title = document.createElement("strong");
+      title.textContent = "符・点数の内訳";
+
+      const list = document.createElement("ul");
+      for (const item of answer.fuBreakdown) {
+        const listItem = document.createElement("li");
+        listItem.textContent = item;
+        list.appendChild(listItem);
+      }
+
+      explanation.append(title, list);
+
+      document.getElementById("answerPanel").hidden = false;
+      document.getElementById("scoreResponsePanel").hidden = true;
+      document.getElementById("showAnswerButton").hidden = true;
+      document.getElementById("nextQuestionButton").textContent =
+        currentQuestionIndex === questions.length - 1
+          ? "セッションを終了する"
+          : "次の問題";
+      document.getElementById("nextQuestionButton").hidden = false;
+      document.getElementById("thinkingMessage").hidden = true;
+
+      document.getElementById("answerPanel").scrollIntoView({
+        behavior: "smooth",
+        block: "nearest"
+      });
     }
 
     function displayQuestion(question) {
@@ -8141,6 +8439,8 @@ Ver1.1 問題管理情報
       document.querySelector(".stage").hidden = false;
       document.getElementById("restartFromBeginningButton").hidden = false;
       document.getElementById("answerPanel").hidden = true;
+      document.getElementById("scoreResponsePanel").hidden = false;
+      displayScoreInputs(question);
       document.getElementById("showAnswerButton").hidden = false;
       document.getElementById("nextQuestionButton").hidden = true;
       document.getElementById("thinkingMessage").hidden = false;
@@ -8153,52 +8453,20 @@ Ver1.1 問題管理情報
         return;
       }
 
-      stopTimer();
-
-      const answer = getActiveAnswer(currentQuestion);
-      const yakuText = answer.yaku
-        .map(yaku => `${yaku.name} ${yaku.han}翻`)
-        .join("、");
-
-      document.getElementById("answerGrid").replaceChildren(
-        createAnswerItem("役", yakuText),
-        createAnswerItem("翻", `${answer.totalHan}翻`),
-        createAnswerItem("符", `${answer.fu}符`),
-        createAnswerItem("点数区分", answer.score.category),
-        createAnswerItem("点数", answer.score.pointText)
-      );
-
-      const explanation = document.getElementById("answerExplanation");
-      explanation.replaceChildren();
-
-      const title = document.createElement("strong");
-      title.textContent = "符・点数の内訳";
-
-      const list = document.createElement("ul");
-      for (const item of answer.fuBreakdown) {
-        const listItem = document.createElement("li");
-        listItem.textContent = item;
-        list.appendChild(listItem);
+      const submitted = getSubmittedScore(currentQuestion);
+      if (!submitted) {
+        document.getElementById("scoreInputError").textContent =
+          currentQuestion.winType === "tsumo" && currentQuestion.seatWind !== "east"
+            ? "子と親、両方の支払点数を入力してください。"
+            : "点数を入力してください。";
+        return;
       }
 
-      explanation.append(title, list);
-
+      stopTimer();
+      submittedAnswer = submitted;
       answerShown = true;
       saveSessionState();
-
-      document.getElementById("answerPanel").hidden = false;
-      document.getElementById("showAnswerButton").hidden = true;
-      document.getElementById("nextQuestionButton").textContent =
-        currentQuestionIndex === questions.length - 1
-          ? "セッションを終了する"
-          : "次の問題";
-      document.getElementById("nextQuestionButton").hidden = false;
-      document.getElementById("thinkingMessage").hidden = true;
-
-      document.getElementById("answerPanel").scrollIntoView({
-        behavior: "smooth",
-        block: "nearest"
-      });
+      renderAnswer(submitted);
     }
 
     function showCompletion() {
@@ -8210,6 +8478,7 @@ Ver1.1 問題管理情報
       document.getElementById("additionalConditionPanel").hidden = true;
       document.querySelector(".stage").hidden = true;
       document.getElementById("thinkingMessage").hidden = true;
+      document.getElementById("scoreResponsePanel").hidden = true;
       document.getElementById("showAnswerButton").hidden = true;
       document.getElementById("nextQuestionButton").hidden = true;
       document.getElementById("restartFromBeginningButton").hidden = true;
@@ -8236,6 +8505,7 @@ Ver1.1 問題管理情報
 
       currentQuestionIndex += 1;
       answerShown = false;
+      submittedAnswer = null;
       saveSessionState();
       displayQuestion(getCurrentSessionQuestion());
 
@@ -8295,8 +8565,9 @@ Ver1.1 問題管理情報
       updateModeDisplay();
       displayQuestion(getCurrentSessionQuestion());
 
-      if (answerShown) {
-        showAnswer();
+      if (answerShown && submittedAnswer) {
+        stopTimer();
+        renderAnswer(submittedAnswer);
       }
     }
 
