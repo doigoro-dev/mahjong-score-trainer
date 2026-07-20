@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <!--
-Ver2.4 複数暗槓・三槓子対応
+Ver2.5 場風・自風対応
 - 暗槓が複数ある場合のレスポンシブ表示に対応
 - 三暗槓を含む三槓子問題を1問追加
 - 暗槓ごとの符を合算して採点
-- 既存113問との後方互換性を維持
+- 既存117問との後方互換性を維持
 -->
 <!--
 Ver2.1 役追加
@@ -41,10 +41,10 @@ Ver1.3 やり直し機能
 
 <!--
 Ver1.2 セッション出題仕様
-- セッション開始時にFisher-Yates方式で全113問をシャッフル
-- 113問を一巡するまで同じ問題は再出題しない
+- セッション開始時にFisher-Yates方式で全117問をシャッフル
+- 117問を一巡するまで同じ問題は再出題しない
 - 「第n問（n / 112）」と「残りn問」を表示
-- 113問終了後に完了画面と再挑戦ボタンを表示
+- 117問終了後に完了画面と再挑戦ボタンを表示
 - 再挑戦時は新しい順番で再シャッフル
 - sessionStorageへ出題順、現在位置、回答表示状態を保存
 - 同じタブでリロードした場合は途中から再開
@@ -52,7 +52,7 @@ Ver1.2 セッション出題仕様
 
 <!--
 Ver1.1 問題管理情報
-- 全113問に management メタデータを付与
+- 全117問に management メタデータを付与
 - 管理項目: 符、翻、点数区分、親子、ロン／ツモ、待ち分類、主な役、切り上げ満貫
 - 30符4翻: 0問
 - 60符3翻: 10問
@@ -61,7 +61,7 @@ Ver1.1 問題管理情報
 
 <!--
 品質保証情報
-- 問題数: 113問
+- 問題数: 117問
 - 符別構成: 20符10問、25符10問、30符20問、40符20問、50符15問、60符25問
 - 全問題の翻数合計を検証済み
 - 全問題の符内訳と最終符を検証済み
@@ -76,7 +76,7 @@ Ver1.1 問題管理情報
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>麻雀点数計算トレーナー 113問版 Ver2.4（複数暗槓・三槓子対応版）</title>
+  <title>麻雀点数計算トレーナー 117問版 Ver2.5（場風・自風対応版）</title>
   <style>
     :root {
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -640,8 +640,8 @@ Ver1.1 問題管理情報
 </head>
 <body>
   <main>
-    <h1>麻雀点数計算トレーナー 113問版 Ver2.3</h1>
-    <p class="subtitle">暗槓問題対応版：113問を重複なしで一巡</p>
+    <h1>麻雀点数計算トレーナー 117問版 Ver2.3</h1>
+    <p class="subtitle">暗槓問題対応版：117問を重複なしで一巡</p>
 
 
     <section class="mode-panel" aria-label="出題モード" data-testid="mode-panel">
@@ -704,8 +704,8 @@ Ver1.1 問題管理情報
     </section>
 
     <section id="completionPanel" class="answer-panel" hidden data-testid="completion-panel">
-      <h2>🎉 全113問終了しました！</h2>
-      <p>今回のセッションでは、全113問を重複なしで1回ずつ出題しました。</p>
+      <h2>🎉 全117問終了しました！</h2>
+      <p>今回のセッションでは、全117問を重複なしで1回ずつ出題しました。</p>
       <div class="button-row">
         <button id="restartSessionButton" class="button button-primary" type="button" data-testid="restart-session">
           もう一度挑戦する
@@ -7957,10 +7957,270 @@ Ver1.1 問題管理情報
             }
       }
 
+      ,
+      {
+            "id": "q114",
+            "concealedTiles": [
+                  "east",
+                  "east",
+                  "east",
+                  "2m",
+                  "3m",
+                  "4m",
+                  "4p",
+                  "5p",
+                  "6p",
+                  "6s",
+                  "7s",
+                  "5s",
+                  "5s"
+            ],
+            "winningTile": "8s",
+            "winType": "ron",
+            "roundWind": "east",
+            "seatWind": "west",
+            "riichi": false,
+            "menzen": true,
+            "answer": {
+                  "yaku": [
+                        {
+                              "name": "場風（東）",
+                              "han": 1
+                        }
+                  ],
+                  "totalHan": 1,
+                  "fu": 40,
+                  "score": {
+                        "display": "1300点",
+                        "pointText": "1300点",
+                        "category": "通常",
+                        "basePoints": 320,
+                        "kiriageMangan": false
+                  },
+                  "fuBreakdown": [
+                        "副底：20符",
+                        "門前ロン：10符",
+                        "役牌（東）の暗刻：8符",
+                        "合計38符を切り上げて40符"
+                  ]
+            },
+            "management": {
+                  "fu": 40,
+                  "han": 1,
+                  "scoreCategory": "通常",
+                  "playerType": "子",
+                  "winType": "ロン",
+                  "waitType": "両面",
+                  "mainYaku": [
+                        "場風（東）"
+                  ],
+                  "kiriageMangan": false
+            }
+      },
+      {
+            "id": "q115",
+            "concealedTiles": [
+                  "west",
+                  "west",
+                  "west",
+                  "2m",
+                  "2m",
+                  "2m",
+                  "3p",
+                  "4p",
+                  "5p",
+                  "6s",
+                  "7s",
+                  "9m",
+                  "9m"
+            ],
+            "winningTile": "8s",
+            "winType": "tsumo",
+            "roundWind": "south",
+            "seatWind": "west",
+            "riichi": false,
+            "menzen": true,
+            "answer": {
+                  "yaku": [
+                        {
+                              "name": "門前清自摸和",
+                              "han": 1
+                        },
+                        {
+                              "name": "自風（西）",
+                              "han": 1
+                        }
+                  ],
+                  "totalHan": 2,
+                  "fu": 40,
+                  "score": {
+                        "display": "700点／1300点",
+                        "pointText": "700点／1300点",
+                        "category": "通常",
+                        "basePoints": 640,
+                        "kiriageMangan": false
+                  },
+                  "fuBreakdown": [
+                        "副底：20符",
+                        "ツモ：2符",
+                        "役牌（西）の暗刻：8符",
+                        "中張牌（二萬）の暗刻：4符",
+                        "合計34符を切り上げて40符"
+                  ]
+            },
+            "management": {
+                  "fu": 40,
+                  "han": 2,
+                  "scoreCategory": "通常",
+                  "playerType": "子",
+                  "winType": "ツモ",
+                  "waitType": "両面",
+                  "mainYaku": [
+                        "門前清自摸和",
+                        "自風（西）"
+                  ],
+                  "kiriageMangan": false
+            }
+      },
+      {
+            "id": "q116",
+            "concealedTiles": [
+                  "south",
+                  "south",
+                  "south",
+                  "1m",
+                  "2m",
+                  "4p",
+                  "5p",
+                  "6p",
+                  "7s",
+                  "8s",
+                  "9s",
+                  "5m",
+                  "5m"
+            ],
+            "winningTile": "3m",
+            "winType": "ron",
+            "roundWind": "south",
+            "seatWind": "south",
+            "riichi": false,
+            "menzen": true,
+            "answer": {
+                  "yaku": [
+                        {
+                              "name": "場風（南）",
+                              "han": 1
+                        },
+                        {
+                              "name": "自風（南）",
+                              "han": 1
+                        }
+                  ],
+                  "totalHan": 2,
+                  "fu": 40,
+                  "score": {
+                        "display": "2600点",
+                        "pointText": "2600点",
+                        "category": "通常",
+                        "basePoints": 640,
+                        "kiriageMangan": false
+                  },
+                  "fuBreakdown": [
+                        "副底：20符",
+                        "門前ロン：10符",
+                        "連風牌（南）の暗刻：8符",
+                        "辺張待ち：2符",
+                        "合計40符"
+                  ]
+            },
+            "management": {
+                  "fu": 40,
+                  "han": 2,
+                  "scoreCategory": "通常",
+                  "playerType": "子",
+                  "winType": "ロン",
+                  "waitType": "辺張",
+                  "mainYaku": [
+                        "場風（南）",
+                        "自風（南）"
+                  ],
+                  "kiriageMangan": false
+            }
+      },
+      {
+            "id": "q117",
+            "concealedTiles": [
+                  "east",
+                  "east",
+                  "east",
+                  "2m",
+                  "3m",
+                  "4m",
+                  "4p",
+                  "5p",
+                  "6p",
+                  "6s",
+                  "7s",
+                  "5s",
+                  "5s"
+            ],
+            "winningTile": "8s",
+            "winType": "tsumo",
+            "roundWind": "east",
+            "seatWind": "east",
+            "riichi": false,
+            "menzen": true,
+            "answer": {
+                  "yaku": [
+                        {
+                              "name": "門前清自摸和",
+                              "han": 1
+                        },
+                        {
+                              "name": "場風（東）",
+                              "han": 1
+                        },
+                        {
+                              "name": "自風（東）",
+                              "han": 1
+                        }
+                  ],
+                  "totalHan": 3,
+                  "fu": 30,
+                  "score": {
+                        "display": "2000点オール",
+                        "pointText": "2000点オール",
+                        "category": "通常",
+                        "basePoints": 960,
+                        "kiriageMangan": false
+                  },
+                  "fuBreakdown": [
+                        "副底：20符",
+                        "ツモ：2符",
+                        "連風牌（東）の暗刻：8符",
+                        "合計30符"
+                  ]
+            },
+            "management": {
+                  "fu": 30,
+                  "han": 3,
+                  "scoreCategory": "通常",
+                  "playerType": "親",
+                  "winType": "ツモ",
+                  "waitType": "両面",
+                  "mainYaku": [
+                        "門前清自摸和",
+                        "場風（東）",
+                        "自風（東）"
+                  ],
+                  "kiriageMangan": false
+            }
+      }
+
 
 ];
 
-    const SESSION_STORAGE_KEY = "mahjongScoreTrainerVer2_4Session";
+    const SESSION_STORAGE_KEY = "mahjongScoreTrainerVer2_5Session";
     const MODE_NORMAL = "normal";
     const MODE_HAN_VARIATION = "hanVariation";
     let currentQuestion = null;
@@ -8768,7 +9028,7 @@ Ver1.1 問題管理情報
       const errors = [];
 
       if (questions.length !== 112) {
-        errors.push(`問題数が113問ではありません：${questions.length}問`);
+        errors.push(`問題数が117問ではありません：${questions.length}問`);
       }
 
       const ids = new Set();
@@ -8826,7 +9086,7 @@ Ver1.1 問題管理情報
       if (errors.length > 0) {
         console.error("問題データ検証エラー", errors);
       } else {
-        console.info("問題データ検証完了：113問すべて正常です");
+        console.info("問題データ検証完了：117問すべて正常です");
       }
 
       return errors;
