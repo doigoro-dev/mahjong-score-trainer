@@ -1,5 +1,12 @@
 <!DOCTYPE html>
 <!--
+Ver2.1 役追加
+- 三色同順、混全帯么九、純全帯么九、二盃口を追加
+- 清一色、小三元、混老頭、三色同刻を追加
+- 問題数を100問から108問へ拡張
+- 引き続き門前のみ（副露・槓子は未対応）
+-->
+<!--
 Ver1.6 レスポンシブ牌表示
 - 表示領域に合わせて牌全体を自動縮小
 - 牌サイズ、牌間隔、和了牌との間隔、和了牌ラベルを連動調整
@@ -27,10 +34,10 @@ Ver1.3 やり直し機能
 
 <!--
 Ver1.2 セッション出題仕様
-- セッション開始時にFisher-Yates方式で全100問をシャッフル
-- 100問を一巡するまで同じ問題は再出題しない
-- 「第n問（n / 100）」と「残りn問」を表示
-- 100問終了後に完了画面と再挑戦ボタンを表示
+- セッション開始時にFisher-Yates方式で全108問をシャッフル
+- 108問を一巡するまで同じ問題は再出題しない
+- 「第n問（n / 108）」と「残りn問」を表示
+- 108問終了後に完了画面と再挑戦ボタンを表示
 - 再挑戦時は新しい順番で再シャッフル
 - sessionStorageへ出題順、現在位置、回答表示状態を保存
 - 同じタブでリロードした場合は途中から再開
@@ -38,7 +45,7 @@ Ver1.2 セッション出題仕様
 
 <!--
 Ver1.1 問題管理情報
-- 全100問に management メタデータを付与
+- 全108問に management メタデータを付与
 - 管理項目: 符、翻、点数区分、親子、ロン／ツモ、待ち分類、主な役、切り上げ満貫
 - 30符4翻: 0問
 - 60符3翻: 10問
@@ -47,7 +54,7 @@ Ver1.1 問題管理情報
 
 <!--
 品質保証情報
-- 問題数: 100問
+- 問題数: 108問
 - 符別構成: 20符10問、25符10問、30符20問、40符20問、50符15問、60符25問
 - 全問題の翻数合計を検証済み
 - 全問題の符内訳と最終符を検証済み
@@ -62,7 +69,7 @@ Ver1.1 問題管理情報
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>麻雀点数計算トレーナー 100問版 Ver1.6（やり直しボタン対応版）</title>
+  <title>麻雀点数計算トレーナー 108問版 Ver2.1（役追加版）</title>
   <style>
     :root {
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -545,8 +552,8 @@ Ver1.1 問題管理情報
 </head>
 <body>
   <main>
-    <h1>麻雀点数計算トレーナー 100問版 Ver1.6</h1>
-    <p class="subtitle">レスポンシブ牌表示対応版：100問を重複なしで一巡</p>
+    <h1>麻雀点数計算トレーナー 108問版 Ver2.1</h1>
+    <p class="subtitle">役追加版：108問を重複なしで一巡</p>
 
 
     <section class="mode-panel" aria-label="出題モード" data-testid="mode-panel">
@@ -609,8 +616,8 @@ Ver1.1 問題管理情報
     </section>
 
     <section id="completionPanel" class="answer-panel" hidden data-testid="completion-panel">
-      <h2>🎉 全100問終了しました！</h2>
-      <p>今回のセッションでは、全問題を重複なしで1回ずつ出題しました。</p>
+      <h2>🎉 全108問終了しました！</h2>
+      <p>今回のセッションでは、全108問を重複なしで1回ずつ出題しました。</p>
       <div class="button-row">
         <button id="restartSessionButton" class="button button-primary" type="button" data-testid="restart-session">
           もう一度挑戦する
@@ -7040,10 +7047,520 @@ Ver1.1 問題管理情報
                   ],
                   "kiriageMangan": true
             }
+      },
+
+      {
+            "id": "q101",
+            "concealedTiles": [
+                  "2m",
+                  "3m",
+                  "4m",
+                  "2p",
+                  "3p",
+                  "4p",
+                  "5p",
+                  "5p",
+                  "2s",
+                  "3s",
+                  "4s",
+                  "6s",
+                  "7s"
+            ],
+            "winningTile": "8s",
+            "winType": "tsumo",
+            "roundWind": "east",
+            "seatWind": "south",
+            "riichi": false,
+            "menzen": true,
+            "answer": {
+                  "yaku": [
+                        {
+                              "name": "門前清自摸和",
+                              "han": 1
+                        },
+                        {
+                              "name": "平和",
+                              "han": 1
+                        },
+                        {
+                              "name": "三色同順",
+                              "han": 2
+                        }
+                  ],
+                  "totalHan": 4,
+                  "fu": 20,
+                  "score": {
+                        "display": "1300点／2600点",
+                        "pointText": "1300点／2600点",
+                        "category": "通常",
+                        "basePoints": 1280,
+                        "kiriageMangan": false
+                  },
+                  "fuBreakdown": [
+                        "副底：20符",
+                        "平和ツモのため20符"
+                  ]
+            },
+            "management": {
+                  "fu": 20,
+                  "han": 4,
+                  "scoreCategory": "通常",
+                  "playerType": "子",
+                  "winType": "ツモ",
+                  "waitType": "両面",
+                  "mainYaku": [
+                        "門前清自摸和",
+                        "平和",
+                        "三色同順"
+                  ],
+                  "kiriageMangan": false
+            }
+      },
+      {
+            "id": "q102",
+            "concealedTiles": [
+                  "1m",
+                  "2m",
+                  "3m",
+                  "7p",
+                  "8p",
+                  "9p",
+                  "1s",
+                  "2s",
+                  "red",
+                  "red",
+                  "red",
+                  "east",
+                  "east"
+            ],
+            "winningTile": "3s",
+            "winType": "ron",
+            "roundWind": "south",
+            "seatWind": "west",
+            "riichi": false,
+            "menzen": true,
+            "answer": {
+                  "yaku": [
+                        {
+                              "name": "役牌（中）",
+                              "han": 1
+                        },
+                        {
+                              "name": "混全帯么九",
+                              "han": 2
+                        }
+                  ],
+                  "totalHan": 3,
+                  "fu": 40,
+                  "score": {
+                        "display": "5200点",
+                        "pointText": "5200点",
+                        "category": "通常",
+                        "basePoints": 1280,
+                        "kiriageMangan": false
+                  },
+                  "fuBreakdown": [
+                        "副底：20符",
+                        "門前ロン：10符",
+                        "么九牌の暗刻：8符",
+                        "辺張待ち：2符",
+                        "合計：40符"
+                  ]
+            },
+            "management": {
+                  "fu": 40,
+                  "han": 3,
+                  "scoreCategory": "通常",
+                  "playerType": "子",
+                  "winType": "ロン",
+                  "waitType": "辺張",
+                  "mainYaku": [
+                        "役牌（中）",
+                        "混全帯么九"
+                  ],
+                  "kiriageMangan": false
+            }
+      },
+      {
+            "id": "q103",
+            "concealedTiles": [
+                  "1m",
+                  "2m",
+                  "3m",
+                  "7m",
+                  "8m",
+                  "9m",
+                  "1p",
+                  "2p",
+                  "9p",
+                  "9p",
+                  "7s",
+                  "8s",
+                  "9s"
+            ],
+            "winningTile": "3p",
+            "winType": "ron",
+            "roundWind": "east",
+            "seatWind": "north",
+            "riichi": false,
+            "menzen": true,
+            "answer": {
+                  "yaku": [
+                        {
+                              "name": "純全帯么九",
+                              "han": 3
+                        }
+                  ],
+                  "totalHan": 3,
+                  "fu": 40,
+                  "score": {
+                        "display": "5200点",
+                        "pointText": "5200点",
+                        "category": "通常",
+                        "basePoints": 1280,
+                        "kiriageMangan": false
+                  },
+                  "fuBreakdown": [
+                        "副底：20符",
+                        "門前ロン：10符",
+                        "辺張待ち：2符",
+                        "合計32符を切り上げて40符"
+                  ]
+            },
+            "management": {
+                  "fu": 40,
+                  "han": 3,
+                  "scoreCategory": "通常",
+                  "playerType": "子",
+                  "winType": "ロン",
+                  "waitType": "辺張",
+                  "mainYaku": [
+                        "純全帯么九"
+                  ],
+                  "kiriageMangan": false
+            }
+      },
+      {
+            "id": "q104",
+            "concealedTiles": [
+                  "1m",
+                  "1m",
+                  "2m",
+                  "2m",
+                  "3m",
+                  "3m",
+                  "4p",
+                  "4p",
+                  "5p",
+                  "5p",
+                  "6p",
+                  "7s",
+                  "7s"
+            ],
+            "winningTile": "6p",
+            "winType": "ron",
+            "roundWind": "south",
+            "seatWind": "west",
+            "riichi": false,
+            "menzen": true,
+            "answer": {
+                  "yaku": [
+                        {
+                              "name": "平和",
+                              "han": 1
+                        },
+                        {
+                              "name": "二盃口",
+                              "han": 3
+                        }
+                  ],
+                  "totalHan": 4,
+                  "fu": 30,
+                  "score": {
+                        "display": "切り上げ満貫（8000点）",
+                        "pointText": "8000点",
+                        "category": "切り上げ満貫",
+                        "basePoints": 2000,
+                        "kiriageMangan": true
+                  },
+                  "fuBreakdown": [
+                        "副底：20符",
+                        "門前ロン：10符",
+                        "合計：30符",
+                        "30符4翻のため、切り上げ満貫を適用"
+                  ]
+            },
+            "management": {
+                  "fu": 30,
+                  "han": 4,
+                  "scoreCategory": "切り上げ満貫",
+                  "playerType": "子",
+                  "winType": "ロン",
+                  "waitType": "両面",
+                  "mainYaku": [
+                        "平和",
+                        "二盃口"
+                  ],
+                  "kiriageMangan": true
+            }
+      },
+      {
+            "id": "q105",
+            "concealedTiles": [
+                  "1m",
+                  "1m",
+                  "2m",
+                  "2m",
+                  "3m",
+                  "3m",
+                  "4m",
+                  "4m",
+                  "6m",
+                  "6m",
+                  "8m",
+                  "8m",
+                  "9m"
+            ],
+            "winningTile": "9m",
+            "winType": "ron",
+            "roundWind": "west",
+            "seatWind": "south",
+            "riichi": false,
+            "menzen": true,
+            "answer": {
+                  "yaku": [
+                        {
+                              "name": "七対子",
+                              "han": 2
+                        },
+                        {
+                              "name": "清一色",
+                              "han": 6
+                        }
+                  ],
+                  "totalHan": 8,
+                  "fu": 25,
+                  "score": {
+                        "display": "倍満（16000点）",
+                        "pointText": "16000点",
+                        "category": "倍満",
+                        "basePoints": 4000,
+                        "kiriageMangan": false
+                  },
+                  "fuBreakdown": [
+                        "七対子は固定25符"
+                  ]
+            },
+            "management": {
+                  "fu": 25,
+                  "han": 8,
+                  "scoreCategory": "倍満",
+                  "playerType": "子",
+                  "winType": "ロン",
+                  "waitType": "単騎",
+                  "mainYaku": [
+                        "七対子",
+                        "清一色"
+                  ],
+                  "kiriageMangan": false
+            }
+      },
+      {
+            "id": "q106",
+            "concealedTiles": [
+                  "1m",
+                  "2m",
+                  "3m",
+                  "4p",
+                  "5p",
+                  "white",
+                  "white",
+                  "white",
+                  "green",
+                  "green",
+                  "green",
+                  "red",
+                  "red"
+            ],
+            "winningTile": "6p",
+            "winType": "ron",
+            "roundWind": "south",
+            "seatWind": "west",
+            "riichi": false,
+            "menzen": true,
+            "answer": {
+                  "yaku": [
+                        {
+                              "name": "役牌（白）",
+                              "han": 1
+                        },
+                        {
+                              "name": "役牌（發）",
+                              "han": 1
+                        },
+                        {
+                              "name": "小三元",
+                              "han": 2
+                        }
+                  ],
+                  "totalHan": 4,
+                  "fu": 50,
+                  "score": {
+                        "display": "6400点",
+                        "pointText": "6400点",
+                        "category": "通常",
+                        "basePoints": 1600,
+                        "kiriageMangan": false
+                  },
+                  "fuBreakdown": [
+                        "副底：20符",
+                        "門前ロン：10符",
+                        "么九牌の暗刻：8符 × 2",
+                        "役牌の雀頭：2符",
+                        "合計48符を切り上げて50符"
+                  ]
+            },
+            "management": {
+                  "fu": 50,
+                  "han": 4,
+                  "scoreCategory": "通常",
+                  "playerType": "子",
+                  "winType": "ロン",
+                  "waitType": "両面",
+                  "mainYaku": [
+                        "役牌（白）",
+                        "役牌（發）",
+                        "小三元"
+                  ],
+                  "kiriageMangan": false
+            }
+      },
+      {
+            "id": "q107",
+            "concealedTiles": [
+                  "1m",
+                  "1m",
+                  "9m",
+                  "9m",
+                  "1p",
+                  "1p",
+                  "9p",
+                  "9p",
+                  "east",
+                  "east",
+                  "white",
+                  "white",
+                  "red"
+            ],
+            "winningTile": "red",
+            "winType": "ron",
+            "roundWind": "south",
+            "seatWind": "west",
+            "riichi": false,
+            "menzen": true,
+            "answer": {
+                  "yaku": [
+                        {
+                              "name": "七対子",
+                              "han": 2
+                        },
+                        {
+                              "name": "混老頭",
+                              "han": 2
+                        }
+                  ],
+                  "totalHan": 4,
+                  "fu": 25,
+                  "score": {
+                        "display": "6400点",
+                        "pointText": "6400点",
+                        "category": "通常",
+                        "basePoints": 1600,
+                        "kiriageMangan": false
+                  },
+                  "fuBreakdown": [
+                        "七対子は固定25符"
+                  ]
+            },
+            "management": {
+                  "fu": 25,
+                  "han": 4,
+                  "scoreCategory": "通常",
+                  "playerType": "子",
+                  "winType": "ロン",
+                  "waitType": "単騎",
+                  "mainYaku": [
+                        "七対子",
+                        "混老頭"
+                  ],
+                  "kiriageMangan": false
+            }
+      },
+      {
+            "id": "q108",
+            "concealedTiles": [
+                  "1m",
+                  "2m",
+                  "5m",
+                  "5m",
+                  "5m",
+                  "5p",
+                  "5p",
+                  "5p",
+                  "5s",
+                  "5s",
+                  "5s",
+                  "east",
+                  "east"
+            ],
+            "winningTile": "3m",
+            "winType": "ron",
+            "roundWind": "south",
+            "seatWind": "west",
+            "riichi": false,
+            "menzen": true,
+            "answer": {
+                  "yaku": [
+                        {
+                              "name": "三色同刻",
+                              "han": 2
+                        }
+                  ],
+                  "totalHan": 2,
+                  "fu": 50,
+                  "score": {
+                        "display": "3200点",
+                        "pointText": "3200点",
+                        "category": "通常",
+                        "basePoints": 800,
+                        "kiriageMangan": false
+                  },
+                  "fuBreakdown": [
+                        "副底：20符",
+                        "門前ロン：10符",
+                        "中張牌の暗刻：4符 × 3",
+                        "辺張待ち：2符",
+                        "合計44符を切り上げて50符"
+                  ]
+            },
+            "management": {
+                  "fu": 50,
+                  "han": 2,
+                  "scoreCategory": "通常",
+                  "playerType": "子",
+                  "winType": "ロン",
+                  "waitType": "辺張",
+                  "mainYaku": [
+                        "三色同刻"
+                  ],
+                  "kiriageMangan": false
+            }
       }
+
+
 ];
 
-    const SESSION_STORAGE_KEY = "mahjongScoreTrainerVer1_4Session";
+    const SESSION_STORAGE_KEY = "mahjongScoreTrainerVer2_1Session";
     const MODE_NORMAL = "normal";
     const MODE_HAN_VARIATION = "hanVariation";
     let currentQuestion = null;
@@ -7763,8 +8280,8 @@ Ver1.1 問題管理情報
     function validateQuestionData() {
       const errors = [];
 
-      if (questions.length !== 100) {
-        errors.push(`問題数が100問ではありません：${questions.length}問`);
+      if (questions.length !== 108) {
+        errors.push(`問題数が108問ではありません：${questions.length}問`);
       }
 
       const ids = new Set();
@@ -7798,7 +8315,7 @@ Ver1.1 問題管理情報
       if (errors.length > 0) {
         console.error("問題データ検証エラー", errors);
       } else {
-        console.info("問題データ検証完了：100問すべて正常です");
+        console.info("問題データ検証完了：108問すべて正常です");
       }
 
       return errors;
