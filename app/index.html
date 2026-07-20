@@ -1,10 +1,17 @@
 <!DOCTYPE html>
 <!--
+Ver2.3 暗槓問題・符計算対応
+- 暗槓を含む問題を4問追加
+- 中張牌の暗槓16符、幺九牌の暗槓32符に対応
+- 暗槓を含む問題でも手牌構成を検証可能
+- 既存108問との後方互換性を維持
+-->
+<!--
 Ver2.1 役追加
 - 三色同順、混全帯么九、純全帯么九、二盃口を追加
 - 清一色、小三元、混老頭、三色同刻を追加
 - 問題数を100問から108問へ拡張
-- 引き続き門前のみ（副露・槓子は未対応）
+- この版の追加問題は門前・槓子なし
 -->
 <!--
 Ver1.6 レスポンシブ牌表示
@@ -34,10 +41,10 @@ Ver1.3 やり直し機能
 
 <!--
 Ver1.2 セッション出題仕様
-- セッション開始時にFisher-Yates方式で全108問をシャッフル
-- 108問を一巡するまで同じ問題は再出題しない
-- 「第n問（n / 108）」と「残りn問」を表示
-- 108問終了後に完了画面と再挑戦ボタンを表示
+- セッション開始時にFisher-Yates方式で全112問をシャッフル
+- 112問を一巡するまで同じ問題は再出題しない
+- 「第n問（n / 112）」と「残りn問」を表示
+- 112問終了後に完了画面と再挑戦ボタンを表示
 - 再挑戦時は新しい順番で再シャッフル
 - sessionStorageへ出題順、現在位置、回答表示状態を保存
 - 同じタブでリロードした場合は途中から再開
@@ -45,7 +52,7 @@ Ver1.2 セッション出題仕様
 
 <!--
 Ver1.1 問題管理情報
-- 全108問に management メタデータを付与
+- 全112問に management メタデータを付与
 - 管理項目: 符、翻、点数区分、親子、ロン／ツモ、待ち分類、主な役、切り上げ満貫
 - 30符4翻: 0問
 - 60符3翻: 10問
@@ -54,7 +61,7 @@ Ver1.1 問題管理情報
 
 <!--
 品質保証情報
-- 問題数: 108問
+- 問題数: 112問
 - 符別構成: 20符10問、25符10問、30符20問、40符20問、50符15問、60符25問
 - 全問題の翻数合計を検証済み
 - 全問題の符内訳と最終符を検証済み
@@ -62,14 +69,14 @@ Ver1.1 問題管理情報
 - 切り上げ満貫対象: 10問
 - 対象ID: q026, q030, q081, q085, q086, q090, q091, q095, q096, q100
 - 問題ID重複なし
-- 全問題が手牌13枚＋和了牌1枚
+- 通常問題は手牌13枚＋和了牌1枚、暗槓問題は構成上13枚分＋和了牌1枚
 -->
 
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>麻雀点数計算トレーナー 108問版 Ver2.1（役追加版）</title>
+  <title>麻雀点数計算トレーナー 112問版 Ver2.3（暗槓問題対応版）</title>
   <style>
     :root {
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -186,6 +193,13 @@ Ver1.1 問題管理情報
       }
     }
 
+    /* 暗槓がある問題では、物理的な牌が15枚になるため表示だけを少し縮小する。 */
+    #completeHandContainer.has-concealed-kan {
+      --tile-size: clamp(15px, calc((100cqw - 130px) / 15), 66px);
+      --tile-gap: clamp(0px, 0.28cqw, 4px);
+      --winning-gap: clamp(4px, 1.2cqw, 16px);
+    }
+
     .complete-hand-row {
       display: flex;
       width: 100%;
@@ -199,6 +213,43 @@ Ver1.1 問題管理情報
       min-width: 0;
       gap: var(--tile-gap);
       align-items: flex-end;
+    }
+
+    .concealed-tile-section {
+      display: flex;
+      min-width: 0;
+      gap: var(--tile-gap);
+      align-items: flex-end;
+    }
+
+    .concealed-kan-section {
+      display: flex;
+      flex: 0 0 auto;
+      gap: var(--winning-gap);
+      align-items: flex-end;
+      margin-left: var(--winning-gap);
+    }
+
+    .concealed-kan-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex: 0 0 auto;
+    }
+
+    .concealed-kan-tiles {
+      display: flex;
+      gap: var(--tile-gap);
+      align-items: flex-end;
+    }
+
+    .concealed-kan-label {
+      margin-top: clamp(3px, 0.7cqw, 8px);
+      color: #475569;
+      font-size: var(--winning-label-size);
+      line-height: 1.35;
+      font-weight: 700;
+      white-space: nowrap;
     }
 
     .winning-tile-area {
@@ -543,6 +594,12 @@ Ver1.1 問題管理情報
         padding-inline: 3px;
       }
 
+      #completeHandContainer.has-concealed-kan {
+        --tile-size: clamp(13px, calc((100cqw - 50px) / 15), 25px);
+        --tile-gap: 0px;
+        --winning-gap: clamp(2px, 0.8cqw, 5px);
+      }
+
       .winning-label {
         font-size: clamp(0.43rem, 1.7cqw, 0.58rem);
       }
@@ -552,8 +609,8 @@ Ver1.1 問題管理情報
 </head>
 <body>
   <main>
-    <h1>麻雀点数計算トレーナー 108問版 Ver2.1</h1>
-    <p class="subtitle">役追加版：108問を重複なしで一巡</p>
+    <h1>麻雀点数計算トレーナー 112問版 Ver2.3</h1>
+    <p class="subtitle">暗槓問題対応版：112問を重複なしで一巡</p>
 
 
     <section class="mode-panel" aria-label="出題モード" data-testid="mode-panel">
@@ -616,8 +673,8 @@ Ver1.1 問題管理情報
     </section>
 
     <section id="completionPanel" class="answer-panel" hidden data-testid="completion-panel">
-      <h2>🎉 全108問終了しました！</h2>
-      <p>今回のセッションでは、全108問を重複なしで1回ずつ出題しました。</p>
+      <h2>🎉 全112問終了しました！</h2>
+      <p>今回のセッションでは、全112問を重複なしで1回ずつ出題しました。</p>
       <div class="button-row">
         <button id="restartSessionButton" class="button button-primary" type="button" data-testid="restart-session">
           もう一度挑戦する
@@ -663,7 +720,7 @@ Ver1.1 問題管理情報
 
     /*
      * Ver1.1 固定問題（100問）。各問題に管理用メタデータを付与。
-     * 現行形式では副露・槓子を扱わないため、60符以上を高符カテゴリとして収録。
+     * 既存108問は副露・槓子を扱わず、60符以上を高符カテゴリとして収録。
      * すべて門前、立直なし、ドラなし、副露なし。
      */
     const questions = [
@@ -7555,12 +7612,266 @@ Ver1.1 問題管理情報
                   ],
                   "kiriageMangan": false
             }
+      },
+      {
+            "id": "q109",
+            "concealedTiles": [
+                  "1m",
+                  "2m",
+                  "1p",
+                  "2p",
+                  "3p",
+                  "1s",
+                  "2s",
+                  "3s",
+                  "west",
+                  "west"
+            ],
+            "concealedKans": [
+                  "9m"
+            ],
+            "winningTile": "3m",
+            "winType": "ron",
+            "roundWind": "east",
+            "seatWind": "south",
+            "riichi": false,
+            "menzen": true,
+            "answer": {
+                  "yaku": [
+                        {
+                              "name": "三色同順",
+                              "han": 2
+                        },
+                        {
+                              "name": "混全帯么九",
+                              "han": 2
+                        }
+                  ],
+                  "totalHan": 4,
+                  "fu": 70,
+                  "score": {
+                        "display": "8000点",
+                        "pointText": "8000点",
+                        "category": "満貫",
+                        "basePoints": 2000,
+                        "kiriageMangan": false
+                  },
+                  "fuBreakdown": [
+                        "副底：20符",
+                        "門前ロン：10符",
+                        "幺九牌の暗槓：32符",
+                        "辺張待ち：2符",
+                        "合計64符を切り上げて70符"
+                  ]
+            },
+            "management": {
+                  "fu": 70,
+                  "han": 4,
+                  "scoreCategory": "満貫",
+                  "playerType": "子",
+                  "winType": "ロン",
+                  "waitType": "辺張",
+                  "mainYaku": [
+                        "三色同順",
+                        "混全帯么九"
+                  ],
+                  "kiriageMangan": false
+            }
+      },
+      {
+            "id": "q110",
+            "concealedTiles": [
+                  "2m",
+                  "3m",
+                  "4m",
+                  "3m",
+                  "4m",
+                  "5m",
+                  "6s",
+                  "7s",
+                  "6p",
+                  "6p"
+            ],
+            "concealedKans": [
+                  "5p"
+            ],
+            "winningTile": "8s",
+            "winType": "tsumo",
+            "roundWind": "east",
+            "seatWind": "south",
+            "riichi": false,
+            "menzen": true,
+            "answer": {
+                  "yaku": [
+                        {
+                              "name": "門前清自摸和",
+                              "han": 1
+                        },
+                        {
+                              "name": "断么九",
+                              "han": 1
+                        }
+                  ],
+                  "totalHan": 2,
+                  "fu": 40,
+                  "score": {
+                        "display": "700点／1300点",
+                        "pointText": "700点／1300点",
+                        "category": "通常",
+                        "basePoints": 640,
+                        "kiriageMangan": false
+                  },
+                  "fuBreakdown": [
+                        "副底：20符",
+                        "ツモ：2符",
+                        "中張牌の暗槓：16符",
+                        "合計38符を切り上げて40符"
+                  ]
+            },
+            "management": {
+                  "fu": 40,
+                  "han": 2,
+                  "scoreCategory": "通常",
+                  "playerType": "子",
+                  "winType": "ツモ",
+                  "waitType": "両面",
+                  "mainYaku": [
+                        "門前清自摸和",
+                        "断么九"
+                  ],
+                  "kiriageMangan": false
+            }
+      },
+      {
+            "id": "q111",
+            "concealedTiles": [
+                  "2m",
+                  "3m",
+                  "4p",
+                  "5p",
+                  "6p",
+                  "6s",
+                  "7s",
+                  "8s",
+                  "2p",
+                  "2p"
+            ],
+            "concealedKans": [
+                  "white"
+            ],
+            "winningTile": "4m",
+            "winType": "ron",
+            "roundWind": "south",
+            "seatWind": "east",
+            "riichi": false,
+            "menzen": true,
+            "answer": {
+                  "yaku": [
+                        {
+                              "name": "役牌（白）",
+                              "han": 1
+                        }
+                  ],
+                  "totalHan": 1,
+                  "fu": 70,
+                  "score": {
+                        "display": "3400点",
+                        "pointText": "3400点",
+                        "category": "通常",
+                        "basePoints": 560,
+                        "kiriageMangan": false
+                  },
+                  "fuBreakdown": [
+                        "副底：20符",
+                        "門前ロン：10符",
+                        "幺九牌の暗槓：32符",
+                        "合計62符を切り上げて70符"
+                  ]
+            },
+            "management": {
+                  "fu": 70,
+                  "han": 1,
+                  "scoreCategory": "通常",
+                  "playerType": "親",
+                  "winType": "ロン",
+                  "waitType": "両面",
+                  "mainYaku": [
+                        "役牌（白）"
+                  ],
+                  "kiriageMangan": false
+            }
+      },
+      {
+            "id": "q112",
+            "concealedTiles": [
+                  "1m",
+                  "2m",
+                  "3m",
+                  "4m",
+                  "5m",
+                  "6m",
+                  "7m",
+                  "8m",
+                  "5p",
+                  "5p"
+            ],
+            "concealedKans": [
+                  "1s"
+            ],
+            "winningTile": "9m",
+            "winType": "tsumo",
+            "roundWind": "south",
+            "seatWind": "west",
+            "riichi": false,
+            "menzen": true,
+            "answer": {
+                  "yaku": [
+                        {
+                              "name": "門前清自摸和",
+                              "han": 1
+                        },
+                        {
+                              "name": "一気通貫",
+                              "han": 2
+                        }
+                  ],
+                  "totalHan": 3,
+                  "fu": 60,
+                  "score": {
+                        "display": "2000点／4000点",
+                        "pointText": "2000点／4000点",
+                        "category": "切り上げ満貫",
+                        "basePoints": 2000,
+                        "kiriageMangan": true
+                  },
+                  "fuBreakdown": [
+                        "副底：20符",
+                        "ツモ：2符",
+                        "幺九牌の暗槓：32符",
+                        "辺張待ち：2符",
+                        "合計56符を切り上げて60符",
+                        "60符3翻のため切り上げ満貫"
+                  ]
+            },
+            "management": {
+                  "fu": 60,
+                  "han": 3,
+                  "scoreCategory": "切り上げ満貫",
+                  "playerType": "子",
+                  "winType": "ツモ",
+                  "waitType": "辺張",
+                  "mainYaku": [
+                        "門前清自摸和",
+                        "一気通貫"
+                  ],
+                  "kiriageMangan": true
+            }
       }
 
 
 ];
 
-    const SESSION_STORAGE_KEY = "mahjongScoreTrainerVer2_1Session";
+    const SESSION_STORAGE_KEY = "mahjongScoreTrainerVer2_3Session";
     const MODE_NORMAL = "normal";
     const MODE_HAN_VARIATION = "hanVariation";
     let currentQuestion = null;
@@ -8145,12 +8456,58 @@ Ver1.1 問題管理情報
       );
     }
 
-    function displayCompleteHand(concealedTiles, winningTile, container) {
-      if (!Array.isArray(concealedTiles) || concealedTiles.length !== 13) {
-        throw new Error("concealedTilesには13枚の配列を指定してください。");
+    function normalizeConcealedKanTileCode(concealedKan, index) {
+      if (typeof concealedKan === "string") {
+        return concealedKan;
+      }
+
+      if (
+        concealedKan &&
+        typeof concealedKan === "object" &&
+        typeof concealedKan.tile === "string"
+      ) {
+        return concealedKan.tile;
+      }
+
+      throw new Error(
+        `concealedKans[${index}]には牌コード、または { tile: 牌コード } を指定してください。`
+      );
+    }
+
+    function displayCompleteHand(
+      concealedTiles,
+      winningTile,
+      container,
+      concealedKans = []
+    ) {
+      if (!Array.isArray(concealedTiles)) {
+        throw new Error("concealedTilesには配列を指定してください。");
+      }
+
+      if (!Array.isArray(concealedKans)) {
+        throw new Error("concealedKansには配列を指定してください。");
+      }
+
+      const normalizedConcealedKans = concealedKans.map(
+        normalizeConcealedKanTileCode
+      );
+
+      // 暗槓は物理的には4枚だが、手牌構成上は刻子と同じ3枚分として数える。
+      // 例：暗槓1組なら concealedTiles 10枚 + 暗槓1組（3枚分） = 13枚分。
+      const structuralTileCount =
+        concealedTiles.length + normalizedConcealedKans.length * 3;
+
+      if (structuralTileCount !== 13) {
+        throw new Error(
+          "concealedTilesの枚数とconcealedKansの組数は、合計13枚分になるよう指定してください。"
+        );
       }
 
       container.replaceChildren();
+      container.classList.toggle(
+        "has-concealed-kan",
+        normalizedConcealedKans.length > 0
+      );
 
       const row = document.createElement("div");
       row.className = "complete-hand-row";
@@ -8158,10 +8515,46 @@ Ver1.1 問題管理情報
       const concealedHand = document.createElement("div");
       concealedHand.className = "concealed-hand";
 
+      const concealedTileSection = document.createElement("div");
+      concealedTileSection.className = "concealed-tile-section";
+
       const sortedTiles = sortTilesForDisplay(concealedTiles);
 
       for (const tileCode of sortedTiles) {
-        concealedHand.appendChild(createTile(tileCode));
+        concealedTileSection.appendChild(createTile(tileCode));
+      }
+
+      concealedHand.appendChild(concealedTileSection);
+
+      if (normalizedConcealedKans.length > 0) {
+        const concealedKanSection = document.createElement("div");
+        concealedKanSection.className = "concealed-kan-section";
+
+        const sortedKans = [...normalizedConcealedKans].sort(
+          (left, right) => getTileSortValue(left) - getTileSortValue(right)
+        );
+
+        for (const tileCode of sortedKans) {
+          const kanGroup = document.createElement("div");
+          kanGroup.className = "concealed-kan-group";
+
+          const kanTiles = document.createElement("div");
+          kanTiles.className = "concealed-kan-tiles";
+          kanTiles.setAttribute("aria-label", `${tileCode}の暗槓`);
+
+          for (let index = 0; index < 4; index += 1) {
+            kanTiles.appendChild(createTile(tileCode));
+          }
+
+          const kanLabel = document.createElement("div");
+          kanLabel.className = "concealed-kan-label";
+          kanLabel.textContent = "暗槓";
+
+          kanGroup.append(kanTiles, kanLabel);
+          concealedKanSection.appendChild(kanGroup);
+        }
+
+        concealedHand.appendChild(concealedKanSection);
       }
 
       const winningTileArea = document.createElement("div");
@@ -8280,8 +8673,8 @@ Ver1.1 問題管理情報
     function validateQuestionData() {
       const errors = [];
 
-      if (questions.length !== 108) {
-        errors.push(`問題数が108問ではありません：${questions.length}問`);
+      if (questions.length !== 112) {
+        errors.push(`問題数が112問ではありません：${questions.length}問`);
       }
 
       const ids = new Set();
@@ -8291,8 +8684,32 @@ Ver1.1 問題管理情報
         }
         ids.add(question.id);
 
-        if (question.concealedTiles.length !== 13) {
-          errors.push(`${question.id}：手牌が13枚ではありません`);
+        const concealedKans = question.concealedKans ?? [];
+        const structuralTileCount =
+          question.concealedTiles.length + concealedKans.length * 3;
+
+        if (structuralTileCount !== 13) {
+          errors.push(
+            `${question.id}：手牌構成が13枚分ではありません（${structuralTileCount}枚分）`
+          );
+        }
+
+        const physicalTiles = [
+          ...question.concealedTiles,
+          question.winningTile,
+          ...concealedKans.flatMap(kan => {
+            const tileCode = normalizeConcealedKanTileCode(kan, 0);
+            return [tileCode, tileCode, tileCode, tileCode];
+          })
+        ];
+        const tileCounts = new Map();
+        for (const tileCode of physicalTiles) {
+          tileCounts.set(tileCode, (tileCounts.get(tileCode) ?? 0) + 1);
+        }
+        for (const [tileCode, count] of tileCounts) {
+          if (count > 4) {
+            errors.push(`${question.id}：${tileCode}が${count}枚あります`);
+          }
         }
 
         const hanSum = question.answer.yaku.reduce(
@@ -8315,7 +8732,7 @@ Ver1.1 問題管理情報
       if (errors.length > 0) {
         console.error("問題データ検証エラー", errors);
       } else {
-        console.info("問題データ検証完了：108問すべて正常です");
+        console.info("問題データ検証完了：112問すべて正常です");
       }
 
       return errors;
@@ -8948,7 +9365,8 @@ Ver1.1 問題管理情報
       displayCompleteHand(
         question.concealedTiles,
         question.winningTile,
-        document.getElementById("completeHandContainer")
+        document.getElementById("completeHandContainer"),
+        question.concealedKans ?? []
       );
 
       document.getElementById("completionPanel").hidden = true;
