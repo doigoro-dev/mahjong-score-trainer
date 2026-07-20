@@ -8,7 +8,13 @@
 **Platform:** Web Browser (HTML / CSS / JavaScript)  
 **Quality:** Playwright E2E + GitHub Actions CI
 
-> ※ GitHub Pages公開後、ここにデモURLを掲載予定です。
+---
+
+## 🌐 デモ
+
+GitHub Pagesで公開しています。
+
+https://<GitHubユーザー名>.github.io/mahjong-score-trainer/
 
 ---
 
