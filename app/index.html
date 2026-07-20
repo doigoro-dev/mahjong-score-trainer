@@ -76,7 +76,7 @@ Ver1.1 問題管理情報
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>麻雀点数計算トレーナー 117問版 Ver2.5（場風・自風対応版）</title>
+  <title>麻雀点数計算トレーナー 117問版 Ver2.6（実戦モード Step 1）</title>
   <style>
     :root {
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -505,6 +505,103 @@ Ver1.1 問題管理情報
       line-height: 1.6;
     }
 
+    .practical-flow-panel {
+      margin: 0 0 18px;
+      padding: 18px;
+      border-radius: 14px;
+      border: 1px solid #86efac;
+      background: #f0fdf4;
+    }
+
+    .practical-flow-panel[hidden] {
+      display: none;
+    }
+
+    .practical-step-label {
+      margin: 0 0 6px;
+      color: #166534;
+      font-size: 0.82rem;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+    }
+
+    .practical-flow-title {
+      margin: 0 0 8px;
+      color: #14532d;
+      font-size: 1.12rem;
+    }
+
+    .practical-flow-message {
+      margin: 0 0 14px;
+      color: #365314;
+      line-height: 1.7;
+    }
+
+    .practical-action-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .practical-action-button {
+      padding: 11px 18px;
+      border: 1px solid #16a34a;
+      border-radius: 10px;
+      background: #ffffff;
+      color: #166534;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .practical-action-button:hover {
+      background: #dcfce7;
+    }
+
+    .practical-dora-area {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin: 8px 0 10px;
+    }
+
+    .practical-dora-block {
+      min-width: 104px;
+      padding: 8px 10px;
+      border: 1px solid #cbd5e1;
+      border-radius: 12px;
+      background: #ffffff;
+      text-align: center;
+    }
+
+    .practical-dora-title {
+      margin: 0 0 5px;
+      color: #334155;
+      font-size: 0.82rem;
+      font-weight: 800;
+    }
+
+    .practical-dora-tiles {
+      display: flex;
+      justify-content: center;
+      gap: 4px;
+    }
+
+    .practical-dora-tiles .tile-wrapper {
+      width: clamp(29px, 4.5vw, 44px);
+    }
+
+    .practical-result {
+      margin-top: 12px;
+      padding: 12px 14px;
+      border-radius: 10px;
+      background: #ffffff;
+      border: 1px solid #bbf7d0;
+      color: #14532d;
+      font-weight: 700;
+      line-height: 1.7;
+    }
+
     .condition-panel {
       margin: 0 0 18px;
       padding: 14px 16px;
@@ -640,8 +737,8 @@ Ver1.1 問題管理情報
 </head>
 <body>
   <main>
-    <h1>麻雀点数計算トレーナー 117問版 Ver2.3</h1>
-    <p class="subtitle">暗槓問題対応版：117問を重複なしで一巡</p>
+    <h1>麻雀点数計算トレーナー Ver2.9</h1>
+    <p class="subtitle">実戦モード：役なし・非立直時のツモ固定に対応</p>
 
 
     <section class="mode-panel" aria-label="出題モード" data-testid="mode-panel">
@@ -653,6 +750,9 @@ Ver1.1 問題管理情報
         <button id="hanVariationModeButton" class="mode-button" type="button" aria-pressed="false" data-testid="han-variation-mode">
           翻数変化モード
         </button>
+        <button id="practicalModeButton" class="mode-button" type="button" aria-pressed="false" data-testid="practical-mode">
+          実戦モード
+        </button>
       </div>
       <p id="modeDescription" class="mode-description" data-testid="mode-description">
         手牌から役・翻・符・点数を計算します。
@@ -663,6 +763,15 @@ Ver1.1 問題管理情報
     <div id="remainingCount" class="question-number" aria-live="polite" data-testid="remaining-count"></div>
 
     <section id="questionInfo" class="question-info" data-testid="question-info"></section>
+
+    <section id="practicalFlowPanel" class="practical-flow-panel" hidden aria-live="polite" data-testid="practical-flow-panel">
+      <p id="practicalStepLabel" class="practical-step-label"></p>
+      <h2 id="practicalFlowTitle" class="practical-flow-title"></h2>
+      <p id="practicalFlowMessage" class="practical-flow-message"></p>
+      <div id="practicalDoraArea" class="practical-dora-area" hidden></div>
+      <div id="practicalActionRow" class="practical-action-row"></div>
+      <div id="practicalResult" class="practical-result" hidden></div>
+    </section>
 
     <section id="additionalConditionPanel" class="condition-panel" hidden data-testid="additional-condition-panel">
       <strong>付加条件</strong>
@@ -714,7 +823,7 @@ Ver1.1 問題管理情報
     </section>
 
     <div class="notice">
-      通常モードは立直・一発・ドラ・赤ドラ・裏ドラ・副露を扱わない門前問題です。翻数変化モードでは、各問題に用意した複数候補から、立直・一発・ドラ・赤ドラ・裏ドラの付加条件をランダムに選びます。副露は対象外です。牌は画面幅に合わせて自動的に縮小されます。
+      通常モードは基本の点数計算、翻数変化モードは付加条件込みの点数計算を練習します。実戦モードでは、表ドラを確認して立直判断→和了結果→立直時のみ裏ドラを確認し、そのまま最終点数を入力します。立直・ドラ・裏ドラは自動で翻数と点数へ反映されます。
     </div>
   </main>
 
@@ -820,7 +929,13 @@ Ver1.1 問題管理情報
                         "一盃口"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "9m"
+            ],
+            "uraDoraIndicators": [
+                  "1m"
+            ]
       },
       {
             "id": "q002",
@@ -887,7 +1002,13 @@ Ver1.1 問題管理情報
                         "断么九"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "2p"
+            ],
+            "uraDoraIndicators": [
+                  "2s"
+            ]
       },
       {
             "id": "q003",
@@ -949,7 +1070,13 @@ Ver1.1 問題管理情報
                         "平和"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "2m"
+            ],
+            "uraDoraIndicators": [
+                  "3m"
+            ]
       },
       {
             "id": "q004",
@@ -1016,7 +1143,13 @@ Ver1.1 問題管理情報
                         "一気通貫"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "2s"
+            ],
+            "uraDoraIndicators": [
+                  "1p"
+            ]
       },
       {
             "id": "q005",
@@ -1072,7 +1205,13 @@ Ver1.1 問題管理情報
                         "七対子"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "6m"
+            ],
+            "uraDoraIndicators": [
+                  "2m"
+            ]
       },
       {
             "id": "q006",
@@ -1133,7 +1272,13 @@ Ver1.1 問題管理情報
                         "七対子"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "8s"
+            ],
+            "uraDoraIndicators": [
+                  "8m"
+            ]
       },
       {
             "id": "q007",
@@ -1194,7 +1339,13 @@ Ver1.1 問題管理情報
                         "混一色"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "green"
+            ],
+            "uraDoraIndicators": [
+                  "6s"
+            ]
       },
       {
             "id": "q008",
@@ -1260,7 +1411,13 @@ Ver1.1 問題管理情報
                         "七対子"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "2m"
+            ],
+            "uraDoraIndicators": [
+                  "4m"
+            ]
       },
       {
             "id": "q009",
@@ -1318,7 +1475,13 @@ Ver1.1 問題管理情報
                         "平和"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "1s"
+            ],
+            "uraDoraIndicators": [
+                  "1p"
+            ]
       },
       {
             "id": "q010",
@@ -1378,7 +1541,13 @@ Ver1.1 問題管理情報
                         "門前清自摸和"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "8s"
+            ],
+            "uraDoraIndicators": [
+                  "8m"
+            ]
       },
       {
             "id": "q011",
@@ -1441,7 +1610,13 @@ Ver1.1 問題管理情報
                         "一盃口"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "2m"
+            ],
+            "uraDoraIndicators": [
+                  "5s"
+            ]
       },
       {
             "id": "q012",
@@ -1506,7 +1681,13 @@ Ver1.1 問題管理情報
                         "断么九"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "2m"
+            ],
+            "uraDoraIndicators": [
+                  "1s"
+            ]
       },
       {
             "id": "q013",
@@ -1569,7 +1750,13 @@ Ver1.1 問題管理情報
                         "断么九"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "3s"
+            ],
+            "uraDoraIndicators": [
+                  "north"
+            ]
       },
       {
             "id": "q014",
@@ -1633,7 +1820,13 @@ Ver1.1 問題管理情報
                         "役牌（發）"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "5s"
+            ],
+            "uraDoraIndicators": [
+                  "4m"
+            ]
       },
       {
             "id": "q015",
@@ -1693,7 +1886,13 @@ Ver1.1 問題管理情報
                         "断么九"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "3s"
+            ],
+            "uraDoraIndicators": [
+                  "7s"
+            ]
       },
       {
             "id": "q016",
@@ -1754,7 +1953,13 @@ Ver1.1 問題管理情報
                         "門前清自摸和"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "5s"
+            ],
+            "uraDoraIndicators": [
+                  "east"
+            ]
       },
       {
             "id": "q017",
@@ -1814,7 +2019,13 @@ Ver1.1 問題管理情報
                         "役牌（發）"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "2s"
+            ],
+            "uraDoraIndicators": [
+                  "4m"
+            ]
       },
       {
             "id": "q018",
@@ -1879,7 +2090,13 @@ Ver1.1 問題管理情報
                         "役牌（白）"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "4m"
+            ],
+            "uraDoraIndicators": [
+                  "5p"
+            ]
       },
       {
             "id": "q019",
@@ -1939,7 +2156,13 @@ Ver1.1 問題管理情報
                         "役牌（中）"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "9m"
+            ],
+            "uraDoraIndicators": [
+                  "4p"
+            ]
       },
       {
             "id": "q020",
@@ -2004,7 +2227,13 @@ Ver1.1 問題管理情報
                         "三暗刻"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "4s"
+            ],
+            "uraDoraIndicators": [
+                  "3m"
+            ]
       },
       {
             "id": "q021",
@@ -2074,7 +2303,13 @@ Ver1.1 問題管理情報
                         "三暗刻"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "7s"
+            ],
+            "uraDoraIndicators": [
+                  "3p"
+            ]
       },
       {
             "id": "q022",
@@ -2139,7 +2374,13 @@ Ver1.1 問題管理情報
                         "三暗刻"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "4m"
+            ],
+            "uraDoraIndicators": [
+                  "2p"
+            ]
       },
       {
             "id": "q023",
@@ -2198,7 +2439,13 @@ Ver1.1 問題管理情報
                         "役牌（發）"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "5s"
+            ],
+            "uraDoraIndicators": [
+                  "3p"
+            ]
       },
       {
             "id": "q024",
@@ -2259,7 +2506,13 @@ Ver1.1 問題管理情報
                         "門前清自摸和"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "2s"
+            ],
+            "uraDoraIndicators": [
+                  "9s"
+            ]
       },
       {
             "id": "q025",
@@ -2324,7 +2577,13 @@ Ver1.1 問題管理情報
                         "三暗刻"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "west"
+            ],
+            "uraDoraIndicators": [
+                  "7s"
+            ]
       },
       {
             "id": "q026",
@@ -2391,7 +2650,13 @@ Ver1.1 問題管理情報
                         "三暗刻"
                   ],
                   "kiriageMangan": true
-            }
+            },
+            "doraIndicators": [
+                  "5s"
+            ],
+            "uraDoraIndicators": [
+                  "9m"
+            ]
       },
       {
             "id": "q027",
@@ -2452,7 +2717,13 @@ Ver1.1 問題管理情報
                         "三暗刻"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "south"
+            ],
+            "uraDoraIndicators": [
+                  "1m"
+            ]
       },
       {
             "id": "q028",
@@ -2523,7 +2794,13 @@ Ver1.1 問題管理情報
                         "三暗刻"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "6m"
+            ],
+            "uraDoraIndicators": [
+                  "1m"
+            ]
       },
       {
             "id": "q029",
@@ -2594,7 +2871,13 @@ Ver1.1 問題管理情報
                         "三暗刻"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "white"
+            ],
+            "uraDoraIndicators": [
+                  "1p"
+            ]
       },
       {
             "id": "q030",
@@ -2661,7 +2944,13 @@ Ver1.1 問題管理情報
                         "三暗刻"
                   ],
                   "kiriageMangan": true
-            }
+            },
+            "doraIndicators": [
+                  "6m"
+            ],
+            "uraDoraIndicators": [
+                  "6s"
+            ]
       },
       {
             "id": "q031",
@@ -2728,7 +3017,13 @@ Ver1.1 問題管理情報
                         "一盃口"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "3m"
+            ],
+            "uraDoraIndicators": [
+                  "south"
+            ]
       },
       {
             "id": "q032",
@@ -2795,7 +3090,13 @@ Ver1.1 問題管理情報
                         "断么九"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "4p"
+            ],
+            "uraDoraIndicators": [
+                  "1p"
+            ]
       },
       {
             "id": "q033",
@@ -2857,7 +3158,13 @@ Ver1.1 問題管理情報
                         "平和"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "5p"
+            ],
+            "uraDoraIndicators": [
+                  "1m"
+            ]
       },
       {
             "id": "q034",
@@ -2924,7 +3231,13 @@ Ver1.1 問題管理情報
                         "一気通貫"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "2p"
+            ],
+            "uraDoraIndicators": [
+                  "4m"
+            ]
       },
       {
             "id": "q035",
@@ -2991,7 +3304,13 @@ Ver1.1 問題管理情報
                         "一盃口"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "1m"
+            ],
+            "uraDoraIndicators": [
+                  "3p"
+            ]
       },
       {
             "id": "q036",
@@ -3058,7 +3377,13 @@ Ver1.1 問題管理情報
                         "断么九"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "3m"
+            ],
+            "uraDoraIndicators": [
+                  "2s"
+            ]
       },
       {
             "id": "q037",
@@ -3114,7 +3439,13 @@ Ver1.1 問題管理情報
                         "七対子"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "4p"
+            ],
+            "uraDoraIndicators": [
+                  "1m"
+            ]
       },
       {
             "id": "q038",
@@ -3175,7 +3506,13 @@ Ver1.1 問題管理情報
                         "七対子"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "8m"
+            ],
+            "uraDoraIndicators": [
+                  "3m"
+            ]
       },
       {
             "id": "q039",
@@ -3236,7 +3573,13 @@ Ver1.1 問題管理情報
                         "混一色"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "5s"
+            ],
+            "uraDoraIndicators": [
+                  "green"
+            ]
       },
       {
             "id": "q040",
@@ -3302,7 +3645,13 @@ Ver1.1 問題管理情報
                         "七対子"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "1p"
+            ],
+            "uraDoraIndicators": [
+                  "6p"
+            ]
       },
       {
             "id": "q041",
@@ -3358,7 +3707,13 @@ Ver1.1 問題管理情報
                         "七対子"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "7p"
+            ],
+            "uraDoraIndicators": [
+                  "south"
+            ]
       },
       {
             "id": "q042",
@@ -3419,7 +3774,13 @@ Ver1.1 問題管理情報
                         "七対子"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "north"
+            ],
+            "uraDoraIndicators": [
+                  "8p"
+            ]
       },
       {
             "id": "q043",
@@ -3477,7 +3838,13 @@ Ver1.1 問題管理情報
                         "平和"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "2s"
+            ],
+            "uraDoraIndicators": [
+                  "south"
+            ]
       },
       {
             "id": "q044",
@@ -3537,7 +3904,13 @@ Ver1.1 問題管理情報
                         "門前清自摸和"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "2m"
+            ],
+            "uraDoraIndicators": [
+                  "3p"
+            ]
       },
       {
             "id": "q045",
@@ -3600,7 +3973,13 @@ Ver1.1 問題管理情報
                         "一盃口"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "west"
+            ],
+            "uraDoraIndicators": [
+                  "3m"
+            ]
       },
       {
             "id": "q046",
@@ -3665,7 +4044,13 @@ Ver1.1 問題管理情報
                         "断么九"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "3m"
+            ],
+            "uraDoraIndicators": [
+                  "white"
+            ]
       },
       {
             "id": "q047",
@@ -3728,7 +4113,13 @@ Ver1.1 問題管理情報
                         "断么九"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "5p"
+            ],
+            "uraDoraIndicators": [
+                  "1m"
+            ]
       },
       {
             "id": "q048",
@@ -3792,7 +4183,13 @@ Ver1.1 問題管理情報
                         "役牌（發）"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "4m"
+            ],
+            "uraDoraIndicators": [
+                  "6p"
+            ]
       },
       {
             "id": "q049",
@@ -3850,7 +4247,13 @@ Ver1.1 問題管理情報
                         "平和"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "1p"
+            ],
+            "uraDoraIndicators": [
+                  "7s"
+            ]
       },
       {
             "id": "q050",
@@ -3910,7 +4313,13 @@ Ver1.1 問題管理情報
                         "門前清自摸和"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "8m"
+            ],
+            "uraDoraIndicators": [
+                  "6s"
+            ]
       },
       {
             "id": "q051",
@@ -3973,7 +4382,13 @@ Ver1.1 問題管理情報
                         "一盃口"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "2p"
+            ],
+            "uraDoraIndicators": [
+                  "7s"
+            ]
       },
       {
             "id": "q052",
@@ -4038,7 +4453,13 @@ Ver1.1 問題管理情報
                         "断么九"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "1s"
+            ],
+            "uraDoraIndicators": [
+                  "north"
+            ]
       },
       {
             "id": "q053",
@@ -4101,7 +4522,13 @@ Ver1.1 問題管理情報
                         "断么九"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "8p"
+            ],
+            "uraDoraIndicators": [
+                  "4s"
+            ]
       },
       {
             "id": "q054",
@@ -4165,7 +4592,13 @@ Ver1.1 問題管理情報
                         "役牌（發）"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "4s"
+            ],
+            "uraDoraIndicators": [
+                  "4p"
+            ]
       },
       {
             "id": "q055",
@@ -4223,7 +4656,13 @@ Ver1.1 問題管理情報
                         "平和"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "2s"
+            ],
+            "uraDoraIndicators": [
+                  "1p"
+            ]
       },
       {
             "id": "q056",
@@ -4283,7 +4722,13 @@ Ver1.1 問題管理情報
                         "門前清自摸和"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "9p"
+            ],
+            "uraDoraIndicators": [
+                  "6m"
+            ]
       },
       {
             "id": "q057",
@@ -4343,7 +4788,13 @@ Ver1.1 問題管理情報
                         "断么九"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "6m"
+            ],
+            "uraDoraIndicators": [
+                  "3s"
+            ]
       },
       {
             "id": "q058",
@@ -4404,7 +4855,13 @@ Ver1.1 問題管理情報
                         "門前清自摸和"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "2p"
+            ],
+            "uraDoraIndicators": [
+                  "6s"
+            ]
       },
       {
             "id": "q059",
@@ -4464,7 +4921,13 @@ Ver1.1 問題管理情報
                         "役牌（發）"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "3p"
+            ],
+            "uraDoraIndicators": [
+                  "2s"
+            ]
       },
       {
             "id": "q060",
@@ -4529,7 +4992,13 @@ Ver1.1 問題管理情報
                         "役牌（白）"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "5s"
+            ],
+            "uraDoraIndicators": [
+                  "5m"
+            ]
       },
       {
             "id": "q061",
@@ -4589,7 +5058,13 @@ Ver1.1 問題管理情報
                         "役牌（中）"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "8p"
+            ],
+            "uraDoraIndicators": [
+                  "4p"
+            ]
       },
       {
             "id": "q062",
@@ -4654,7 +5129,13 @@ Ver1.1 問題管理情報
                         "三暗刻"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "4p"
+            ],
+            "uraDoraIndicators": [
+                  "3m"
+            ]
       },
       {
             "id": "q063",
@@ -4714,7 +5195,13 @@ Ver1.1 問題管理情報
                         "断么九"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "7s"
+            ],
+            "uraDoraIndicators": [
+                  "5s"
+            ]
       },
       {
             "id": "q064",
@@ -4775,7 +5262,13 @@ Ver1.1 問題管理情報
                         "門前清自摸和"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "5s"
+            ],
+            "uraDoraIndicators": [
+                  "8m"
+            ]
       },
       {
             "id": "q065",
@@ -4835,7 +5328,13 @@ Ver1.1 問題管理情報
                         "役牌（發）"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "9s"
+            ],
+            "uraDoraIndicators": [
+                  "5s"
+            ]
       },
       {
             "id": "q066",
@@ -4900,7 +5399,13 @@ Ver1.1 問題管理情報
                         "役牌（白）"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "4p"
+            ],
+            "uraDoraIndicators": [
+                  "7m"
+            ]
       },
       {
             "id": "q067",
@@ -4960,7 +5465,13 @@ Ver1.1 問題管理情報
                         "役牌（中）"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "4p"
+            ],
+            "uraDoraIndicators": [
+                  "white"
+            ]
       },
       {
             "id": "q068",
@@ -5025,7 +5536,13 @@ Ver1.1 問題管理情報
                         "三暗刻"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "5m"
+            ],
+            "uraDoraIndicators": [
+                  "3p"
+            ]
       },
       {
             "id": "q069",
@@ -5085,7 +5602,13 @@ Ver1.1 問題管理情報
                         "断么九"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "north"
+            ],
+            "uraDoraIndicators": [
+                  "7m"
+            ]
       },
       {
             "id": "q070",
@@ -5146,7 +5669,13 @@ Ver1.1 問題管理情報
                         "門前清自摸和"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "7m"
+            ],
+            "uraDoraIndicators": [
+                  "9m"
+            ]
       },
       {
             "id": "q071",
@@ -5216,7 +5745,13 @@ Ver1.1 問題管理情報
                         "三暗刻"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "5m"
+            ],
+            "uraDoraIndicators": [
+                  "2p"
+            ]
       },
       {
             "id": "q072",
@@ -5281,7 +5816,13 @@ Ver1.1 問題管理情報
                         "三暗刻"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "2p"
+            ],
+            "uraDoraIndicators": [
+                  "4p"
+            ]
       },
       {
             "id": "q073",
@@ -5340,7 +5881,13 @@ Ver1.1 問題管理情報
                         "役牌（發）"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "west"
+            ],
+            "uraDoraIndicators": [
+                  "7s"
+            ]
       },
       {
             "id": "q074",
@@ -5401,7 +5948,13 @@ Ver1.1 問題管理情報
                         "門前清自摸和"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "1s"
+            ],
+            "uraDoraIndicators": [
+                  "4p"
+            ]
       },
       {
             "id": "q075",
@@ -5466,7 +6019,13 @@ Ver1.1 問題管理情報
                         "三暗刻"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "1p"
+            ],
+            "uraDoraIndicators": [
+                  "3s"
+            ]
       },
       {
             "id": "q076",
@@ -5536,7 +6095,13 @@ Ver1.1 問題管理情報
                         "三暗刻"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "5p"
+            ],
+            "uraDoraIndicators": [
+                  "east"
+            ]
       },
       {
             "id": "q077",
@@ -5601,7 +6166,13 @@ Ver1.1 問題管理情報
                         "三暗刻"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "east"
+            ],
+            "uraDoraIndicators": [
+                  "4s"
+            ]
       },
       {
             "id": "q078",
@@ -5660,7 +6231,13 @@ Ver1.1 問題管理情報
                         "役牌（發）"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "6s"
+            ],
+            "uraDoraIndicators": [
+                  "5m"
+            ]
       },
       {
             "id": "q079",
@@ -5721,7 +6298,13 @@ Ver1.1 問題管理情報
                         "門前清自摸和"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "3s"
+            ],
+            "uraDoraIndicators": [
+                  "5p"
+            ]
       },
       {
             "id": "q080",
@@ -5786,7 +6369,13 @@ Ver1.1 問題管理情報
                         "三暗刻"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "5m"
+            ],
+            "uraDoraIndicators": [
+                  "6p"
+            ]
       },
       {
             "id": "q081",
@@ -5853,7 +6442,13 @@ Ver1.1 問題管理情報
                         "三暗刻"
                   ],
                   "kiriageMangan": true
-            }
+            },
+            "doraIndicators": [
+                  "white"
+            ],
+            "uraDoraIndicators": [
+                  "3p"
+            ]
       },
       {
             "id": "q082",
@@ -5914,7 +6509,13 @@ Ver1.1 問題管理情報
                         "三暗刻"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "7s"
+            ],
+            "uraDoraIndicators": [
+                  "4m"
+            ]
       },
       {
             "id": "q083",
@@ -5985,7 +6586,13 @@ Ver1.1 問題管理情報
                         "三暗刻"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "green"
+            ],
+            "uraDoraIndicators": [
+                  "5s"
+            ]
       },
       {
             "id": "q084",
@@ -6056,7 +6663,13 @@ Ver1.1 問題管理情報
                         "三暗刻"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "north"
+            ],
+            "uraDoraIndicators": [
+                  "9m"
+            ]
       },
       {
             "id": "q085",
@@ -6123,7 +6736,13 @@ Ver1.1 問題管理情報
                         "三暗刻"
                   ],
                   "kiriageMangan": true
-            }
+            },
+            "doraIndicators": [
+                  "3m"
+            ],
+            "uraDoraIndicators": [
+                  "4p"
+            ]
       },
       {
             "id": "q086",
@@ -6190,7 +6809,13 @@ Ver1.1 問題管理情報
                         "三暗刻"
                   ],
                   "kiriageMangan": true
-            }
+            },
+            "doraIndicators": [
+                  "5m"
+            ],
+            "uraDoraIndicators": [
+                  "9p"
+            ]
       },
       {
             "id": "q087",
@@ -6251,7 +6876,13 @@ Ver1.1 問題管理情報
                         "三暗刻"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "5p"
+            ],
+            "uraDoraIndicators": [
+                  "1p"
+            ]
       },
       {
             "id": "q088",
@@ -6322,7 +6953,13 @@ Ver1.1 問題管理情報
                         "三暗刻"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "5m"
+            ],
+            "uraDoraIndicators": [
+                  "6s"
+            ]
       },
       {
             "id": "q089",
@@ -6393,7 +7030,13 @@ Ver1.1 問題管理情報
                         "三暗刻"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "3m"
+            ],
+            "uraDoraIndicators": [
+                  "1m"
+            ]
       },
       {
             "id": "q090",
@@ -6460,7 +7103,13 @@ Ver1.1 問題管理情報
                         "三暗刻"
                   ],
                   "kiriageMangan": true
-            }
+            },
+            "doraIndicators": [
+                  "8s"
+            ],
+            "uraDoraIndicators": [
+                  "8p"
+            ]
       },
       {
             "id": "q091",
@@ -6527,7 +7176,13 @@ Ver1.1 問題管理情報
                         "三暗刻"
                   ],
                   "kiriageMangan": true
-            }
+            },
+            "doraIndicators": [
+                  "green"
+            ],
+            "uraDoraIndicators": [
+                  "1m"
+            ]
       },
       {
             "id": "q092",
@@ -6588,7 +7243,13 @@ Ver1.1 問題管理情報
                         "三暗刻"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "9p"
+            ],
+            "uraDoraIndicators": [
+                  "2p"
+            ]
       },
       {
             "id": "q093",
@@ -6659,7 +7320,13 @@ Ver1.1 問題管理情報
                         "三暗刻"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "2p"
+            ],
+            "uraDoraIndicators": [
+                  "6p"
+            ]
       },
       {
             "id": "q094",
@@ -6730,7 +7397,13 @@ Ver1.1 問題管理情報
                         "三暗刻"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "north"
+            ],
+            "uraDoraIndicators": [
+                  "4s"
+            ]
       },
       {
             "id": "q095",
@@ -6797,7 +7470,13 @@ Ver1.1 問題管理情報
                         "三暗刻"
                   ],
                   "kiriageMangan": true
-            }
+            },
+            "doraIndicators": [
+                  "6m"
+            ],
+            "uraDoraIndicators": [
+                  "7m"
+            ]
       },
       {
             "id": "q096",
@@ -6864,7 +7543,13 @@ Ver1.1 問題管理情報
                         "三暗刻"
                   ],
                   "kiriageMangan": true
-            }
+            },
+            "doraIndicators": [
+                  "5p"
+            ],
+            "uraDoraIndicators": [
+                  "3p"
+            ]
       },
       {
             "id": "q097",
@@ -6925,7 +7610,13 @@ Ver1.1 問題管理情報
                         "三暗刻"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "8p"
+            ],
+            "uraDoraIndicators": [
+                  "7s"
+            ]
       },
       {
             "id": "q098",
@@ -6996,7 +7687,13 @@ Ver1.1 問題管理情報
                         "三暗刻"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "6s"
+            ],
+            "uraDoraIndicators": [
+                  "3s"
+            ]
       },
       {
             "id": "q099",
@@ -7067,7 +7764,13 @@ Ver1.1 問題管理情報
                         "三暗刻"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "north"
+            ],
+            "uraDoraIndicators": [
+                  "green"
+            ]
       },
       {
             "id": "q100",
@@ -7134,9 +7837,14 @@ Ver1.1 問題管理情報
                         "三暗刻"
                   ],
                   "kiriageMangan": true
-            }
+            },
+            "doraIndicators": [
+                  "6s"
+            ],
+            "uraDoraIndicators": [
+                  "1m"
+            ]
       },
-
       {
             "id": "q101",
             "concealedTiles": [
@@ -7202,7 +7910,13 @@ Ver1.1 問題管理情報
                         "三色同順"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "south"
+            ],
+            "uraDoraIndicators": [
+                  "1s"
+            ]
       },
       {
             "id": "q102",
@@ -7267,7 +7981,13 @@ Ver1.1 問題管理情報
                         "混全帯么九"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "2m"
+            ],
+            "uraDoraIndicators": [
+                  "1s"
+            ]
       },
       {
             "id": "q103",
@@ -7326,7 +8046,13 @@ Ver1.1 問題管理情報
                         "純全帯么九"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "8s"
+            ],
+            "uraDoraIndicators": [
+                  "5s"
+            ]
       },
       {
             "id": "q104",
@@ -7390,7 +8116,13 @@ Ver1.1 問題管理情報
                         "二盃口"
                   ],
                   "kiriageMangan": true
-            }
+            },
+            "doraIndicators": [
+                  "5p"
+            ],
+            "uraDoraIndicators": [
+                  "9m"
+            ]
       },
       {
             "id": "q105",
@@ -7451,7 +8183,13 @@ Ver1.1 問題管理情報
                         "清一色"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "west"
+            ],
+            "uraDoraIndicators": [
+                  "3m"
+            ]
       },
       {
             "id": "q106",
@@ -7521,7 +8259,13 @@ Ver1.1 問題管理情報
                         "小三元"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "white"
+            ],
+            "uraDoraIndicators": [
+                  "4s"
+            ]
       },
       {
             "id": "q107",
@@ -7582,7 +8326,13 @@ Ver1.1 問題管理情報
                         "混老頭"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "8m"
+            ],
+            "uraDoraIndicators": [
+                  "north"
+            ]
       },
       {
             "id": "q108",
@@ -7642,7 +8392,13 @@ Ver1.1 問題管理情報
                         "三色同刻"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "4m"
+            ],
+            "uraDoraIndicators": [
+                  "4p"
+            ]
       },
       {
             "id": "q109",
@@ -7707,7 +8463,13 @@ Ver1.1 問題管理情報
                         "混全帯么九"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "8s"
+            ],
+            "uraDoraIndicators": [
+                  "6m"
+            ]
       },
       {
             "id": "q110",
@@ -7771,7 +8533,13 @@ Ver1.1 問題管理情報
                         "断么九"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "2m"
+            ],
+            "uraDoraIndicators": [
+                  "4m"
+            ]
       },
       {
             "id": "q111",
@@ -7830,7 +8598,13 @@ Ver1.1 問題管理情報
                         "役牌（白）"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "1m"
+            ],
+            "uraDoraIndicators": [
+                  "3p"
+            ]
       },
       {
             "id": "q112",
@@ -7896,9 +8670,14 @@ Ver1.1 問題管理情報
                         "一気通貫"
                   ],
                   "kiriageMangan": true
-            }
-      }
-      ,
+            },
+            "doraIndicators": [
+                  "1m"
+            ],
+            "uraDoraIndicators": [
+                  "5s"
+            ]
+      },
       {
             "id": "q113",
             "concealedTiles": [
@@ -7954,10 +8733,14 @@ Ver1.1 問題管理情報
                         "三槓子"
                   ],
                   "kiriageMangan": false
-            }
-      }
-
-      ,
+            },
+            "doraIndicators": [
+                  "7m"
+            ],
+            "uraDoraIndicators": [
+                  "2m"
+            ]
+      },
       {
             "id": "q114",
             "concealedTiles": [
@@ -8015,7 +8798,13 @@ Ver1.1 問題管理情報
                         "場風（東）"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "3m"
+            ],
+            "uraDoraIndicators": [
+                  "5s"
+            ]
       },
       {
             "id": "q115",
@@ -8080,7 +8869,13 @@ Ver1.1 問題管理情報
                         "自風（西）"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "6s"
+            ],
+            "uraDoraIndicators": [
+                  "8s"
+            ]
       },
       {
             "id": "q116",
@@ -8145,7 +8940,13 @@ Ver1.1 問題管理情報
                         "自風（南）"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "5p"
+            ],
+            "uraDoraIndicators": [
+                  "7s"
+            ]
       },
       {
             "id": "q117",
@@ -8214,15 +9015,23 @@ Ver1.1 問題管理情報
                         "自風（東）"
                   ],
                   "kiriageMangan": false
-            }
+            },
+            "doraIndicators": [
+                  "4m"
+            ],
+            "uraDoraIndicators": [
+                  "4s"
+            ]
       }
-
-
 ];
 
-    const SESSION_STORAGE_KEY = "mahjongScoreTrainerVer2_5Session";
+    const SESSION_STORAGE_KEY = "mahjongScoreTrainerVer2_9Session";
     const MODE_NORMAL = "normal";
     const MODE_HAN_VARIATION = "hanVariation";
+    const MODE_PRACTICAL = "practical";
+    const PRACTICAL_STEP_RIICHI = "riichi";
+    const PRACTICAL_STEP_AGARI = "agari";
+    const PRACTICAL_STEP_DORA = "dora";
     let currentQuestion = null;
     let sessionOrder = [];
     let currentQuestionIndex = 0;
@@ -8233,6 +9042,9 @@ Ver1.1 問題管理情報
     let timerStartedAt = 0;
     let elapsedMilliseconds = 0;
     let submittedAnswer = null;
+    let practicalStep = PRACTICAL_STEP_RIICHI;
+    let practicalRiichiSelected = null;
+    let practicalWinType = null;
 
     function svgElement(name, attributes = {}) {
       const element = document.createElementNS(SVG_NS, name);
@@ -8911,16 +9723,20 @@ Ver1.1 問題管理情報
         concealedHand.appendChild(concealedKanSection);
       }
 
-      const winningTileArea = document.createElement("div");
-      winningTileArea.className = "winning-tile-area";
-      winningTileArea.appendChild(createTile(winningTile));
+      row.appendChild(concealedHand);
 
-      const label = document.createElement("div");
-      label.className = "winning-label";
-      label.textContent = "和了牌";
-      winningTileArea.appendChild(label);
+      if (winningTile) {
+        const winningTileArea = document.createElement("div");
+        winningTileArea.className = "winning-tile-area";
+        winningTileArea.appendChild(createTile(winningTile));
 
-      row.append(concealedHand, winningTileArea);
+        const label = document.createElement("div");
+        label.className = "winning-label";
+        label.textContent = "和了牌";
+        winningTileArea.appendChild(label);
+        row.appendChild(winningTileArea);
+      }
+
       container.appendChild(row);
     }
 
@@ -9140,10 +9956,14 @@ Ver1.1 問題管理情報
       return Math.ceil(value / 100) * 100;
     }
 
-    function calculateScoreFromFuHan(question, totalHan) {
-      const fu = question.answer.fu;
+    function calculateScoreFromFuHan(
+      question,
+      totalHan,
+      fu = question.answer.fu,
+      winType = question.winType
+    ) {
       const dealer = question.seatWind === "east";
-      const tsumo = question.winType === "tsumo";
+      const tsumo = winType === "tsumo";
 
       let category = "通常";
       let basePoints;
@@ -9318,7 +10138,249 @@ Ver1.1 問題管理情報
       }
     }
 
+    function getNextDoraTile(indicator) {
+      if (HONOR_TILES[indicator]) {
+        const windOrder = ["east", "south", "west", "north"];
+        const dragonOrder = ["white", "green", "red"];
+        const order = windOrder.includes(indicator) ? windOrder : dragonOrder;
+        return order[(order.indexOf(indicator) + 1) % order.length];
+      }
+
+      const number = Number(indicator[0]);
+      const suit = indicator[1];
+      return `${number === 9 ? 1 : number + 1}${suit}`;
+    }
+
+    function getPhysicalWinningTiles(question) {
+      const tiles = [...question.concealedTiles, question.winningTile];
+
+      for (const concealedKan of question.concealedKans ?? []) {
+        if (typeof concealedKan === "string") {
+          tiles.push(concealedKan, concealedKan, concealedKan, concealedKan);
+        } else if (Array.isArray(concealedKan.tiles)) {
+          tiles.push(...concealedKan.tiles);
+        }
+      }
+
+      return tiles;
+    }
+
+    function countDoraFromIndicators(question, indicators) {
+      const winningTiles = getPhysicalWinningTiles(question);
+      return indicators
+        .map(getNextDoraTile)
+        .reduce(
+          (total, doraTile) =>
+            total + winningTiles.filter(tile => tile === doraTile).length,
+          0
+        );
+    }
+
+    function hasYakuWithoutTsumo(question) {
+      const yakuList = Array.isArray(question?.answer?.yaku)
+        ? question.answer.yaku
+        : [];
+
+      return yakuList.some(yaku => {
+        const name = typeof yaku === "string" ? yaku : yaku?.name;
+        return Boolean(name) &&
+          name !== "門前清自摸和" &&
+          name !== "ツモ";
+      });
+    }
+
+    function resolvePracticalWinType(question, shouldRiichi) {
+      if (!question) {
+        return null;
+      }
+
+      if (!shouldRiichi && !hasYakuWithoutTsumo(question)) {
+        return "tsumo";
+      }
+
+      return question.winType;
+    }
+
+    function getEffectiveWinType(question) {
+      if (currentMode !== MODE_PRACTICAL) {
+        return question.winType;
+      }
+
+      return practicalWinType || question.winType;
+    }
+
+    function roundFuToTen(fu) {
+      return Math.ceil(fu / 10) * 10;
+    }
+
+    function calculateRolelessTsumoFu(question) {
+      const breakdown = Array.isArray(question?.answer?.fuBreakdown)
+        ? question.answer.fuBreakdown
+        : [];
+
+      let rawFu = 0;
+      let parsedComponent = false;
+
+      for (const item of breakdown) {
+        if (
+          typeof item !== "string" ||
+          item.includes("合計") ||
+          item.includes("切り上げ")
+        ) {
+          continue;
+        }
+
+        const match = item.match(/[：:]\s*(\d+)符/);
+        if (!match) {
+          continue;
+        }
+
+        parsedComponent = true;
+        const componentFu = Number(match[1]);
+
+        if (item.includes("門前ロン")) {
+          continue;
+        }
+
+        rawFu += componentFu;
+      }
+
+      if (parsedComponent) {
+        rawFu += 2;
+        return roundFuToTen(Math.max(rawFu, 20));
+      }
+
+      return question.answer.fu;
+    }
+
+    function getPracticalDoraSummary(question) {
+      const doraIndicators = question.doraIndicators ?? [];
+      const uraDoraIndicators = question.uraDoraIndicators ?? [];
+
+      return {
+        doraIndicators,
+        uraDoraIndicators,
+        doraCount: countDoraFromIndicators(question, doraIndicators),
+        uraDoraCount: practicalRiichiSelected
+          ? countDoraFromIndicators(question, uraDoraIndicators)
+          : 0
+      };
+    }
+
+    function createPracticalDoraBlock(titleText, indicators) {
+      const block = document.createElement("section");
+      block.className = "practical-dora-block";
+
+      const title = document.createElement("h3");
+      title.className = "practical-dora-title";
+      title.textContent = titleText;
+
+      const tiles = document.createElement("div");
+      tiles.className = "practical-dora-tiles";
+
+      for (const indicator of indicators) {
+        tiles.appendChild(createTile(indicator));
+      }
+
+      block.append(title, tiles);
+      return block;
+    }
+
+    function renderPracticalDoraArea(showUraDora) {
+      const area = document.getElementById("practicalDoraArea");
+      const blocks = [
+        createPracticalDoraBlock(
+          "表ドラ表示牌",
+          currentQuestion.doraIndicators ?? []
+        )
+      ];
+
+      if (showUraDora) {
+        blocks.push(
+          createPracticalDoraBlock(
+            "裏ドラ表示牌",
+            currentQuestion.uraDoraIndicators ?? []
+          )
+        );
+      }
+
+      area.replaceChildren(...blocks);
+      area.hidden = false;
+    }
+
     function getActiveAnswer(question) {
+      if (currentMode === MODE_PRACTICAL) {
+        const doraSummary = getPracticalDoraSummary(question);
+        const effectiveWinType = getEffectiveWinType(question);
+        const isConvertedRolelessTsumo =
+          !practicalRiichiSelected &&
+          question.winType === "ron" &&
+          effectiveWinType === "tsumo" &&
+          !hasYakuWithoutTsumo(question);
+        const effectiveFu = isConvertedRolelessTsumo
+          ? calculateRolelessTsumoFu(question)
+          : question.answer.fu;
+        const additionalYaku = [];
+
+        if (isConvertedRolelessTsumo) {
+          additionalYaku.push({ name: "門前清自摸和", han: 1 });
+        }
+
+        if (practicalRiichiSelected) {
+          additionalYaku.push({ name: "立直", han: 1 });
+        }
+
+        if (doraSummary.doraCount > 0) {
+          additionalYaku.push({
+            name: `ドラ${doraSummary.doraCount}`,
+            han: doraSummary.doraCount
+          });
+        }
+
+        if (doraSummary.uraDoraCount > 0) {
+          additionalYaku.push({
+            name: `裏ドラ${doraSummary.uraDoraCount}`,
+            han: doraSummary.uraDoraCount
+          });
+        }
+
+        const extraHan = additionalYaku.reduce(
+          (total, yaku) => total + yaku.han,
+          0
+        );
+        const totalHan = question.answer.totalHan + extraHan;
+        const score = calculateScoreFromFuHan(
+          question,
+          totalHan,
+          effectiveFu,
+          effectiveWinType
+        );
+
+        return {
+          yaku: [...question.answer.yaku, ...additionalYaku],
+          totalHan,
+          fu: effectiveFu,
+          score,
+          fuBreakdown: [
+            ...question.answer.fuBreakdown.filter(
+              item => !item.includes("切り上げ満貫を適用")
+            ),
+            `基本${question.answer.totalHan}翻＋実戦条件${extraHan}翻＝合計${totalHan}翻`,
+            isConvertedRolelessTsumo
+              ? `役なし・非立直のためツモへ変更し、門前清自摸和1翻を追加（${effectiveFu}符）`
+              : `和了方法：${WIN_TYPE_LABELS[effectiveWinType]}`,
+            `表ドラ：${doraSummary.doraCount}枚`,
+            practicalRiichiSelected
+              ? `裏ドラ：${doraSummary.uraDoraCount}枚`
+              : "裏ドラ：立直しなかったため対象外",
+            score.kiriageMangan
+              ? "30符4翻または60符3翻のため、切り上げ満貫を適用"
+              : `合計${totalHan}翻として点数を計算`
+          ],
+          conditions: additionalYaku
+        };
+      }
+
       if (currentMode !== MODE_HAN_VARIATION) {
         return {
           yaku: question.answer.yaku,
@@ -9359,15 +10421,20 @@ Ver1.1 問題管理情報
     function updateModeDisplay() {
       const normalButton = document.getElementById("normalModeButton");
       const variationButton = document.getElementById("hanVariationModeButton");
+      const practicalButton = document.getElementById("practicalModeButton");
       const description = document.getElementById("modeDescription");
 
-      const isVariation = currentMode === MODE_HAN_VARIATION;
-      normalButton.setAttribute("aria-pressed", String(!isVariation));
-      variationButton.setAttribute("aria-pressed", String(isVariation));
+      normalButton.setAttribute("aria-pressed", String(currentMode === MODE_NORMAL));
+      variationButton.setAttribute("aria-pressed", String(currentMode === MODE_HAN_VARIATION));
+      practicalButton.setAttribute("aria-pressed", String(currentMode === MODE_PRACTICAL));
 
-      description.textContent = isVariation
-        ? "手牌の基本役・符に、問題ごとの候補から選ばれた立直・一発・ドラ等を加えて点数を計算します。"
-        : "手牌から役・翻・符・点数を計算します。";
+      if (currentMode === MODE_HAN_VARIATION) {
+        description.textContent = "手牌の基本役・符に、問題ごとの候補から選ばれた立直・一発・ドラ等を加えて点数を計算します。";
+      } else if (currentMode === MODE_PRACTICAL) {
+        description.textContent = "表ドラを見て立直判断し、和了後に立直時だけ裏ドラを確認して最終点数を計算します。";
+      } else {
+        description.textContent = "手牌から役・翻・符・点数を計算します。";
+      }
     }
 
     function switchMode(mode) {
@@ -9407,7 +10474,10 @@ Ver1.1 問題管理情報
         answerShown,
         currentMode,
         sessionVariations,
-        submittedAnswer
+        submittedAnswer,
+        practicalStep,
+        practicalRiichiSelected,
+        practicalWinType
       };
 
       try {
@@ -9448,7 +10518,9 @@ Ver1.1 問題管理情報
         currentMode =
           state.currentMode === MODE_HAN_VARIATION
             ? MODE_HAN_VARIATION
-            : MODE_NORMAL;
+            : state.currentMode === MODE_PRACTICAL
+              ? MODE_PRACTICAL
+              : MODE_NORMAL;
         sessionVariations =
           state.sessionVariations && typeof state.sessionVariations === "object"
             ? state.sessionVariations
@@ -9456,6 +10528,21 @@ Ver1.1 問題管理情報
         submittedAnswer =
           state.submittedAnswer && typeof state.submittedAnswer === "object"
             ? state.submittedAnswer
+            : null;
+        practicalStep = [
+          PRACTICAL_STEP_RIICHI,
+          PRACTICAL_STEP_AGARI,
+          PRACTICAL_STEP_DORA
+        ].includes(state.practicalStep)
+          ? state.practicalStep
+          : PRACTICAL_STEP_RIICHI;
+        practicalRiichiSelected =
+          typeof state.practicalRiichiSelected === "boolean"
+            ? state.practicalRiichiSelected
+            : null;
+        practicalWinType =
+          state.practicalWinType === "tsumo" || state.practicalWinType === "ron"
+            ? state.practicalWinType
             : null;
 
         if (answerShown && !submittedAnswer) {
@@ -9470,10 +10557,14 @@ Ver1.1 問題管理情報
     }
 
     function createNewSession() {
-      sessionOrder = shuffleArray(questions.map(question => question.id));
+      sessionOrder = shuffleArray(
+        questions.map(question => question.id)
+      );
       currentQuestionIndex = 0;
       answerShown = false;
       submittedAnswer = null;
+      practicalStep = PRACTICAL_STEP_RIICHI;
+      practicalRiichiSelected = null;
       createSessionVariations();
       saveSessionState();
     }
@@ -9513,7 +10604,7 @@ Ver1.1 問題管理情報
       document.getElementById("scoreInputError").textContent = "";
       container.replaceChildren();
 
-      if (question.winType === "ron") {
+      if (getEffectiveWinType(question) === "ron") {
         container.append(createScoreInput("ronScoreInput", "申告点数"));
         return;
       }
@@ -9546,7 +10637,7 @@ Ver1.1 問題管理情報
     }
 
     function getSubmittedScore(question) {
-      if (question.winType === "ron") {
+      if (getEffectiveWinType(question) === "ron") {
         const score = readPositiveInteger("ronScoreInput");
         return score === null ? null : { type: "ron", score };
       }
@@ -9569,7 +10660,7 @@ Ver1.1 問題管理情報
     function getExpectedScore(question, answer) {
       const values = (answer.score.pointText.match(/\d+/g) || []).map(Number);
 
-      if (question.winType === "ron") {
+      if (getEffectiveWinType(question) === "ron") {
         return { type: "ron", score: values[0] };
       }
 
@@ -9678,6 +10769,136 @@ Ver1.1 問題管理情報
       });
     }
 
+    function createPracticalButton(label, onClick) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "practical-action-button";
+      button.textContent = label;
+      button.addEventListener("click", onClick);
+      return button;
+    }
+
+    function resetPracticalQuestionState() {
+      practicalStep = PRACTICAL_STEP_RIICHI;
+      practicalRiichiSelected = null;
+      practicalWinType = null;
+    }
+
+    function advancePracticalStep(nextStep) {
+      practicalStep = nextStep;
+      saveSessionState();
+      renderPracticalStep();
+    }
+
+    function selectPracticalRiichi(shouldRiichi) {
+      practicalRiichiSelected = shouldRiichi;
+      practicalWinType = resolvePracticalWinType(
+        currentQuestion,
+        shouldRiichi
+      );
+      displayScoreInputs(currentQuestion);
+      advancePracticalStep(PRACTICAL_STEP_AGARI);
+    }
+
+    function renderPracticalQuestionInfo(showWinType) {
+      const cards = [];
+      if (showWinType) {
+        cards.push(createInfoCard("和了方法", WIN_TYPE_LABELS[currentQuestion.winType]));
+      }
+      cards.push(
+        createInfoCard("場風", WIND_LABELS[currentQuestion.roundWind]),
+        createInfoCard("自風", WIND_LABELS[currentQuestion.seatWind]),
+        createTimerInfoCard()
+      );
+      document.getElementById("questionInfo").replaceChildren(...cards);
+      updateTimerDisplay();
+    }
+
+    function renderPracticalStep() {
+      if (currentMode !== MODE_PRACTICAL || !currentQuestion) {
+        return;
+      }
+
+      const panel = document.getElementById("practicalFlowPanel");
+      const stepLabel = document.getElementById("practicalStepLabel");
+      const title = document.getElementById("practicalFlowTitle");
+      const message = document.getElementById("practicalFlowMessage");
+      const actions = document.getElementById("practicalActionRow");
+      const result = document.getElementById("practicalResult");
+      const scorePanel = document.getElementById("scoreResponsePanel");
+      const gradeButton = document.getElementById("showAnswerButton");
+      const doraArea = document.getElementById("practicalDoraArea");
+
+      panel.hidden = false;
+      actions.replaceChildren();
+      result.hidden = true;
+      result.textContent = "";
+      doraArea.hidden = true;
+      doraArea.replaceChildren();
+      scorePanel.hidden = true;
+      gradeButton.hidden = true;
+
+      if (practicalStep === PRACTICAL_STEP_RIICHI) {
+        stepLabel.textContent = "STEP 1 / 3　聴牌";
+        title.textContent = "立直しますか？";
+        message.textContent = "表ドラ表示牌を確認し、現在の手牌から立直するかを判断してください。和了牌と和了方法はまだ表示されません。";
+        renderPracticalDoraArea(false);
+        actions.append(
+          createPracticalButton("立直する", () => selectPracticalRiichi(true)),
+          createPracticalButton("立直しない", () => selectPracticalRiichi(false))
+        );
+        renderPracticalQuestionInfo(false);
+        displayCompleteHand(
+          currentQuestion.concealedTiles,
+          null,
+          document.getElementById("completeHandContainer"),
+          currentQuestion.concealedKans ?? []
+        );
+        document.getElementById("thinkingMessage").textContent =
+          "表ドラを含めた聴牌時点の役・符・最低点を考えて、立直判断をしてください。";
+        return;
+      }
+
+      renderPracticalQuestionInfo(true);
+      displayCompleteHand(
+        currentQuestion.concealedTiles,
+        currentQuestion.winningTile,
+        document.getElementById("completeHandContainer"),
+        currentQuestion.concealedKans ?? []
+      );
+
+      if (practicalStep === PRACTICAL_STEP_AGARI) {
+        stepLabel.textContent = "STEP 2 / 3　和了";
+        title.textContent = `和了結果：${WIN_TYPE_LABELS[getEffectiveWinType(currentQuestion)]}`;
+        message.textContent = "和了牌と和了方法が確定しました。符やツモ役の変化を考えてください。";
+        renderPracticalDoraArea(false);
+        result.hidden = false;
+        result.textContent = `立直判断：${practicalRiichiSelected ? "立直する" : "立直しない"} ／ 和了方法：${WIN_TYPE_LABELS[getEffectiveWinType(currentQuestion)]}`;
+        actions.append(createPracticalButton("ドラ確認へ", () => advancePracticalStep(PRACTICAL_STEP_DORA)));
+        document.getElementById("thinkingMessage").textContent =
+          "和了方法を反映した最終形を確認し、ドラ確認前の点数を考えてください。";
+        return;
+      }
+
+      if (practicalStep === PRACTICAL_STEP_DORA) {
+        stepLabel.textContent = "STEP 3 / 3　ドラ確認・点数入力";
+        title.textContent = practicalRiichiSelected
+          ? "裏ドラを確認して最終点数を入力"
+          : "表ドラを確認して最終点数を入力";
+        message.textContent = practicalRiichiSelected
+          ? "立直したため、裏ドラ表示牌が公開されました。立直・表ドラ・裏ドラを含めて計算してください。"
+          : "立直しなかったため、裏ドラはありません。表ドラを含めて計算してください。";
+        renderPracticalDoraArea(practicalRiichiSelected);
+        result.hidden = false;
+        result.textContent = `選択：${practicalRiichiSelected ? "立直する" : "立直しない"} ／ 結果：${WIN_TYPE_LABELS[getEffectiveWinType(currentQuestion)]}`;
+        scorePanel.hidden = false;
+        gradeButton.hidden = false;
+        document.getElementById("thinkingMessage").textContent =
+          "役・翻・符を整理し、最終点数を入力して採点してください。";
+        return;
+      }
+    }
+
     function displayQuestion(question) {
       if (!question) {
         showCompletion();
@@ -9685,6 +10906,16 @@ Ver1.1 問題管理情報
       }
 
       currentQuestion = question;
+      if (
+        currentMode === MODE_PRACTICAL &&
+        practicalRiichiSelected !== null &&
+        practicalWinType === null
+      ) {
+        practicalWinType = resolvePracticalWinType(
+          currentQuestion,
+          practicalRiichiSelected
+        );
+      }
       const questionNumber = currentQuestionIndex + 1;
       const remaining = questions.length - questionNumber;
 
@@ -9693,15 +10924,9 @@ Ver1.1 問題管理情報
       document.getElementById("remainingCount").textContent =
         `残り${remaining}問`;
 
-      document.getElementById("questionInfo").replaceChildren(
-        createInfoCard("和了方法", WIN_TYPE_LABELS[question.winType]),
-        createInfoCard("場風", WIND_LABELS[question.roundWind]),
-        createInfoCard("自風", WIND_LABELS[question.seatWind]),
-        createTimerInfoCard()
-      );
-
       const conditionPanel = document.getElementById("additionalConditionPanel");
       const conditionText = document.getElementById("additionalConditionText");
+      const practicalPanel = document.getElementById("practicalFlowPanel");
 
       if (currentMode === MODE_HAN_VARIATION) {
         const variation = sessionVariations[question.id];
@@ -9716,23 +10941,37 @@ Ver1.1 問題管理情報
         conditionPanel.hidden = true;
       }
 
-      displayCompleteHand(
-        question.concealedTiles,
-        question.winningTile,
-        document.getElementById("completeHandContainer"),
-        question.concealedKans ?? []
-      );
-
+      practicalPanel.hidden = currentMode !== MODE_PRACTICAL;
       document.getElementById("completionPanel").hidden = true;
       document.getElementById("questionInfo").hidden = false;
       document.querySelector(".stage").hidden = false;
       document.getElementById("restartFromBeginningButton").hidden = false;
       document.getElementById("answerPanel").hidden = true;
-      document.getElementById("scoreResponsePanel").hidden = false;
-      displayScoreInputs(question);
-      document.getElementById("showAnswerButton").hidden = false;
       document.getElementById("nextQuestionButton").hidden = true;
       document.getElementById("thinkingMessage").hidden = false;
+
+      displayScoreInputs(question);
+
+      if (currentMode === MODE_PRACTICAL) {
+        renderPracticalStep();
+      } else {
+        document.getElementById("questionInfo").replaceChildren(
+          createInfoCard("和了方法", WIN_TYPE_LABELS[question.winType]),
+          createInfoCard("場風", WIND_LABELS[question.roundWind]),
+          createInfoCard("自風", WIND_LABELS[question.seatWind]),
+          createTimerInfoCard()
+        );
+        displayCompleteHand(
+          question.concealedTiles,
+          question.winningTile,
+          document.getElementById("completeHandContainer"),
+          question.concealedKans ?? []
+        );
+        document.getElementById("scoreResponsePanel").hidden = false;
+        document.getElementById("showAnswerButton").hidden = false;
+        document.getElementById("thinkingMessage").textContent =
+          "役・翻・符を脳内で計算し、実戦と同じように最終点数を入力してください。";
+      }
 
       startTimer();
     }
@@ -9745,7 +10984,7 @@ Ver1.1 問題管理情報
       const submitted = getSubmittedScore(currentQuestion);
       if (!submitted) {
         document.getElementById("scoreInputError").textContent =
-          currentQuestion.winType === "tsumo" && currentQuestion.seatWind !== "east"
+          getEffectiveWinType(currentQuestion) === "tsumo" && currentQuestion.seatWind !== "east"
             ? "子と親、両方の支払点数を入力してください。"
             : "点数を入力してください。";
         return;
@@ -9765,6 +11004,7 @@ Ver1.1 問題管理情報
       document.getElementById("remainingCount").textContent = "残り0問";
       document.getElementById("questionInfo").hidden = true;
       document.getElementById("additionalConditionPanel").hidden = true;
+      document.getElementById("practicalFlowPanel").hidden = true;
       document.querySelector(".stage").hidden = true;
       document.getElementById("thinkingMessage").hidden = true;
       document.getElementById("scoreResponsePanel").hidden = true;
@@ -9795,6 +11035,7 @@ Ver1.1 問題管理情報
       currentQuestionIndex += 1;
       answerShown = false;
       submittedAnswer = null;
+      resetPracticalQuestionState();
       saveSessionState();
       displayQuestion(getCurrentSessionQuestion());
 
@@ -9883,6 +11124,10 @@ Ver1.1 問題管理情報
     document
       .getElementById("hanVariationModeButton")
       .addEventListener("click", () => switchMode(MODE_HAN_VARIATION));
+
+    document
+      .getElementById("practicalModeButton")
+      .addEventListener("click", () => switchMode(MODE_PRACTICAL));
 
     initializeTrainer();
   </script>
