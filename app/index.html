@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <!--
-Ver2.3 暗槓問題・符計算対応
-- 暗槓を含む問題を4問追加
-- 中張牌の暗槓16符、幺九牌の暗槓32符に対応
-- 暗槓を含む問題でも手牌構成を検証可能
-- 既存108問との後方互換性を維持
+Ver2.4 複数暗槓・三槓子対応
+- 暗槓が複数ある場合のレスポンシブ表示に対応
+- 三暗槓を含む三槓子問題を1問追加
+- 暗槓ごとの符を合算して採点
+- 既存113問との後方互換性を維持
 -->
 <!--
 Ver2.1 役追加
@@ -41,10 +41,10 @@ Ver1.3 やり直し機能
 
 <!--
 Ver1.2 セッション出題仕様
-- セッション開始時にFisher-Yates方式で全112問をシャッフル
-- 112問を一巡するまで同じ問題は再出題しない
+- セッション開始時にFisher-Yates方式で全113問をシャッフル
+- 113問を一巡するまで同じ問題は再出題しない
 - 「第n問（n / 112）」と「残りn問」を表示
-- 112問終了後に完了画面と再挑戦ボタンを表示
+- 113問終了後に完了画面と再挑戦ボタンを表示
 - 再挑戦時は新しい順番で再シャッフル
 - sessionStorageへ出題順、現在位置、回答表示状態を保存
 - 同じタブでリロードした場合は途中から再開
@@ -52,7 +52,7 @@ Ver1.2 セッション出題仕様
 
 <!--
 Ver1.1 問題管理情報
-- 全112問に management メタデータを付与
+- 全113問に management メタデータを付与
 - 管理項目: 符、翻、点数区分、親子、ロン／ツモ、待ち分類、主な役、切り上げ満貫
 - 30符4翻: 0問
 - 60符3翻: 10問
@@ -61,7 +61,7 @@ Ver1.1 問題管理情報
 
 <!--
 品質保証情報
-- 問題数: 112問
+- 問題数: 113問
 - 符別構成: 20符10問、25符10問、30符20問、40符20問、50符15問、60符25問
 - 全問題の翻数合計を検証済み
 - 全問題の符内訳と最終符を検証済み
@@ -76,7 +76,7 @@ Ver1.1 問題管理情報
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>麻雀点数計算トレーナー 112問版 Ver2.3（暗槓問題対応版）</title>
+  <title>麻雀点数計算トレーナー 113問版 Ver2.4（複数暗槓・三槓子対応版）</title>
   <style>
     :root {
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -193,11 +193,29 @@ Ver1.1 問題管理情報
       }
     }
 
-    /* 暗槓がある問題では、物理的な牌が15枚になるため表示だけを少し縮小する。 */
-    #completeHandContainer.has-concealed-kan {
+    /* 暗槓の組数に応じ、物理的な牌数（15～18枚）が収まるよう段階的に縮小する。 */
+    #completeHandContainer.has-concealed-kans-1 {
       --tile-size: clamp(15px, calc((100cqw - 130px) / 15), 66px);
       --tile-gap: clamp(0px, 0.28cqw, 4px);
       --winning-gap: clamp(4px, 1.2cqw, 16px);
+    }
+
+    #completeHandContainer.has-concealed-kans-2 {
+      --tile-size: clamp(14px, calc((100cqw - 105px) / 16), 61px);
+      --tile-gap: clamp(0px, 0.22cqw, 3px);
+      --winning-gap: clamp(3px, 0.9cqw, 12px);
+    }
+
+    #completeHandContainer.has-concealed-kans-3,
+    #completeHandContainer.has-concealed-kans-4 {
+      --tile-size: clamp(13px, calc((100cqw - 78px) / 17), 57px);
+      --tile-gap: clamp(0px, 0.16cqw, 2px);
+      --winning-gap: clamp(2px, 0.65cqw, 8px);
+    }
+
+    #completeHandContainer.has-concealed-kans-3 .concealed-kan-section,
+    #completeHandContainer.has-concealed-kans-4 .concealed-kan-section {
+      gap: clamp(2px, 0.45cqw, 6px);
     }
 
     .complete-hand-row {
@@ -594,10 +612,23 @@ Ver1.1 問題管理情報
         padding-inline: 3px;
       }
 
-      #completeHandContainer.has-concealed-kan {
+      #completeHandContainer.has-concealed-kans-1 {
         --tile-size: clamp(13px, calc((100cqw - 50px) / 15), 25px);
         --tile-gap: 0px;
         --winning-gap: clamp(2px, 0.8cqw, 5px);
+      }
+
+      #completeHandContainer.has-concealed-kans-2 {
+        --tile-size: clamp(12px, calc((100cqw - 36px) / 16), 23px);
+        --tile-gap: 0px;
+        --winning-gap: clamp(1px, 0.6cqw, 4px);
+      }
+
+      #completeHandContainer.has-concealed-kans-3,
+      #completeHandContainer.has-concealed-kans-4 {
+        --tile-size: clamp(11px, calc((100cqw - 22px) / 17), 21px);
+        --tile-gap: 0px;
+        --winning-gap: clamp(1px, 0.4cqw, 3px);
       }
 
       .winning-label {
@@ -609,8 +640,8 @@ Ver1.1 問題管理情報
 </head>
 <body>
   <main>
-    <h1>麻雀点数計算トレーナー 112問版 Ver2.3</h1>
-    <p class="subtitle">暗槓問題対応版：112問を重複なしで一巡</p>
+    <h1>麻雀点数計算トレーナー 113問版 Ver2.3</h1>
+    <p class="subtitle">暗槓問題対応版：113問を重複なしで一巡</p>
 
 
     <section class="mode-panel" aria-label="出題モード" data-testid="mode-panel">
@@ -673,8 +704,8 @@ Ver1.1 問題管理情報
     </section>
 
     <section id="completionPanel" class="answer-panel" hidden data-testid="completion-panel">
-      <h2>🎉 全112問終了しました！</h2>
-      <p>今回のセッションでは、全112問を重複なしで1回ずつ出題しました。</p>
+      <h2>🎉 全113問終了しました！</h2>
+      <p>今回のセッションでは、全113問を重複なしで1回ずつ出題しました。</p>
       <div class="button-row">
         <button id="restartSessionButton" class="button button-primary" type="button" data-testid="restart-session">
           もう一度挑戦する
@@ -720,7 +751,7 @@ Ver1.1 問題管理情報
 
     /*
      * Ver1.1 固定問題（100問）。各問題に管理用メタデータを付与。
-     * 既存108問は副露・槓子を扱わず、60符以上を高符カテゴリとして収録。
+     * 既存108問は副露・槓子を扱わず、q109以降で暗槓問題を収録。
      * すべて門前、立直なし、ドラなし、副露なし。
      */
     const questions = [
@@ -7867,11 +7898,69 @@ Ver1.1 問題管理情報
                   "kiriageMangan": true
             }
       }
+      ,
+      {
+            "id": "q113",
+            "concealedTiles": [
+                  "2m",
+                  "3m",
+                  "5p",
+                  "5p"
+            ],
+            "concealedKans": [
+                  "1s",
+                  "6p",
+                  "9m"
+            ],
+            "winningTile": "4m",
+            "winType": "ron",
+            "roundWind": "south",
+            "seatWind": "west",
+            "riichi": false,
+            "menzen": true,
+            "answer": {
+                  "yaku": [
+                        {
+                              "name": "三槓子",
+                              "han": 2
+                        }
+                  ],
+                  "totalHan": 2,
+                  "fu": 110,
+                  "score": {
+                        "display": "7100点",
+                        "pointText": "7100点",
+                        "category": "通常",
+                        "basePoints": 1760,
+                        "kiriageMangan": false
+                  },
+                  "fuBreakdown": [
+                        "副底：20符",
+                        "門前ロン：10符",
+                        "幺九牌の暗槓（一索）：32符",
+                        "中張牌の暗槓（六筒）：16符",
+                        "幺九牌の暗槓（九萬）：32符",
+                        "合計110符"
+                  ]
+            },
+            "management": {
+                  "fu": 110,
+                  "han": 2,
+                  "scoreCategory": "通常",
+                  "playerType": "子",
+                  "winType": "ロン",
+                  "waitType": "両面",
+                  "mainYaku": [
+                        "三槓子"
+                  ],
+                  "kiriageMangan": false
+            }
+      }
 
 
 ];
 
-    const SESSION_STORAGE_KEY = "mahjongScoreTrainerVer2_3Session";
+    const SESSION_STORAGE_KEY = "mahjongScoreTrainerVer2_4Session";
     const MODE_NORMAL = "normal";
     const MODE_HAN_VARIATION = "hanVariation";
     let currentQuestion = null;
@@ -8504,10 +8593,15 @@ Ver1.1 問題管理情報
       }
 
       container.replaceChildren();
-      container.classList.toggle(
-        "has-concealed-kan",
-        normalizedConcealedKans.length > 0
-      );
+
+      for (let count = 1; count <= 4; count += 1) {
+        container.classList.remove(`has-concealed-kans-${count}`);
+      }
+
+      if (normalizedConcealedKans.length > 0) {
+        const layoutKanCount = Math.min(normalizedConcealedKans.length, 4);
+        container.classList.add(`has-concealed-kans-${layoutKanCount}`);
+      }
 
       const row = document.createElement("div");
       row.className = "complete-hand-row";
@@ -8674,7 +8768,7 @@ Ver1.1 問題管理情報
       const errors = [];
 
       if (questions.length !== 112) {
-        errors.push(`問題数が112問ではありません：${questions.length}問`);
+        errors.push(`問題数が113問ではありません：${questions.length}問`);
       }
 
       const ids = new Set();
@@ -8732,7 +8826,7 @@ Ver1.1 問題管理情報
       if (errors.length > 0) {
         console.error("問題データ検証エラー", errors);
       } else {
-        console.info("問題データ検証完了：112問すべて正常です");
+        console.info("問題データ検証完了：113問すべて正常です");
       }
 
       return errors;
