@@ -1,0 +1,22 @@
+{
+  "name": "mahjong-score-trainer",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Mahjong Score Trainer application and Playwright regression tests",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:ui": "playwright test --ui",
+    "test:smoke": "playwright test --grep @smoke",
+    "test:data": "playwright test tests/e2e/03-data-integrity.spec.ts",
+    "test:responsive": "playwright test tests/e2e/05-responsive.spec.ts",
+    "report": "playwright show-report playwright-report",
+    "install:browsers": "playwright install chromium",
+    "test:static-data": "node scripts/static-data-check.mjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.61.1",
+    "@types/node": "^22.20.1",
+    "typescript": "5.8.3"
+  }
+}
