@@ -55,6 +55,9 @@ let submittedAnswer = null;
 let practicalStep = PRACTICAL_STEP_RIICHI;
 let practicalRiichiSelected = null;
 let practicalWinType = null;
+let isReviewMode = false;
+let reviewQuestion = null;
+let reviewSessionSnapshot = null;
 
 function svgElement(name, attributes = {}) {
   const element = document.createElementNS(SVG_NS, name);
@@ -1316,7 +1319,7 @@ function resolvePracticalWinType(question, shouldRiichi) {
 }
 
 function getEffectiveWinType(question) {
-  if (currentMode !== MODE_PRACTICAL) {
+  if (isReviewMode || currentMode !== MODE_PRACTICAL) {
     return question.winType;
   }
 
@@ -1423,7 +1426,7 @@ function renderPracticalDoraArea(showUraDora) {
 }
 
 function getActiveAnswer(question) {
-  if (currentMode === MODE_PRACTICAL) {
+  if (!isReviewMode && currentMode === MODE_PRACTICAL) {
     const doraSummary = getPracticalDoraSummary(question);
     const effectiveWinType = getEffectiveWinType(question);
     const isConvertedRolelessTsumo =
@@ -1495,7 +1498,7 @@ function getActiveAnswer(question) {
     };
   }
 
-  if (currentMode !== MODE_HAN_VARIATION) {
+  if (isReviewMode || currentMode !== MODE_HAN_VARIATION) {
     return {
       yaku: question.answer.yaku,
       totalHan: question.answer.totalHan,
@@ -1537,7 +1540,24 @@ function updateModeDisplay() {
   const variationButton = document.getElementById("hanVariationModeButton");
   const practicalButton = document.getElementById("practicalModeButton");
   const description = document.getElementById("modeDescription");
+  const reviewIndicator = document.getElementById("reviewModeIndicator");
+  const modeButtons = [normalButton, variationButton, practicalButton];
 
+  if (isReviewMode) {
+    for (const button of modeButtons) {
+      button.setAttribute("aria-pressed", "false");
+      button.disabled = true;
+    }
+    reviewIndicator.hidden = false;
+    description.textContent =
+      "選択した問題を通常モード形式で復習しています。元の出題モードと進捗は一時停止したまま保持されています。";
+    return;
+  }
+
+  for (const button of modeButtons) {
+    button.disabled = false;
+  }
+  reviewIndicator.hidden = true;
   normalButton.setAttribute("aria-pressed", String(currentMode === MODE_NORMAL));
   variationButton.setAttribute("aria-pressed", String(currentMode === MODE_HAN_VARIATION));
   practicalButton.setAttribute("aria-pressed", String(currentMode === MODE_PRACTICAL));
@@ -1564,6 +1584,9 @@ function switchMode(mode) {
     return;
   }
 
+  isReviewMode = false;
+  reviewQuestion = null;
+  reviewSessionSnapshot = null;
   currentMode = mode;
   restartSession();
   updateModeDisplay();
@@ -1870,8 +1893,9 @@ function renderAnswer(submitted) {
   document.getElementById("answerPanel").hidden = false;
   document.getElementById("scoreResponsePanel").hidden = true;
   document.getElementById("showAnswerButton").hidden = true;
-  document.getElementById("nextQuestionButton").textContent =
-    currentQuestionIndex === questions.length - 1
+  document.getElementById("nextQuestionButton").textContent = isReviewMode
+    ? "通常学習へ戻る"
+    : currentQuestionIndex === questions.length - 1
       ? "セッションを終了する"
       : "次の問題";
   document.getElementById("nextQuestionButton").hidden = false;
@@ -2013,6 +2037,111 @@ function renderPracticalStep() {
   }
 }
 
+
+function createQuestionSelectLabel(question) {
+  const yakuNames = Array.isArray(question.answer?.yaku)
+    ? question.answer.yaku.map(yaku => yaku.name).join("・")
+    : "役情報なし";
+  const fu = Number.isFinite(question.answer?.fu) ? `${question.answer.fu}符` : "符不明";
+  const han = Number.isFinite(question.answer?.totalHan)
+    ? `${question.answer.totalHan}翻`
+    : "翻不明";
+
+  return `${question.id}｜${fu}${han}｜${yakuNames}`;
+}
+
+function initializeQuestionSelect() {
+  const select = document.getElementById("questionSelect");
+  const fragment = document.createDocumentFragment();
+
+  for (const question of questions) {
+    const option = document.createElement("option");
+    option.value = question.id;
+    option.textContent = createQuestionSelectLabel(question);
+    fragment.appendChild(option);
+  }
+
+  select.replaceChildren(fragment);
+}
+
+function syncQuestionSelect() {
+  const select = document.getElementById("questionSelect");
+  if (select && currentQuestion) {
+    select.value = currentQuestion.id;
+  }
+}
+
+function createReviewSessionSnapshot() {
+  return {
+    answerShown,
+    submittedAnswer,
+    practicalStep,
+    practicalRiichiSelected,
+    practicalWinType
+  };
+}
+
+function startSelectedQuestion() {
+  const selectedQuestionId = document.getElementById("questionSelect").value;
+  const selectedQuestion = questions.find(
+    question => question.id === selectedQuestionId
+  );
+
+  if (!selectedQuestion) {
+    console.error(`選択した問題が見つかりません: ${selectedQuestionId}`);
+    return;
+  }
+
+  stopTimer();
+  if (!isReviewMode) {
+    reviewSessionSnapshot = createReviewSessionSnapshot();
+  }
+
+  isReviewMode = true;
+  reviewQuestion = selectedQuestion;
+  updateModeDisplay();
+  answerShown = false;
+  submittedAnswer = null;
+  resetPracticalQuestionState();
+  displayQuestion(reviewQuestion);
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
+}
+
+function returnToNormalSession() {
+  if (!isReviewMode) {
+    return;
+  }
+
+  stopTimer();
+  isReviewMode = false;
+  reviewQuestion = null;
+  updateModeDisplay();
+
+  if (reviewSessionSnapshot) {
+    answerShown = reviewSessionSnapshot.answerShown;
+    submittedAnswer = reviewSessionSnapshot.submittedAnswer;
+    practicalStep = reviewSessionSnapshot.practicalStep;
+    practicalRiichiSelected = reviewSessionSnapshot.practicalRiichiSelected;
+    practicalWinType = reviewSessionSnapshot.practicalWinType;
+  }
+  reviewSessionSnapshot = null;
+
+  displayQuestion(getCurrentSessionQuestion());
+  if (answerShown && submittedAnswer) {
+    stopTimer();
+    renderAnswer(submittedAnswer);
+  }
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
+}
+
 function displayQuestion(question) {
   if (!question) {
     showCompletion();
@@ -2020,7 +2149,9 @@ function displayQuestion(question) {
   }
 
   currentQuestion = question;
+  syncQuestionSelect();
   if (
+    !isReviewMode &&
     currentMode === MODE_PRACTICAL &&
     practicalRiichiSelected !== null &&
     practicalWinType === null
@@ -2033,16 +2164,23 @@ function displayQuestion(question) {
   const questionNumber = currentQuestionIndex + 1;
   const remaining = questions.length - questionNumber;
 
-  document.getElementById("questionNumber").textContent =
-    `第${questionNumber}問（${questionNumber} / ${questions.length}）`;
-  document.getElementById("remainingCount").textContent =
-    `残り${remaining}問`;
+  if (isReviewMode) {
+    document.getElementById("questionNumber").textContent =
+      `復習問題：${question.id}`;
+    document.getElementById("remainingCount").textContent =
+      `通常学習は一時停止中（第${questionNumber}問・残り${remaining}問）`;
+  } else {
+    document.getElementById("questionNumber").textContent =
+      `第${questionNumber}問（${questionNumber} / ${questions.length}）`;
+    document.getElementById("remainingCount").textContent =
+      `残り${remaining}問`;
+  }
 
   const conditionPanel = document.getElementById("additionalConditionPanel");
   const conditionText = document.getElementById("additionalConditionText");
   const practicalPanel = document.getElementById("practicalFlowPanel");
 
-  if (currentMode === MODE_HAN_VARIATION) {
+  if (!isReviewMode && currentMode === MODE_HAN_VARIATION) {
     const variation = sessionVariations[question.id];
     conditionText.textContent =
       variation.conditions
@@ -2055,18 +2193,19 @@ function displayQuestion(question) {
     conditionPanel.hidden = true;
   }
 
-  practicalPanel.hidden = currentMode !== MODE_PRACTICAL;
+  practicalPanel.hidden = isReviewMode || currentMode !== MODE_PRACTICAL;
   document.getElementById("completionPanel").hidden = true;
   document.getElementById("questionInfo").hidden = false;
   document.querySelector(".stage").hidden = false;
-  document.getElementById("restartFromBeginningButton").hidden = false;
+  document.getElementById("restartFromBeginningButton").hidden = isReviewMode;
+  document.getElementById("returnToSessionButton").hidden = !isReviewMode;
   document.getElementById("answerPanel").hidden = true;
   document.getElementById("nextQuestionButton").hidden = true;
   document.getElementById("thinkingMessage").hidden = false;
 
   displayScoreInputs(question);
 
-  if (currentMode === MODE_PRACTICAL) {
+  if (!isReviewMode && currentMode === MODE_PRACTICAL) {
     renderPracticalStep();
   } else {
     document.getElementById("questionInfo").replaceChildren(
@@ -2107,7 +2246,9 @@ function showAnswer() {
   stopTimer();
   submittedAnswer = submitted;
   answerShown = true;
-  saveSessionState();
+  if (!isReviewMode) {
+    saveSessionState();
+  }
   renderAnswer(submitted);
 }
 
@@ -2125,6 +2266,7 @@ function showCompletion() {
   document.getElementById("showAnswerButton").hidden = true;
   document.getElementById("nextQuestionButton").hidden = true;
   document.getElementById("restartFromBeginningButton").hidden = true;
+  document.getElementById("returnToSessionButton").hidden = true;
   document.getElementById("answerPanel").hidden = true;
   document.getElementById("completionPanel").hidden = false;
 
@@ -2141,6 +2283,11 @@ function showCompletion() {
 }
 
 function showNextQuestion() {
+  if (isReviewMode) {
+    returnToNormalSession();
+    return;
+  }
+
   if (currentQuestionIndex >= questions.length - 1) {
     showCompletion();
     return;
@@ -2160,6 +2307,9 @@ function showNextQuestion() {
 }
 
 function restartSession() {
+  isReviewMode = false;
+  reviewQuestion = null;
+  reviewSessionSnapshot = null;
   createNewSession();
   displayQuestion(getCurrentSessionQuestion());
 
@@ -2207,6 +2357,7 @@ function initializeTrainer() {
 
   console.info(`Question validation: OK (${questions.length} questions)`);
   summarizeQuestionManagement();
+  initializeQuestionSelect();
 
   if (!loadSessionState()) {
     createNewSession();
@@ -2248,5 +2399,14 @@ document
 document
   .getElementById("practicalModeButton")
   .addEventListener("click", () => switchMode(MODE_PRACTICAL));
+
+
+document
+  .getElementById("startSelectedQuestionButton")
+  .addEventListener("click", startSelectedQuestion);
+
+document
+  .getElementById("returnToSessionButton")
+  .addEventListener("click", returnToNormalSession);
 
 initializeTrainer();
