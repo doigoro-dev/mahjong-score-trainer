@@ -865,7 +865,6 @@ Ver1.1 問題管理情報
      * すべて門前、立直なし、ドラなし、副露なし。
      */
     const questions = window.MAHJONG_QUESTIONS;
-    if (!Array.isArray(questions)) throw new Error("questions.js load failed");
 
     const SESSION_STORAGE_KEY = "mahjongScoreTrainerVer2_9Session";
     const MODE_NORMAL = "normal";
@@ -1684,70 +1683,174 @@ Ver1.1 問題管理情報
 
     function validateQuestionData() {
       const errors = [];
+      const validWinds = new Set(["east", "south", "west", "north"]);
+      const validWinTypes = new Set(["ron", "tsumo"]);
 
-      if (questions.length !== 112) {
-        errors.push(`問題数が117問ではありません：${questions.length}問`);
+      if (!Array.isArray(questions)) {
+        errors.push("questions.jsを読み込めませんでした");
+        return errors;
+      }
+
+      if (questions.length === 0) {
+        errors.push("問題データが0件です");
+        return errors;
       }
 
       const ids = new Set();
-      for (const question of questions) {
-        if (ids.has(question.id)) {
-          errors.push(`問題IDの重複：${question.id}`);
-        }
-        ids.add(question.id);
 
-        const concealedKans = question.concealedKans ?? [];
-        const structuralTileCount =
-          question.concealedTiles.length + concealedKans.length * 3;
+      for (const [index, question] of questions.entries()) {
+        const location = question?.id || `配列${index + 1}番目`;
 
-        if (structuralTileCount !== 13) {
-          errors.push(
-            `${question.id}：手牌構成が13枚分ではありません（${structuralTileCount}枚分）`
-          );
+        if (!question || typeof question !== "object") {
+          errors.push(`${location}：問題データがオブジェクトではありません`);
+          continue;
         }
 
-        const physicalTiles = [
-          ...question.concealedTiles,
-          question.winningTile,
-          ...concealedKans.flatMap(kan => {
-            const tileCode = normalizeConcealedKanTileCode(kan, 0);
-            return [tileCode, tileCode, tileCode, tileCode];
-          })
-        ];
-        const tileCounts = new Map();
-        for (const tileCode of physicalTiles) {
-          tileCounts.set(tileCode, (tileCounts.get(tileCode) ?? 0) + 1);
+        if (typeof question.id !== "string" || question.id.trim() === "") {
+          errors.push(`${location}：問題IDが未設定です`);
+        } else if (ids.has(question.id)) {
+          errors.push(`${location}：問題IDが重複しています`);
+        } else {
+          ids.add(question.id);
         }
-        for (const [tileCode, count] of tileCounts) {
-          if (count > 4) {
-            errors.push(`${question.id}：${tileCode}が${count}枚あります`);
+
+        if (!Array.isArray(question.concealedTiles)) {
+          errors.push(`${location}：concealedTilesが配列ではありません`);
+        }
+
+        if (typeof question.winningTile !== "string" || question.winningTile.trim() === "") {
+          errors.push(`${location}：winningTileが未設定です`);
+        }
+
+        if (!validWinTypes.has(question.winType)) {
+          errors.push(`${location}：winTypeはronまたはtsumoで指定してください`);
+        }
+
+        if (!validWinds.has(question.roundWind)) {
+          errors.push(`${location}：roundWindが不正です`);
+        }
+
+        if (!validWinds.has(question.seatWind)) {
+          errors.push(`${location}：seatWindが不正です`);
+        }
+
+        if (!question.answer || typeof question.answer !== "object") {
+          errors.push(`${location}：answerが未設定です`);
+        } else {
+          if (!Number.isFinite(question.answer.fu)) {
+            errors.push(`${location}：answer.fuが数値ではありません`);
+          }
+
+          if (!Number.isFinite(question.answer.totalHan)) {
+            errors.push(`${location}：answer.totalHanが数値ではありません`);
+          }
+
+          if (!question.answer.score || typeof question.answer.score !== "object") {
+            errors.push(`${location}：answer.scoreが未設定です`);
+          }
+
+          if (!Array.isArray(question.answer.yaku)) {
+            errors.push(`${location}：answer.yakuが配列ではありません`);
+          } else if (Number.isFinite(question.answer.totalHan)) {
+            const invalidYaku = question.answer.yaku.some(
+              yaku => !yaku || typeof yaku.name !== "string" || !Number.isFinite(yaku.han)
+            );
+            if (invalidYaku) {
+              errors.push(`${location}：answer.yakuの形式が不正です`);
+            } else {
+              const hanSum = question.answer.yaku.reduce((sum, yaku) => sum + yaku.han, 0);
+              if (hanSum !== question.answer.totalHan) {
+                errors.push(`${location}：役の翻数合計がanswer.totalHanと一致しません`);
+              }
+            }
           }
         }
 
-        const hanSum = question.answer.yaku.reduce(
-          (sum, yaku) => sum + yaku.han,
-          0
-        );
-        if (hanSum !== question.answer.totalHan) {
-          errors.push(`${question.id}：役の翻数合計が不一致`);
+        if (!Array.isArray(question.doraIndicators)) {
+          errors.push(`${location}：doraIndicatorsが配列ではありません`);
         }
 
-        const isKiriage =
-          (question.answer.fu === 30 && question.answer.totalHan === 4) ||
-          (question.answer.fu === 60 && question.answer.totalHan === 3);
-
-        if (isKiriage && question.answer.score.category !== "切り上げ満貫") {
-          errors.push(`${question.id}：切り上げ満貫が未反映`);
+        if (!Array.isArray(question.uraDoraIndicators)) {
+          errors.push(`${location}：uraDoraIndicatorsが配列ではありません`);
         }
-      }
 
-      if (errors.length > 0) {
-        console.error("問題データ検証エラー", errors);
-      } else {
-        console.info("問題データ検証完了：117問すべて正常です");
+        if (Array.isArray(question.concealedTiles) && typeof question.winningTile === "string") {
+          const concealedKans = Array.isArray(question.concealedKans)
+            ? question.concealedKans
+            : [];
+          const structuralTileCount = question.concealedTiles.length + concealedKans.length * 3;
+
+          if (structuralTileCount !== 13) {
+            errors.push(
+              `${location}：手牌構成が13枚分ではありません（${structuralTileCount}枚分）`
+            );
+          }
+
+          const physicalTiles = [
+            ...question.concealedTiles,
+            question.winningTile,
+            ...concealedKans.flatMap(kan => {
+              const tileCode = normalizeConcealedKanTileCode(kan, 0);
+              return [tileCode, tileCode, tileCode, tileCode];
+            })
+          ];
+          const tileCounts = new Map();
+          for (const tileCode of physicalTiles) {
+            tileCounts.set(tileCode, (tileCounts.get(tileCode) ?? 0) + 1);
+          }
+          for (const [tileCode, count] of tileCounts) {
+            if (count > 4) {
+              errors.push(`${location}：${tileCode}が${count}枚あります`);
+            }
+          }
+        }
+
+        if (
+          question.answer &&
+          Number.isFinite(question.answer.fu) &&
+          Number.isFinite(question.answer.totalHan) &&
+          question.answer.score
+        ) {
+          const isKiriage =
+            (question.answer.fu === 30 && question.answer.totalHan === 4) ||
+            (question.answer.fu === 60 && question.answer.totalHan === 3);
+
+          if (isKiriage && question.answer.score.category !== "切り上げ満貫") {
+            errors.push(`${location}：切り上げ満貫が未反映です`);
+          }
+        }
       }
 
       return errors;
+    }
+
+    function showQuestionDataError(errors) {
+      console.error("Question validation: FAILED", errors);
+
+      const main = document.querySelector("main");
+      main.innerHTML = "";
+
+      const panel = document.createElement("section");
+      panel.setAttribute("role", "alert");
+      panel.style.maxWidth = "760px";
+      panel.style.margin = "48px auto";
+      panel.style.padding = "24px";
+      panel.style.border = "2px solid #b91c1c";
+      panel.style.borderRadius = "12px";
+      panel.style.background = "#fef2f2";
+      panel.style.color = "#7f1d1d";
+
+      const title = document.createElement("h1");
+      title.textContent = "問題データにエラーがあります";
+
+      const message = document.createElement("p");
+      message.textContent = "詳細は開発者ツールのConsoleを確認してください。";
+
+      const count = document.createElement("p");
+      count.textContent = `検出件数：${errors.length}件`;
+
+      panel.append(title, message, count);
+      main.appendChild(panel);
     }
 
 
@@ -2927,7 +3030,13 @@ Ver1.1 問題管理情報
     }
 
     function initializeTrainer() {
-      validateQuestionData();
+      const validationErrors = validateQuestionData();
+      if (validationErrors.length > 0) {
+        showQuestionDataError(validationErrors);
+        return;
+      }
+
+      console.info(`Question validation: OK (${questions.length} questions)`);
       summarizeQuestionManagement();
 
       if (!loadSessionState()) {
