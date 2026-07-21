@@ -7014,17 +7014,21 @@ window.MAHJONG_QUESTIONS = [
                               "han": 1
                         },
                         {
+                              "name": "断么九",
+                              "han": 1
+                        },
+                        {
                               "name": "三色同順",
                               "han": 2
                         }
                   ],
-                  "totalHan": 4,
+                  "totalHan": 5,
                   "fu": 20,
                   "score": {
-                        "display": "1300点／2600点",
-                        "pointText": "1300点／2600点",
-                        "category": "通常",
-                        "basePoints": 1280,
+                        "display": "満貫（2000点／4000点）",
+                        "pointText": "2000点／4000点",
+                        "category": "満貫",
+                        "basePoints": 2000,
                         "kiriageMangan": false
                   },
                   "fuBreakdown": [
@@ -7034,14 +7038,15 @@ window.MAHJONG_QUESTIONS = [
             },
             "management": {
                   "fu": 20,
-                  "han": 4,
-                  "scoreCategory": "通常",
+                  "han": 5,
+                  "scoreCategory": "満貫",
                   "playerType": "子",
                   "winType": "ツモ",
                   "waitType": "両面",
                   "mainYaku": [
                         "門前清自摸和",
                         "平和",
+                        "断么九",
                         "三色同順"
                   ],
                   "kiriageMangan": false
