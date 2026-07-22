@@ -10,7 +10,8 @@ const AUDIT_CHECKS = [
   checkYakuHanTotal,
   checkYakuListConsistency,
   checkCalculatedScoreCategory,
-  checkFinalScoreDisplay
+  checkFinalScoreDisplay,
+  checkTileCodesAndCounts
 ];
 
 const REQUIRED_FIELD_PATHS = [
@@ -469,6 +470,141 @@ function calculateBasePointsForScore(fu, han, category) {
 
 function roundUpToHundred(points) {
   return Math.ceil(points / 100) * 100;
+}
+
+
+const VALID_TILE_CODES = new Set([
+  "1m", "2m", "3m", "4m", "5m", "6m", "7m", "8m", "9m",
+  "1p", "2p", "3p", "4p", "5p", "6p", "7p", "8p", "9p",
+  "1s", "2s", "3s", "4s", "5s", "6s", "7s", "8s", "9s",
+  "east", "south", "west", "north",
+  "white", "green", "red"
+]);
+
+function checkTileCodesAndCounts(questions) {
+  const errors = [];
+
+  questions.forEach((question, index) => {
+    const questionLabel = getQuestionLabel(question, index);
+    const concealedTiles = question?.concealedTiles;
+    const winningTile = question?.winningTile;
+    const concealedKans =
+      question?.concealedKans === undefined
+        ? []
+        : question.concealedKans;
+
+    let canCheckCounts = true;
+
+    if (!Array.isArray(concealedTiles)) {
+      errors.push(
+        `${questionLabel}: concealedTilesが配列ではありません。`
+      );
+      canCheckCounts = false;
+    }
+
+    if (typeof winningTile !== "string") {
+      errors.push(
+        `${questionLabel}: winningTileが文字列ではありません。`
+      );
+      canCheckCounts = false;
+    }
+
+    if (!Array.isArray(concealedKans)) {
+      errors.push(
+        `${questionLabel}: concealedKansが配列ではありません。`
+      );
+      canCheckCounts = false;
+    }
+
+    if (!canCheckCounts) {
+      return;
+    }
+
+    validateTileCodeList(
+      errors,
+      questionLabel,
+      "concealedTiles",
+      concealedTiles
+    );
+
+    validateTileCodeList(
+      errors,
+      questionLabel,
+      "concealedKans",
+      concealedKans
+    );
+
+    if (!VALID_TILE_CODES.has(winningTile)) {
+      errors.push(
+        `${questionLabel}: winningTileに無効な牌コード` +
+        `「${formatValue(winningTile)}」があります。`
+      );
+    }
+
+    const structuralTileCount =
+      concealedTiles.length +
+      1 +
+      concealedKans.length * 3;
+
+    if (structuralTileCount !== 14) {
+      errors.push(
+        `${questionLabel}: 和了形の構成枚数=${structuralTileCount}枚 / ` +
+        "正しい枚数=14枚 " +
+        `（concealedTiles=${concealedTiles.length}枚、` +
+        `winningTile=1枚、暗槓=${concealedKans.length}組×3枚換算）`
+      );
+    }
+
+    const physicalTileCounts = new Map();
+
+    concealedTiles.forEach((tileCode) => {
+      addTileCount(physicalTileCounts, tileCode, 1);
+    });
+
+    addTileCount(physicalTileCounts, winningTile, 1);
+
+    concealedKans.forEach((tileCode) => {
+      addTileCount(physicalTileCounts, tileCode, 4);
+    });
+
+    physicalTileCounts.forEach((count, tileCode) => {
+      if (VALID_TILE_CODES.has(tileCode) && count > 4) {
+        errors.push(
+          `${questionLabel}: 同一牌「${tileCode}」が` +
+          `${count}枚あります。上限は4枚です。`
+        );
+      }
+    });
+  });
+
+  return createAuditResult("牌コード・牌枚数チェック", errors);
+}
+
+function validateTileCodeList(
+  errors,
+  questionLabel,
+  fieldName,
+  tileCodes
+) {
+  tileCodes.forEach((tileCode, tileIndex) => {
+    if (typeof tileCode !== "string" || !VALID_TILE_CODES.has(tileCode)) {
+      errors.push(
+        `${questionLabel}: ${fieldName}[${tileIndex}]に` +
+        `無効な牌コード「${formatValue(tileCode)}」があります。`
+      );
+    }
+  });
+}
+
+function addTileCount(tileCounts, tileCode, amount) {
+  if (typeof tileCode !== "string") {
+    return;
+  }
+
+  tileCounts.set(
+    tileCode,
+    (tileCounts.get(tileCode) ?? 0) + amount
+  );
 }
 
 function checkFieldConsistency(
