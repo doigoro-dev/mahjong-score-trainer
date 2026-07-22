@@ -11,7 +11,8 @@ const AUDIT_CHECKS = [
   checkYakuListConsistency,
   checkCalculatedScoreCategory,
   checkFinalScoreDisplay,
-  checkTileCodesAndCounts
+  checkTileCodesAndCounts,
+  checkDoraIndicatorFormat
 ];
 
 const REQUIRED_FIELD_PATHS = [
@@ -605,6 +606,67 @@ function addTileCount(tileCounts, tileCode, amount) {
     tileCode,
     (tileCounts.get(tileCode) ?? 0) + amount
   );
+}
+
+
+function checkDoraIndicatorFormat(questions) {
+  const errors = [];
+
+  questions.forEach((question, index) => {
+    const questionLabel = getQuestionLabel(question, index);
+
+    validateIndicatorArray(
+      errors,
+      questionLabel,
+      "doraIndicators",
+      question?.doraIndicators
+    );
+
+    validateIndicatorArray(
+      errors,
+      questionLabel,
+      "uraDoraIndicators",
+      question?.uraDoraIndicators
+    );
+  });
+
+  return createAuditResult("ドラ・裏ドラ形式チェック", errors);
+}
+
+function validateIndicatorArray(
+  errors,
+  questionLabel,
+  fieldName,
+  indicatorTiles
+) {
+  if (!Array.isArray(indicatorTiles)) {
+    errors.push(
+      `${questionLabel}: ${fieldName}が配列ではありません。`
+    );
+    return;
+  }
+
+  const seenTiles = new Set();
+
+  indicatorTiles.forEach((tileCode, tileIndex) => {
+    if (typeof tileCode !== "string" || !VALID_TILE_CODES.has(tileCode)) {
+      errors.push(
+        `${questionLabel}: ${fieldName}[${tileIndex}]に` +
+        `無効な牌コード「${formatValue(tileCode)}」があります。`
+      );
+      return;
+    }
+
+    if (seenTiles.has(tileCode)) {
+      errors.push(
+        `${questionLabel}: ${fieldName}内で表示牌` +
+        `「${tileCode}」が重複しています。`
+      );
+      return;
+    }
+
+    seenTiles.add(tileCode);
+  });
 }
 
 function checkFieldConsistency(
