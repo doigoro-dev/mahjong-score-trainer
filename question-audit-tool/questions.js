@@ -7372,10 +7372,10 @@ window.MAHJONG_QUESTIONS = [
                   "totalHan": 4,
                   "fu": 50,
                   "score": {
-                        "display": "6400点",
-                        "pointText": "6400点",
-                        "category": "通常",
-                        "basePoints": 1600,
+                        "display": "満貫（8000点）",
+                        "pointText": "8000点",
+                        "category": "満貫",
+                        "basePoints": 2000,
                         "kiriageMangan": false
                   },
                   "fuBreakdown": [
@@ -7389,7 +7389,7 @@ window.MAHJONG_QUESTIONS = [
             "management": {
                   "fu": 50,
                   "han": 4,
-                  "scoreCategory": "通常",
+                  "scoreCategory": "満貫",
                   "playerType": "子",
                   "winType": "ロン",
                   "waitType": "両面",

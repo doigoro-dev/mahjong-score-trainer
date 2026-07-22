@@ -8,7 +8,8 @@ const AUDIT_CHECKS = [
   checkScoreCategoryConsistency,
   checkKiriageManganConsistency,
   checkYakuHanTotal,
-  checkYakuListConsistency
+  checkYakuListConsistency,
+  checkCalculatedScoreCategory
 ];
 
 const REQUIRED_FIELD_PATHS = [
@@ -277,6 +278,81 @@ function checkYakuListConsistency(questions) {
   });
 
   return createAuditResult("役一覧整合性チェック", errors);
+}
+
+
+function checkCalculatedScoreCategory(questions) {
+  const errors = [];
+
+  questions.forEach((question, index) => {
+    const questionLabel = getQuestionLabel(question, index);
+    const fu = getValueByPath(question, "answer.fu");
+    const han = getValueByPath(question, "answer.totalHan");
+    const registeredCategory = getValueByPath(
+      question,
+      "answer.score.category"
+    );
+
+    if (
+      typeof fu !== "number" ||
+      !Number.isFinite(fu) ||
+      typeof han !== "number" ||
+      !Number.isFinite(han) ||
+      typeof registeredCategory !== "string"
+    ) {
+      return;
+    }
+
+    const calculatedCategory = calculateScoreCategory(fu, han);
+
+    if (calculatedCategory !== registeredCategory) {
+      errors.push(
+        `${questionLabel}: ${fu}符${han}翻 / ` +
+        `計算したカテゴリ="${calculatedCategory}" / ` +
+        `answer.score.category="${registeredCategory}"`
+      );
+    }
+  });
+
+  return createAuditResult("点数カテゴリ計算チェック", errors);
+}
+
+function calculateScoreCategory(fu, han) {
+  if (han >= 13) {
+    return "数え役満";
+  }
+
+  if (han >= 11) {
+    return "三倍満";
+  }
+
+  if (han >= 8) {
+    return "倍満";
+  }
+
+  if (han >= 6) {
+    return "跳満";
+  }
+
+  if (han >= 5) {
+    return "満貫";
+  }
+
+  const isKiriageMangan =
+    (fu === 30 && han === 4) ||
+    (fu === 60 && han === 3);
+
+  if (isKiriageMangan) {
+    return "切り上げ満貫";
+  }
+
+  const rawBasePoints = fu * (2 ** (han + 2));
+
+  if (rawBasePoints >= 2000) {
+    return "満貫";
+  }
+
+  return "通常";
 }
 
 function checkFieldConsistency(
