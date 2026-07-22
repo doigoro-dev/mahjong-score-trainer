@@ -6,7 +6,9 @@ const AUDIT_CHECKS = [
   checkHanConsistency,
   checkFuConsistency,
   checkScoreCategoryConsistency,
-  checkKiriageManganConsistency
+  checkKiriageManganConsistency,
+  checkYakuHanTotal,
+  checkYakuListConsistency
 ];
 
 const REQUIRED_FIELD_PATHS = [
@@ -178,6 +180,105 @@ function checkKiriageManganConsistency(questions) {
   );
 }
 
+function checkYakuHanTotal(questions) {
+  const errors = [];
+
+  questions.forEach((question, index) => {
+    const questionLabel = getQuestionLabel(question, index);
+    const yakuList = getValueByPath(question, "answer.yaku");
+    const totalHan = getValueByPath(question, "answer.totalHan");
+
+    if (!Array.isArray(yakuList) || totalHan === undefined || totalHan === null) {
+      return;
+    }
+
+    let calculatedHan = 0;
+    let hasInvalidYaku = false;
+
+    yakuList.forEach((yaku, yakuIndex) => {
+      if (
+        yaku === null ||
+        typeof yaku !== "object" ||
+        typeof yaku.name !== "string" ||
+        yaku.name.length === 0 ||
+        typeof yaku.han !== "number" ||
+        !Number.isFinite(yaku.han)
+      ) {
+        errors.push(
+          `${questionLabel}: answer.yaku[${yakuIndex}]の` +
+          "nameまたはhanが正しくありません。"
+        );
+        hasInvalidYaku = true;
+        return;
+      }
+
+      calculatedHan += yaku.han;
+    });
+
+    if (!hasInvalidYaku && calculatedHan !== totalHan) {
+      const breakdown = yakuList
+        .map((yaku) => `${yaku.name}:${yaku.han}翻`)
+        .join(" + ");
+
+      errors.push(
+        `${questionLabel}: 役の翻数合計=${calculatedHan}翻 / ` +
+        `answer.totalHan=${formatValue(totalHan)} ` +
+        `（${breakdown}）`
+      );
+    }
+  });
+
+  return createAuditResult("役の翻数合計チェック", errors);
+}
+
+function checkYakuListConsistency(questions) {
+  const errors = [];
+
+  questions.forEach((question, index) => {
+    const questionLabel = getQuestionLabel(question, index);
+    const yakuList = getValueByPath(question, "answer.yaku");
+    const mainYaku = getValueByPath(question, "management.mainYaku");
+
+    if (!Array.isArray(yakuList) || !Array.isArray(mainYaku)) {
+      return;
+    }
+
+    const answerYakuNames = [];
+    let hasInvalidYaku = false;
+
+    yakuList.forEach((yaku, yakuIndex) => {
+      if (
+        yaku === null ||
+        typeof yaku !== "object" ||
+        typeof yaku.name !== "string" ||
+        yaku.name.length === 0
+      ) {
+        errors.push(
+          `${questionLabel}: answer.yaku[${yakuIndex}].nameが正しくありません。`
+        );
+        hasInvalidYaku = true;
+        return;
+      }
+
+      answerYakuNames.push(yaku.name);
+    });
+
+    if (hasInvalidYaku) {
+      return;
+    }
+
+    if (!areArraysEqual(answerYakuNames, mainYaku)) {
+      errors.push(
+        `${questionLabel}: ` +
+        `answer.yaku=${formatArray(answerYakuNames)} / ` +
+        `management.mainYaku=${formatArray(mainYaku)}`
+      );
+    }
+  });
+
+  return createAuditResult("役一覧整合性チェック", errors);
+}
+
 function checkFieldConsistency(
   questions,
   checkName,
@@ -190,10 +291,6 @@ function checkFieldConsistency(
     const answerValue = getValueByPath(question, answerPath);
     const managementValue = getValueByPath(question, managementPath);
 
-    /*
-     * 欠落は必須項目チェックで検出するため、
-     * ここでは両方の項目が存在する場合だけ比較する。
-     */
     if (
       answerValue === undefined ||
       answerValue === null ||
@@ -215,6 +312,14 @@ function checkFieldConsistency(
   });
 
   return createAuditResult(checkName, errors);
+}
+
+function areArraysEqual(first, second) {
+  if (first.length !== second.length) {
+    return false;
+  }
+
+  return first.every((value, index) => value === second[index]);
 }
 
 function getValueByPath(target, fieldPath) {
@@ -248,6 +353,10 @@ function formatValue(value) {
   }
 
   return String(value);
+}
+
+function formatArray(values) {
+  return `[${values.map((value) => `"${value}"`).join(", ")}]`;
 }
 
 function getQuestionLabel(question, index) {

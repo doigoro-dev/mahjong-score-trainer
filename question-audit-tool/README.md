@@ -4,92 +4,70 @@
 
 麻雀点数計算トレーナーで利用している `questions.js` を監査するための開発者向けツールです。
 
-## 配置場所
-
-```text
-mahjong-score-trainer/
-├─ app/
-├─ docs/
-└─ question-audit-tool/
-   ├─ index.html
-   ├─ styles.css
-   ├─ audit.js
-   ├─ questions.js
-   └─ README.md
-```
-
 現時点では、`app/questions.js` を `question-audit-tool/questions.js` へコピーして利用します。
 
-## Version 0.4
+## Version 0.5
 
-実装内容:
+監査項目は次の8項目です。
 
-- 問題ID重複チェック
-- 必須項目チェック
-- 翻数整合性チェック
-- 符整合性チェック
-- 点数カテゴリ整合性チェック
-- 切り上げ満貫整合性チェック
-- 監査項目ごとのOK／NG表示
-- エラー一覧表示
+1. 問題ID重複チェック
+2. 必須項目チェック
+3. 翻数整合性チェック
+4. 符整合性チェック
+5. 点数カテゴリ整合性チェック
+6. 切り上げ満貫整合性チェック
+7. 役の翻数合計チェック
+8. 役一覧整合性チェック
 
-## 整合性チェック
+## 役の翻数合計チェック
 
-次の値が一致しているかを確認します。
+`answer.yaku`に登録された各役の`han`を合計し、`answer.totalHan`と一致するか確認します。
 
-```text
-answer.totalHan
-management.han
+例:
+
+```javascript
+answer: {
+  yaku: [
+    { name: "門前清自摸和", han: 1 },
+    { name: "平和", han: 1 },
+    { name: "一盃口", han: 1 }
+  ],
+  totalHan: 3
+}
 ```
 
-```text
-answer.fu
-management.fu
-```
+不一致がある場合は、問題ID、計算した翻数、登録された翻数、役ごとの内訳を表示します。
 
 ```text
-answer.score.category
-management.scoreCategory
+q101: 役の翻数合計=5翻 / answer.totalHan=4
 ```
 
-```text
-answer.score.kiriageMangan
-management.kiriageMangan
-```
+また、各役の`name`または`han`が正しい形式でない場合もエラーにします。
 
-不一致がある場合は、問題IDと両方の値を表示します。
+## 役一覧整合性チェック
+
+`answer.yaku[].name`から作成した役名一覧と、`management.mainYaku`が同じ内容・同じ順序になっているか確認します。
 
 例:
 
 ```text
-q101: answer.totalHan=5 / management.han=4
+answer.yaku=["門前清自摸和", "平和"]
+management.mainYaku=["門前清自摸和", "平和"]
 ```
 
-欠落項目は必須項目チェックで検出するため、整合性チェックでは両方の値が存在する場合のみ比較します。
-
-## 監査項目の追加方法
-
-監査関数を作成し、`AUDIT_CHECKS` 配列へ追加します。
-
-```javascript
-const AUDIT_CHECKS = [
-  checkDuplicateIds,
-  checkRequiredFields,
-  checkHanConsistency
-];
-```
+件数、役名、順序のいずれかが異なる場合はエラーになります。
 
 ## 起動方法
 
-1. `app/questions.js` を監査ツールのフォルダへコピーする
-2. `index.html` をブラウザで開く
+1. `app/questions.js`を監査ツールのフォルダへコピーする
+2. `index.html`をブラウザで開く
 3. 「監査開始」を押す
 
-## 今後の予定
+## 今後の候補
 
-- `answer.yaku` の翻数合計チェック
-- `answer.yaku` と `management.mainYaku` の整合性チェック
-- プレイヤー種別・和了方法の整合性チェック
+- プレイヤー種別と自風の整合性チェック
+- 和了方法の整合性チェック
 - 点数表示項目の整合性チェック
-- 牌コード・手牌枚数チェック
+- 基礎点計算チェック
+- 牌コード・牌枚数チェック
 - 役判定
