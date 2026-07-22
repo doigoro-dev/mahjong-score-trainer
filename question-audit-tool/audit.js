@@ -1,5 +1,7 @@
 window.addEventListener("DOMContentLoaded", initialize);
 
+// 実行順に監査関数を登録する。
+// 新しい監査を追加する場合は、関数を定義したうえでこの配列へ追加する。
 const AUDIT_CHECKS = [
   checkDuplicateIds,
   checkRequiredFields,
@@ -15,6 +17,7 @@ const AUDIT_CHECKS = [
   checkDoraIndicatorFormat
 ];
 
+// 問題データとして必須とするプロパティパス。
 const REQUIRED_FIELD_PATHS = [
   "id",
   "concealedTiles",
@@ -474,6 +477,8 @@ function roundUpToHundred(points) {
 }
 
 
+// questions.jsで使用可能な牌コード一覧。
+// ドラ・裏ドラの形式チェックでも同じ定義を共用する。
 const VALID_TILE_CODES = new Set([
   "1m", "2m", "3m", "4m", "5m", "6m", "7m", "8m", "9m",
   "1p", "2p", "3p", "4p", "5p", "6p", "7p", "8p", "9p",
