@@ -1,53 +1,49 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <title>問題データ監査ツール</title>
-
-    <link rel="stylesheet" href="styles.css">
-
-    <script src="questions.js"></script>
-    <script src="audit.js" defer></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>問題データ監査ツール</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="questions.js"></script>
+  <script src="audit.js" defer></script>
 </head>
-
 <body>
+  <main class="container">
+    <header class="page-header">
+      <h1>麻雀点数計算トレーナー</h1>
+      <p class="subtitle">問題データ監査ツール Ver0.2</p>
+    </header>
 
-<h1>麻雀点数計算トレーナー</h1>
-<h2>問題データ監査ツール</h2>
+    <section class="card">
+      <h2>問題データ</h2>
+      <p>読み込み件数：<strong><span id="questionCount">0</span>問</strong></p>
+      <button id="auditButton" type="button">監査開始</button>
+    </section>
 
-<div class="card">
+    <section class="card">
+      <h2>監査結果</h2>
+      <div id="auditStatus" class="status-message status-ready">監査準備完了</div>
 
-    <h3>問題データ</h3>
+      <div id="auditSummary" class="audit-summary" hidden>
+        <div class="summary-item"><span>監査項目</span><strong id="checkCount">0</strong></div>
+        <div class="summary-item"><span>正常</span><strong id="successCount">0</strong></div>
+        <div class="summary-item"><span>異常</span><strong id="failureCount">0</strong></div>
+        <div class="summary-item"><span>エラー件数</span><strong id="errorCount">0</strong></div>
+      </div>
 
-    <p>
-        読み込み件数：
-        <span id="questionCount">0</span>問
-    </p>
+      <div id="auditCheckList" class="audit-check-list"></div>
 
-    <button id="auditButton">
-        監査開始
-    </button>
+      <section id="errorSection" class="error-section" hidden>
+        <h3>エラー一覧</h3>
+        <ul id="errorList"></ul>
+      </section>
+    </section>
 
-</div>
-
-<div class="card">
-
-    <h3>問題一覧</h3>
-
-    <ul id="questionList">
-    </ul>
-
-</div>
-
-<div class="card">
-
-    <h3>監査結果</h3>
-
-    <div id="auditResult">
-        準備完了
-    </div>
-
-</div>
-
+    <section class="card">
+      <h2>問題一覧</h2>
+      <ul id="questionList" class="question-list"></ul>
+    </section>
+  </main>
 </body>
 </html>
