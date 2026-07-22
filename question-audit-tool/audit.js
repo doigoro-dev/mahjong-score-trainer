@@ -9,7 +9,8 @@ const AUDIT_CHECKS = [
   checkKiriageManganConsistency,
   checkYakuHanTotal,
   checkYakuListConsistency,
-  checkCalculatedScoreCategory
+  checkCalculatedScoreCategory,
+  checkFinalScoreDisplay
 ];
 
 const REQUIRED_FIELD_PATHS = [
@@ -353,6 +354,121 @@ function calculateScoreCategory(fu, han) {
   }
 
   return "通常";
+}
+
+
+function checkFinalScoreDisplay(questions) {
+  const errors = [];
+
+  questions.forEach((question, index) => {
+    const questionLabel = getQuestionLabel(question, index);
+    const fu = getValueByPath(question, "answer.fu");
+    const han = getValueByPath(question, "answer.totalHan");
+    const playerType = getValueByPath(question, "management.playerType");
+    const winType = getValueByPath(question, "winType");
+    const category = getValueByPath(question, "answer.score.category");
+    const registeredPointText = getValueByPath(
+      question,
+      "answer.score.pointText"
+    );
+    const registeredDisplay = getValueByPath(
+      question,
+      "answer.score.display"
+    );
+
+    if (
+      typeof fu !== "number" ||
+      !Number.isFinite(fu) ||
+      typeof han !== "number" ||
+      !Number.isFinite(han) ||
+      !["親", "子"].includes(playerType) ||
+      !["ron", "tsumo"].includes(winType) ||
+      typeof category !== "string" ||
+      typeof registeredPointText !== "string" ||
+      typeof registeredDisplay !== "string"
+    ) {
+      return;
+    }
+
+    const expected = calculateFinalScoreDisplay(
+      fu,
+      han,
+      playerType,
+      winType,
+      category
+    );
+
+    if (registeredPointText !== expected.pointText) {
+      errors.push(
+        `${questionLabel}: answer.score.pointText=` +
+        `"${registeredPointText}" / 正しい値="${expected.pointText}"`
+      );
+    }
+
+    const allowedDisplays = [
+      expected.pointText,
+      `${category}（${expected.pointText}）`
+    ];
+
+    if (!allowedDisplays.includes(registeredDisplay)) {
+      errors.push(
+        `${questionLabel}: answer.score.display=` +
+        `"${registeredDisplay}" / 正しい値候補=` +
+        `"${allowedDisplays.join('" または "')}"`
+      );
+    }
+  });
+
+  return createAuditResult("最終点数表示チェック", errors);
+}
+
+function calculateFinalScoreDisplay(
+  fu,
+  han,
+  playerType,
+  winType,
+  category
+) {
+  const basePoints = calculateBasePointsForScore(fu, han, category);
+  let pointText;
+
+  if (winType === "ron") {
+    const multiplier = playerType === "親" ? 6 : 4;
+    const ronPoints = roundUpToHundred(basePoints * multiplier);
+    pointText = `${ronPoints}点`;
+  } else if (playerType === "親") {
+    const payment = roundUpToHundred(basePoints * 2);
+    pointText = `${payment}点オール`;
+  } else {
+    const childPayment = roundUpToHundred(basePoints);
+    const dealerPayment = roundUpToHundred(basePoints * 2);
+    pointText = `${childPayment}点／${dealerPayment}点`;
+  }
+
+  return {
+    pointText
+  };
+}
+
+function calculateBasePointsForScore(fu, han, category) {
+  const limitBasePoints = {
+    "切り上げ満貫": 2000,
+    "満貫": 2000,
+    "跳満": 3000,
+    "倍満": 4000,
+    "三倍満": 6000,
+    "数え役満": 8000
+  };
+
+  if (Object.prototype.hasOwnProperty.call(limitBasePoints, category)) {
+    return limitBasePoints[category];
+  }
+
+  return fu * (2 ** (han + 2));
+}
+
+function roundUpToHundred(points) {
+  return Math.ceil(points / 100) * 100;
 }
 
 function checkFieldConsistency(

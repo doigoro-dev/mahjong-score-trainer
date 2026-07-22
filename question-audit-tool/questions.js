@@ -7372,7 +7372,7 @@ window.MAHJONG_QUESTIONS = [
                   "totalHan": 4,
                   "fu": 50,
                   "score": {
-                        "display": "満貫（8000点）",
+                        "display": "8000点",
                         "pointText": "8000点",
                         "category": "満貫",
                         "basePoints": 2000,
