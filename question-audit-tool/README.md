@@ -20,51 +20,64 @@ mahjong-score-trainer/
 
 現時点では、`app/questions.js` を `question-audit-tool/questions.js` へコピーして利用します。
 
-## Version 0.3
+## Version 0.4
 
 実装内容:
 
-- 問題データ読み込み
-- 問題件数・問題ID一覧表示
-- 監査項目を関数配列で管理
 - 問題ID重複チェック
 - 必須項目チェック
-- 監査項目数・正常数・異常数・エラー件数表示
+- 翻数整合性チェック
+- 符整合性チェック
+- 点数カテゴリ整合性チェック
+- 切り上げ満貫整合性チェック
 - 監査項目ごとのOK／NG表示
 - エラー一覧表示
 
-## 監査項目の管理
+## 整合性チェック
 
-監査関数は `AUDIT_CHECKS` 配列で管理します。
+次の値が一致しているかを確認します。
+
+```text
+answer.totalHan
+management.han
+```
+
+```text
+answer.fu
+management.fu
+```
+
+```text
+answer.score.category
+management.scoreCategory
+```
+
+```text
+answer.score.kiriageMangan
+management.kiriageMangan
+```
+
+不一致がある場合は、問題IDと両方の値を表示します。
+
+例:
+
+```text
+q101: answer.totalHan=5 / management.han=4
+```
+
+欠落項目は必須項目チェックで検出するため、整合性チェックでは両方の値が存在する場合のみ比較します。
+
+## 監査項目の追加方法
+
+監査関数を作成し、`AUDIT_CHECKS` 配列へ追加します。
 
 ```javascript
 const AUDIT_CHECKS = [
   checkDuplicateIds,
-  checkRequiredFields
+  checkRequiredFields,
+  checkHanConsistency
 ];
 ```
-
-今後は監査関数を作成し、この配列へ追加することで監査項目を増やします。
-
-## 必須項目チェック
-
-現在の `questions.js` の問題形式に必要な項目が存在するかを確認します。
-
-主な対象:
-
-- 問題ID
-- 手牌
-- 和了牌
-- 和了方法
-- 場風・自風
-- 立直・門前
-- 正解の役・翻数・符・点数
-- 符内訳
-- 管理用メタデータ
-- 表ドラ表示牌
-- 裏ドラ表示牌
-
-`false`、`0`、空文字、空配列は、項目自体が存在すれば欠落とは判定しません。
 
 ## 起動方法
 
@@ -74,8 +87,9 @@ const AUDIT_CHECKS = [
 
 ## 今後の予定
 
-- 必須項目の型チェック
-- `answer` と `management` の整合性チェック
-- 翻数・符・点数チェック
+- `answer.yaku` の翻数合計チェック
+- `answer.yaku` と `management.mainYaku` の整合性チェック
+- プレイヤー種別・和了方法の整合性チェック
+- 点数表示項目の整合性チェック
 - 牌コード・手牌枚数チェック
 - 役判定

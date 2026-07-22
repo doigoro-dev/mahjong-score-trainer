@@ -1,18 +1,14 @@
 window.addEventListener("DOMContentLoaded", initialize);
 
-/*
- * 監査項目一覧。
- * 新しい監査を追加する場合は、監査関数を作成してこの配列へ追加する。
- */
 const AUDIT_CHECKS = [
   checkDuplicateIds,
-  checkRequiredFields
+  checkRequiredFields,
+  checkHanConsistency,
+  checkFuConsistency,
+  checkScoreCategoryConsistency,
+  checkKiriageManganConsistency
 ];
 
-/*
- * 現在のquestions.jsで必須とする項目。
- * 配列は空でもよいが、項目自体が存在する必要がある。
- */
 const REQUIRED_FIELD_PATHS = [
   "id",
   "concealedTiles",
@@ -146,11 +142,82 @@ function checkRequiredFields(questions) {
   return createAuditResult("必須項目チェック", errors);
 }
 
-/*
- * 指定したパスに値が存在し、undefinedまたはnullでないことを確認する。
- * false、0、空文字、空配列は「項目が存在する」と扱う。
- */
-function hasRequiredValue(target, fieldPath) {
+function checkHanConsistency(questions) {
+  return checkFieldConsistency(
+    questions,
+    "翻数整合性チェック",
+    "answer.totalHan",
+    "management.han"
+  );
+}
+
+function checkFuConsistency(questions) {
+  return checkFieldConsistency(
+    questions,
+    "符整合性チェック",
+    "answer.fu",
+    "management.fu"
+  );
+}
+
+function checkScoreCategoryConsistency(questions) {
+  return checkFieldConsistency(
+    questions,
+    "点数カテゴリ整合性チェック",
+    "answer.score.category",
+    "management.scoreCategory"
+  );
+}
+
+function checkKiriageManganConsistency(questions) {
+  return checkFieldConsistency(
+    questions,
+    "切り上げ満貫整合性チェック",
+    "answer.score.kiriageMangan",
+    "management.kiriageMangan"
+  );
+}
+
+function checkFieldConsistency(
+  questions,
+  checkName,
+  answerPath,
+  managementPath
+) {
+  const errors = [];
+
+  questions.forEach((question, index) => {
+    const answerValue = getValueByPath(question, answerPath);
+    const managementValue = getValueByPath(question, managementPath);
+
+    /*
+     * 欠落は必須項目チェックで検出するため、
+     * ここでは両方の項目が存在する場合だけ比較する。
+     */
+    if (
+      answerValue === undefined ||
+      answerValue === null ||
+      managementValue === undefined ||
+      managementValue === null
+    ) {
+      return;
+    }
+
+    if (!Object.is(answerValue, managementValue)) {
+      const questionLabel = getQuestionLabel(question, index);
+
+      errors.push(
+        `${questionLabel}: ` +
+        `${answerPath}=${formatValue(answerValue)} / ` +
+        `${managementPath}=${formatValue(managementValue)}`
+      );
+    }
+  });
+
+  return createAuditResult(checkName, errors);
+}
+
+function getValueByPath(target, fieldPath) {
   const keys = fieldPath.split(".");
   let current = target;
 
@@ -161,13 +228,26 @@ function hasRequiredValue(target, fieldPath) {
       typeof current !== "object" ||
       !Object.prototype.hasOwnProperty.call(current, key)
     ) {
-      return false;
+      return undefined;
     }
 
     current = current[key];
   }
 
-  return current !== null && current !== undefined;
+  return current;
+}
+
+function hasRequiredValue(target, fieldPath) {
+  const value = getValueByPath(target, fieldPath);
+  return value !== null && value !== undefined;
+}
+
+function formatValue(value) {
+  if (typeof value === "string") {
+    return `"${value}"`;
+  }
+
+  return String(value);
 }
 
 function getQuestionLabel(question, index) {
