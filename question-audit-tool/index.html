@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>問題データ監査ツール</title>
+
+    <link rel="stylesheet" href="styles.css">
+
+    <script src="questions.js"></script>
+    <script src="audit.js" defer></script>
+</head>
+
+<body>
+
+<h1>麻雀点数計算トレーナー</h1>
+<h2>問題データ監査ツール</h2>
+
+<div class="card">
+
+    <h3>問題データ</h3>
+
+    <p>
+        読み込み件数：
+        <span id="questionCount">0</span>問
+    </p>
+
+    <button id="auditButton">
+        監査開始
+    </button>
+
+</div>
+
+<div class="card">
+
+    <h3>問題一覧</h3>
+
+    <ul id="questionList">
+    </ul>
+
+</div>
+
+<div class="card">
+
+    <h3>監査結果</h3>
+
+    <div id="auditResult">
+        準備完了
+    </div>
+
+</div>
+
+</body>
+</html>

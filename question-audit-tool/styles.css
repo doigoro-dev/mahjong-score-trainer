@@ -1,0 +1,37 @@
+body{
+
+    font-family:sans-serif;
+
+    background:#f5f5f5;
+
+    margin:30px;
+
+}
+
+.card{
+
+    background:white;
+
+    padding:20px;
+
+    margin-bottom:20px;
+
+    border-radius:8px;
+
+    box-shadow:0 0 5px rgba(0,0,0,0.15);
+
+}
+
+button{
+
+    padding:10px 20px;
+
+    cursor:pointer;
+
+}
+
+#auditResult{
+
+    white-space:pre-wrap;
+
+}
