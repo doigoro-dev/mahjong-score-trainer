@@ -12,7 +12,7 @@
   <main class="container">
     <header class="page-header">
       <h1>麻雀点数計算トレーナー</h1>
-      <p class="subtitle">問題データ監査ツール Ver0.2</p>
+      <p class="subtitle">問題データ監査ツール Ver0.3</p>
     </header>
 
     <section class="card">
@@ -23,20 +23,35 @@
 
     <section class="card">
       <h2>監査結果</h2>
-      <div id="auditStatus" class="status-message status-ready">監査準備完了</div>
+
+      <div id="auditStatus" class="status-message status-ready">
+        監査準備完了
+      </div>
 
       <div id="auditSummary" class="audit-summary" hidden>
-        <div class="summary-item"><span>監査項目</span><strong id="checkCount">0</strong></div>
-        <div class="summary-item"><span>正常</span><strong id="successCount">0</strong></div>
-        <div class="summary-item"><span>異常</span><strong id="failureCount">0</strong></div>
-        <div class="summary-item"><span>エラー件数</span><strong id="errorCount">0</strong></div>
+        <div class="summary-item">
+          <span>監査項目</span>
+          <strong id="checkCount">0</strong>
+        </div>
+        <div class="summary-item">
+          <span>正常</span>
+          <strong id="successCount">0</strong>
+        </div>
+        <div class="summary-item">
+          <span>異常</span>
+          <strong id="failureCount">0</strong>
+        </div>
+        <div class="summary-item">
+          <span>エラー件数</span>
+          <strong id="errorCount">0</strong>
+        </div>
       </div>
 
       <div id="auditCheckList" class="audit-check-list"></div>
 
       <section id="errorSection" class="error-section" hidden>
         <h3>エラー一覧</h3>
-        <ul id="errorList"></ul>
+        <ul id="errorList" class="error-list"></ul>
       </section>
     </section>
 
