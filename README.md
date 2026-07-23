@@ -21,20 +21,6 @@
 
 ---
 
-## 📸 Screenshots
-
-> ※画像はVersion2の画面です。
-
-| Top | Normal Mode |
-|------|-------------|
-| *(Screenshot)* | *(Screenshot)* |
-
-| Practical Mode | Review Mode |
-|----------------|-------------|
-| *(Screenshot)* | *(Screenshot)* |
-
----
-
 # ✨ Features
 
 Version2では、単なる問題集ではなく、
