@@ -43,7 +43,10 @@ function extractArrayLiteral(source, marker) {
   throw new Error('questions array end not found');
 }
 
-const literal = extractArrayLiteral(html, 'const questions =');
+const literal = extractArrayLiteral(
+  html,
+  'window.MAHJONG_QUESTIONS ='
+);
 const questions = vm.runInNewContext(`(${literal})`, Object.create(null), { timeout: 1000 });
 
 const errors = [];
