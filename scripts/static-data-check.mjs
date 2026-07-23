@@ -4,8 +4,8 @@ import vm from 'node:vm';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const htmlPath = path.resolve(__dirname, '../app/index.html');
-const html = fs.readFileSync(htmlPath, 'utf8');
+const questionsPath = path.resolve(__dirname, '../app/questions.js');
+const questionsSource = fs.readFileSync(questionsPath, 'utf8');
 
 function extractArrayLiteral(source, marker) {
   const markerIndex = source.indexOf(marker);
@@ -44,7 +44,7 @@ function extractArrayLiteral(source, marker) {
 }
 
 const literal = extractArrayLiteral(
-  html,
+  questionsSource,
   'window.MAHJONG_QUESTIONS ='
 );
 const questions = vm.runInNewContext(`(${literal})`, Object.create(null), { timeout: 1000 });
