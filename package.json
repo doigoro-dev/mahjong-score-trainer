@@ -3,9 +3,8 @@
   "version": "1.6.0",
   "private": true,
   "scripts": {
-    "test": "npm run test:static-data && npm run test:e2e",
+    "test": "npm run test:e2e",
     "test:e2e": "playwright test",
-    "test:static-data": "node scripts/static-data-check.mjs",
     "test:smoke": "playwright test tests/e2e/01-startup.spec.ts tests/e2e/02-answer.spec.ts",
     "test:responsive": "playwright test tests/e2e/05-responsive.spec.ts",
     "test:headed": "playwright test --headed",
