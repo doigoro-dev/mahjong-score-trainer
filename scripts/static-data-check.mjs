@@ -55,12 +55,12 @@ const assert = (condition, message) => {
 };
 
 assert(Array.isArray(questions), 'questions must be an array');
-assert(questions.length === 100, `question count must be 100 (actual: ${questions.length})`);
+assert(questions.length === 117, `question count must be 100 (actual: ${questions.length})`);
 
 const ids = questions.map(q => q.id);
 assert(new Set(ids).size === ids.length, 'question IDs must be unique');
 
-const expectedFuCounts = new Map([[20, 10], [25, 10], [30, 20], [40, 20], [50, 15], [60, 25]]);
+const expectedFuCounts = new Map([[20, 11], [25, 12], [30, 22], [40, 26], [50, 17], [60, 26]]);
 const actualFuCounts = new Map();
 let kiriageCount = 0;
 
@@ -88,7 +88,7 @@ for (const [index, q] of questions.entries()) {
 for (const [fu, expected] of expectedFuCounts) {
   assert(actualFuCounts.get(fu) === expected, `${fu} fu count must be ${expected} (actual: ${actualFuCounts.get(fu) ?? 0})`);
 }
-assert(kiriageCount === 10, `kiriage mangan count must be 10 (actual: ${kiriageCount})`);
+assert(kiriageCount === 12, `kiriage mangan count must be 10 (actual: ${kiriageCount})`);
 
 if (errors.length > 0) {
   console.error(`Static data check failed with ${errors.length} error(s):`);
