@@ -14,6 +14,7 @@ const AUDIT_CHECKS = [
   checkCalculatedScoreCategory,
   checkFinalScoreDisplay,
   checkTileCodesAndCounts,
+  checkOpenMeldsFormat,
   checkDoraIndicatorFormat
 ];
 
@@ -21,6 +22,7 @@ const AUDIT_CHECKS = [
 const REQUIRED_FIELD_PATHS = [
   "id",
   "concealedTiles",
+  "openMelds",
   "winningTile",
   "winType",
   "roundWind",
@@ -498,6 +500,10 @@ function checkTileCodesAndCounts(questions) {
       question?.concealedKans === undefined
         ? []
         : question.concealedKans;
+    const openMelds =
+      question?.openMelds === undefined
+        ? []
+        : question.openMelds;
 
     let canCheckCounts = true;
 
@@ -518,6 +524,13 @@ function checkTileCodesAndCounts(questions) {
     if (!Array.isArray(concealedKans)) {
       errors.push(
         `${questionLabel}: concealedKansが配列ではありません。`
+      );
+      canCheckCounts = false;
+    }
+
+    if (!Array.isArray(openMelds)) {
+      errors.push(
+        `${questionLabel}: openMeldsが配列ではありません。`
       );
       canCheckCounts = false;
     }
@@ -550,14 +563,16 @@ function checkTileCodesAndCounts(questions) {
     const structuralTileCount =
       concealedTiles.length +
       1 +
-      concealedKans.length * 3;
+      concealedKans.length * 3 +
+      openMelds.length * 3;
 
     if (structuralTileCount !== 14) {
       errors.push(
         `${questionLabel}: 和了形の構成枚数=${structuralTileCount}枚 / ` +
         "正しい枚数=14枚 " +
         `（concealedTiles=${concealedTiles.length}枚、` +
-        `winningTile=1枚、暗槓=${concealedKans.length}組×3枚換算）`
+        `winningTile=1枚、暗槓=${concealedKans.length}組×3枚換算、` +
+        `副露=${openMelds.length}組×3枚換算）`
       );
     }
 
@@ -571,6 +586,14 @@ function checkTileCodesAndCounts(questions) {
 
     concealedKans.forEach((tileCode) => {
       addTileCount(physicalTileCounts, tileCode, 4);
+    });
+
+    openMelds.forEach((meld) => {
+      if (Array.isArray(meld?.tiles)) {
+        meld.tiles.forEach((tileCode) => {
+          addTileCount(physicalTileCounts, tileCode, 1);
+        });
+      }
     });
 
     physicalTileCounts.forEach((count, tileCode) => {
@@ -611,6 +634,75 @@ function addTileCount(tileCounts, tileCode, amount) {
     tileCode,
     (tileCounts.get(tileCode) ?? 0) + amount
   );
+}
+
+
+const VALID_OPEN_MELD_TYPES = new Set([
+  "chi",
+  "pon",
+  "kan-open"
+]);
+
+const OPEN_MELD_TILE_COUNTS = {
+  chi: 3,
+  pon: 3,
+  "kan-open": 4
+};
+
+function checkOpenMeldsFormat(questions) {
+  const errors = [];
+
+  questions.forEach((question, index) => {
+    const questionLabel = getQuestionLabel(question, index);
+    const openMelds = question?.openMelds;
+
+    if (!Array.isArray(openMelds)) {
+      errors.push(
+        `${questionLabel}: openMeldsが配列ではありません。`
+      );
+      return;
+    }
+
+    openMelds.forEach((meld, meldIndex) => {
+      if (meld === null || typeof meld !== "object") {
+        errors.push(
+          `${questionLabel}: openMelds[${meldIndex}]が` +
+          "オブジェクトではありません。"
+        );
+        return;
+      }
+
+      if (!VALID_OPEN_MELD_TYPES.has(meld.type)) {
+        errors.push(
+          `${questionLabel}: openMelds[${meldIndex}].typeに` +
+          `無効な値「${formatValue(meld.type)}」があります。`
+        );
+      }
+
+      if (!Array.isArray(meld.tiles)) {
+        errors.push(
+          `${questionLabel}: openMelds[${meldIndex}].tilesが` +
+          "配列ではありません。"
+        );
+        return;
+      }
+
+      const expectedTileCount = OPEN_MELD_TILE_COUNTS[meld.type];
+
+      if (
+        expectedTileCount !== undefined &&
+        meld.tiles.length !== expectedTileCount
+      ) {
+        errors.push(
+          `${questionLabel}: openMelds[${meldIndex}].tilesの枚数=` +
+          `${meld.tiles.length}枚 / 正しい枚数=${expectedTileCount}枚 ` +
+          `（type=${formatValue(meld.type)}）`
+        );
+      }
+    });
+  });
+
+  return createAuditResult("副露データ形式チェック", errors);
 }
 
 

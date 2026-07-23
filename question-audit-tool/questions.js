@@ -16,6 +16,7 @@ window.MAHJONG_QUESTIONS = [
                   "8p",
                   "8p"
             ],
+            "openMelds": [],
             "winningTile": "6m",
             "winType": "tsumo",
             "roundWind": "west",
@@ -89,6 +90,7 @@ window.MAHJONG_QUESTIONS = [
                   "4s",
                   "5s"
             ],
+            "openMelds": [],
             "winningTile": "2p",
             "winType": "tsumo",
             "roundWind": "north",
@@ -162,6 +164,7 @@ window.MAHJONG_QUESTIONS = [
                   "5p",
                   "6p"
             ],
+            "openMelds": [],
             "winningTile": "5p",
             "winType": "tsumo",
             "roundWind": "north",
@@ -230,6 +233,7 @@ window.MAHJONG_QUESTIONS = [
                   "8s",
                   "9s"
             ],
+            "openMelds": [],
             "winningTile": "6s",
             "winType": "tsumo",
             "roundWind": "north",
@@ -303,6 +307,7 @@ window.MAHJONG_QUESTIONS = [
                   "north",
                   "north"
             ],
+            "openMelds": [],
             "winningTile": "6m",
             "winType": "ron",
             "roundWind": "north",
@@ -365,6 +370,7 @@ window.MAHJONG_QUESTIONS = [
                   "east",
                   "east"
             ],
+            "openMelds": [],
             "winningTile": "8m",
             "winType": "tsumo",
             "roundWind": "west",
@@ -432,6 +438,7 @@ window.MAHJONG_QUESTIONS = [
                   "red",
                   "red"
             ],
+            "openMelds": [],
             "winningTile": "8p",
             "winType": "ron",
             "roundWind": "west",
@@ -499,6 +506,7 @@ window.MAHJONG_QUESTIONS = [
                   "8s",
                   "8s"
             ],
+            "openMelds": [],
             "winningTile": "8p",
             "winType": "tsumo",
             "roundWind": "south",
@@ -571,6 +579,7 @@ window.MAHJONG_QUESTIONS = [
                   "7s",
                   "7s"
             ],
+            "openMelds": [],
             "winningTile": "1p",
             "winType": "ron",
             "roundWind": "east",
@@ -635,6 +644,7 @@ window.MAHJONG_QUESTIONS = [
                   "8s",
                   "9s"
             ],
+            "openMelds": [],
             "winningTile": "3m",
             "winType": "tsumo",
             "roundWind": "south",
@@ -701,6 +711,7 @@ window.MAHJONG_QUESTIONS = [
                   "7s",
                   "8s"
             ],
+            "openMelds": [],
             "winningTile": "5m",
             "winType": "ron",
             "roundWind": "north",
@@ -770,6 +781,7 @@ window.MAHJONG_QUESTIONS = [
                   "8s",
                   "8s"
             ],
+            "openMelds": [],
             "winningTile": "3s",
             "winType": "tsumo",
             "roundWind": "north",
@@ -841,6 +853,7 @@ window.MAHJONG_QUESTIONS = [
                   "5s",
                   "6s"
             ],
+            "openMelds": [],
             "winningTile": "7s",
             "winType": "ron",
             "roundWind": "east",
@@ -910,6 +923,7 @@ window.MAHJONG_QUESTIONS = [
                   "green",
                   "green"
             ],
+            "openMelds": [],
             "winningTile": "5s",
             "winType": "tsumo",
             "roundWind": "west",
@@ -980,6 +994,7 @@ window.MAHJONG_QUESTIONS = [
                   "8s",
                   "8s"
             ],
+            "openMelds": [],
             "winningTile": "6s",
             "winType": "ron",
             "roundWind": "west",
@@ -1046,6 +1061,7 @@ window.MAHJONG_QUESTIONS = [
                   "8s",
                   "9s"
             ],
+            "openMelds": [],
             "winningTile": "6s",
             "winType": "tsumo",
             "roundWind": "south",
@@ -1113,6 +1129,7 @@ window.MAHJONG_QUESTIONS = [
                   "green",
                   "green"
             ],
+            "openMelds": [],
             "winningTile": "green",
             "winType": "ron",
             "roundWind": "east",
@@ -1179,6 +1196,7 @@ window.MAHJONG_QUESTIONS = [
                   "white",
                   "white"
             ],
+            "openMelds": [],
             "winningTile": "6m",
             "winType": "tsumo",
             "roundWind": "north",
@@ -1250,6 +1268,7 @@ window.MAHJONG_QUESTIONS = [
                   "red",
                   "red"
             ],
+            "openMelds": [],
             "winningTile": "3p",
             "winType": "ron",
             "roundWind": "west",
@@ -1316,6 +1335,7 @@ window.MAHJONG_QUESTIONS = [
                   "6s",
                   "6s"
             ],
+            "openMelds": [],
             "winningTile": "4m",
             "winType": "tsumo",
             "roundWind": "south",
@@ -1387,6 +1407,7 @@ window.MAHJONG_QUESTIONS = [
                   "3s",
                   "3s"
             ],
+            "openMelds": [],
             "winningTile": "2s",
             "winType": "ron",
             "roundWind": "north",
@@ -1463,6 +1484,7 @@ window.MAHJONG_QUESTIONS = [
                   "north",
                   "north"
             ],
+            "openMelds": [],
             "winningTile": "north",
             "winType": "tsumo",
             "roundWind": "west",
@@ -1534,6 +1556,7 @@ window.MAHJONG_QUESTIONS = [
                   "green",
                   "green"
             ],
+            "openMelds": [],
             "winningTile": "4p",
             "winType": "ron",
             "roundWind": "east",
@@ -1599,6 +1622,7 @@ window.MAHJONG_QUESTIONS = [
                   "5s",
                   "green"
             ],
+            "openMelds": [],
             "winningTile": "green",
             "winType": "tsumo",
             "roundWind": "north",
@@ -1666,6 +1690,7 @@ window.MAHJONG_QUESTIONS = [
                   "white",
                   "white"
             ],
+            "openMelds": [],
             "winningTile": "4p",
             "winType": "ron",
             "roundWind": "west",
@@ -1737,6 +1762,7 @@ window.MAHJONG_QUESTIONS = [
                   "red",
                   "red"
             ],
+            "openMelds": [],
             "winningTile": "9s",
             "winType": "ron",
             "roundWind": "west",
@@ -1810,6 +1836,7 @@ window.MAHJONG_QUESTIONS = [
                   "west",
                   "west"
             ],
+            "openMelds": [],
             "winningTile": "2m",
             "winType": "ron",
             "roundWind": "south",
@@ -1877,6 +1904,7 @@ window.MAHJONG_QUESTIONS = [
                   "red",
                   "red"
             ],
+            "openMelds": [],
             "winningTile": "7m",
             "winType": "ron",
             "roundWind": "north",
@@ -1954,6 +1982,7 @@ window.MAHJONG_QUESTIONS = [
                   "red",
                   "red"
             ],
+            "openMelds": [],
             "winningTile": "2p",
             "winType": "ron",
             "roundWind": "north",
@@ -2031,6 +2060,7 @@ window.MAHJONG_QUESTIONS = [
                   "green",
                   "green"
             ],
+            "openMelds": [],
             "winningTile": "5m",
             "winType": "ron",
             "roundWind": "south",
@@ -2104,6 +2134,7 @@ window.MAHJONG_QUESTIONS = [
                   "8s",
                   "8s"
             ],
+            "openMelds": [],
             "winningTile": "6m",
             "winType": "tsumo",
             "roundWind": "west",
@@ -2177,6 +2208,7 @@ window.MAHJONG_QUESTIONS = [
                   "4p",
                   "5p"
             ],
+            "openMelds": [],
             "winningTile": "2s",
             "winType": "tsumo",
             "roundWind": "north",
@@ -2250,6 +2282,7 @@ window.MAHJONG_QUESTIONS = [
                   "5s",
                   "6s"
             ],
+            "openMelds": [],
             "winningTile": "5s",
             "winType": "tsumo",
             "roundWind": "north",
@@ -2318,6 +2351,7 @@ window.MAHJONG_QUESTIONS = [
                   "8p",
                   "9p"
             ],
+            "openMelds": [],
             "winningTile": "6p",
             "winType": "tsumo",
             "roundWind": "north",
@@ -2391,6 +2425,7 @@ window.MAHJONG_QUESTIONS = [
                   "8m",
                   "8m"
             ],
+            "openMelds": [],
             "winningTile": "6p",
             "winType": "tsumo",
             "roundWind": "west",
@@ -2464,6 +2499,7 @@ window.MAHJONG_QUESTIONS = [
                   "4s",
                   "5s"
             ],
+            "openMelds": [],
             "winningTile": "2m",
             "winType": "tsumo",
             "roundWind": "north",
@@ -2537,6 +2573,7 @@ window.MAHJONG_QUESTIONS = [
                   "north",
                   "north"
             ],
+            "openMelds": [],
             "winningTile": "6m",
             "winType": "ron",
             "roundWind": "north",
@@ -2599,6 +2636,7 @@ window.MAHJONG_QUESTIONS = [
                   "east",
                   "east"
             ],
+            "openMelds": [],
             "winningTile": "8m",
             "winType": "tsumo",
             "roundWind": "west",
@@ -2666,6 +2704,7 @@ window.MAHJONG_QUESTIONS = [
                   "red",
                   "red"
             ],
+            "openMelds": [],
             "winningTile": "8s",
             "winType": "ron",
             "roundWind": "west",
@@ -2733,6 +2772,7 @@ window.MAHJONG_QUESTIONS = [
                   "8p",
                   "8p"
             ],
+            "openMelds": [],
             "winningTile": "8s",
             "winType": "tsumo",
             "roundWind": "south",
@@ -2805,6 +2845,7 @@ window.MAHJONG_QUESTIONS = [
                   "north",
                   "north"
             ],
+            "openMelds": [],
             "winningTile": "6p",
             "winType": "ron",
             "roundWind": "north",
@@ -2867,6 +2908,7 @@ window.MAHJONG_QUESTIONS = [
                   "east",
                   "east"
             ],
+            "openMelds": [],
             "winningTile": "8p",
             "winType": "tsumo",
             "roundWind": "west",
@@ -2934,6 +2976,7 @@ window.MAHJONG_QUESTIONS = [
                   "7p",
                   "7p"
             ],
+            "openMelds": [],
             "winningTile": "1s",
             "winType": "ron",
             "roundWind": "east",
@@ -2998,6 +3041,7 @@ window.MAHJONG_QUESTIONS = [
                   "8p",
                   "9p"
             ],
+            "openMelds": [],
             "winningTile": "3m",
             "winType": "tsumo",
             "roundWind": "south",
@@ -3064,6 +3108,7 @@ window.MAHJONG_QUESTIONS = [
                   "7p",
                   "8p"
             ],
+            "openMelds": [],
             "winningTile": "5m",
             "winType": "ron",
             "roundWind": "north",
@@ -3133,6 +3178,7 @@ window.MAHJONG_QUESTIONS = [
                   "8p",
                   "8p"
             ],
+            "openMelds": [],
             "winningTile": "3p",
             "winType": "tsumo",
             "roundWind": "north",
@@ -3204,6 +3250,7 @@ window.MAHJONG_QUESTIONS = [
                   "5p",
                   "6p"
             ],
+            "openMelds": [],
             "winningTile": "7p",
             "winType": "ron",
             "roundWind": "east",
@@ -3273,6 +3320,7 @@ window.MAHJONG_QUESTIONS = [
                   "green",
                   "green"
             ],
+            "openMelds": [],
             "winningTile": "5p",
             "winType": "tsumo",
             "roundWind": "west",
@@ -3343,6 +3391,7 @@ window.MAHJONG_QUESTIONS = [
                   "7s",
                   "7s"
             ],
+            "openMelds": [],
             "winningTile": "1m",
             "winType": "ron",
             "roundWind": "east",
@@ -3407,6 +3456,7 @@ window.MAHJONG_QUESTIONS = [
                   "8s",
                   "9s"
             ],
+            "openMelds": [],
             "winningTile": "3p",
             "winType": "tsumo",
             "roundWind": "south",
@@ -3473,6 +3523,7 @@ window.MAHJONG_QUESTIONS = [
                   "7s",
                   "8s"
             ],
+            "openMelds": [],
             "winningTile": "5p",
             "winType": "ron",
             "roundWind": "north",
@@ -3542,6 +3593,7 @@ window.MAHJONG_QUESTIONS = [
                   "8s",
                   "8s"
             ],
+            "openMelds": [],
             "winningTile": "3s",
             "winType": "tsumo",
             "roundWind": "north",
@@ -3613,6 +3665,7 @@ window.MAHJONG_QUESTIONS = [
                   "5s",
                   "6s"
             ],
+            "openMelds": [],
             "winningTile": "7s",
             "winType": "ron",
             "roundWind": "east",
@@ -3682,6 +3735,7 @@ window.MAHJONG_QUESTIONS = [
                   "green",
                   "green"
             ],
+            "openMelds": [],
             "winningTile": "5s",
             "winType": "tsumo",
             "roundWind": "west",
@@ -3752,6 +3806,7 @@ window.MAHJONG_QUESTIONS = [
                   "7m",
                   "7m"
             ],
+            "openMelds": [],
             "winningTile": "1s",
             "winType": "ron",
             "roundWind": "east",
@@ -3816,6 +3871,7 @@ window.MAHJONG_QUESTIONS = [
                   "8m",
                   "9m"
             ],
+            "openMelds": [],
             "winningTile": "3p",
             "winType": "tsumo",
             "roundWind": "south",
@@ -3882,6 +3938,7 @@ window.MAHJONG_QUESTIONS = [
                   "8p",
                   "8p"
             ],
+            "openMelds": [],
             "winningTile": "6p",
             "winType": "ron",
             "roundWind": "west",
@@ -3948,6 +4005,7 @@ window.MAHJONG_QUESTIONS = [
                   "8p",
                   "9p"
             ],
+            "openMelds": [],
             "winningTile": "6p",
             "winType": "tsumo",
             "roundWind": "south",
@@ -4015,6 +4073,7 @@ window.MAHJONG_QUESTIONS = [
                   "green",
                   "green"
             ],
+            "openMelds": [],
             "winningTile": "green",
             "winType": "ron",
             "roundWind": "east",
@@ -4081,6 +4140,7 @@ window.MAHJONG_QUESTIONS = [
                   "white",
                   "white"
             ],
+            "openMelds": [],
             "winningTile": "6m",
             "winType": "tsumo",
             "roundWind": "north",
@@ -4152,6 +4212,7 @@ window.MAHJONG_QUESTIONS = [
                   "red",
                   "red"
             ],
+            "openMelds": [],
             "winningTile": "3s",
             "winType": "ron",
             "roundWind": "west",
@@ -4218,6 +4279,7 @@ window.MAHJONG_QUESTIONS = [
                   "6p",
                   "6p"
             ],
+            "openMelds": [],
             "winningTile": "4m",
             "winType": "tsumo",
             "roundWind": "south",
@@ -4289,6 +4351,7 @@ window.MAHJONG_QUESTIONS = [
                   "8s",
                   "8s"
             ],
+            "openMelds": [],
             "winningTile": "6s",
             "winType": "ron",
             "roundWind": "west",
@@ -4355,6 +4418,7 @@ window.MAHJONG_QUESTIONS = [
                   "8s",
                   "9s"
             ],
+            "openMelds": [],
             "winningTile": "6s",
             "winType": "tsumo",
             "roundWind": "south",
@@ -4422,6 +4486,7 @@ window.MAHJONG_QUESTIONS = [
                   "green",
                   "green"
             ],
+            "openMelds": [],
             "winningTile": "green",
             "winType": "ron",
             "roundWind": "east",
@@ -4488,6 +4553,7 @@ window.MAHJONG_QUESTIONS = [
                   "white",
                   "white"
             ],
+            "openMelds": [],
             "winningTile": "6p",
             "winType": "tsumo",
             "roundWind": "north",
@@ -4559,6 +4625,7 @@ window.MAHJONG_QUESTIONS = [
                   "red",
                   "red"
             ],
+            "openMelds": [],
             "winningTile": "3m",
             "winType": "ron",
             "roundWind": "west",
@@ -4625,6 +4692,7 @@ window.MAHJONG_QUESTIONS = [
                   "6s",
                   "6s"
             ],
+            "openMelds": [],
             "winningTile": "4p",
             "winType": "tsumo",
             "roundWind": "south",
@@ -4696,6 +4764,7 @@ window.MAHJONG_QUESTIONS = [
                   "8m",
                   "8m"
             ],
+            "openMelds": [],
             "winningTile": "6m",
             "winType": "ron",
             "roundWind": "west",
@@ -4762,6 +4831,7 @@ window.MAHJONG_QUESTIONS = [
                   "8m",
                   "9m"
             ],
+            "openMelds": [],
             "winningTile": "6m",
             "winType": "tsumo",
             "roundWind": "south",
@@ -4829,6 +4899,7 @@ window.MAHJONG_QUESTIONS = [
                   "3p",
                   "3p"
             ],
+            "openMelds": [],
             "winningTile": "2p",
             "winType": "ron",
             "roundWind": "north",
@@ -4905,6 +4976,7 @@ window.MAHJONG_QUESTIONS = [
                   "north",
                   "north"
             ],
+            "openMelds": [],
             "winningTile": "north",
             "winType": "tsumo",
             "roundWind": "west",
@@ -4976,6 +5048,7 @@ window.MAHJONG_QUESTIONS = [
                   "green",
                   "green"
             ],
+            "openMelds": [],
             "winningTile": "4s",
             "winType": "ron",
             "roundWind": "east",
@@ -5041,6 +5114,7 @@ window.MAHJONG_QUESTIONS = [
                   "5p",
                   "green"
             ],
+            "openMelds": [],
             "winningTile": "green",
             "winType": "tsumo",
             "roundWind": "north",
@@ -5108,6 +5182,7 @@ window.MAHJONG_QUESTIONS = [
                   "white",
                   "white"
             ],
+            "openMelds": [],
             "winningTile": "4s",
             "winType": "ron",
             "roundWind": "west",
@@ -5179,6 +5254,7 @@ window.MAHJONG_QUESTIONS = [
                   "3s",
                   "3s"
             ],
+            "openMelds": [],
             "winningTile": "2s",
             "winType": "ron",
             "roundWind": "north",
@@ -5255,6 +5331,7 @@ window.MAHJONG_QUESTIONS = [
                   "north",
                   "north"
             ],
+            "openMelds": [],
             "winningTile": "north",
             "winType": "tsumo",
             "roundWind": "west",
@@ -5326,6 +5403,7 @@ window.MAHJONG_QUESTIONS = [
                   "green",
                   "green"
             ],
+            "openMelds": [],
             "winningTile": "4m",
             "winType": "ron",
             "roundWind": "east",
@@ -5391,6 +5469,7 @@ window.MAHJONG_QUESTIONS = [
                   "5s",
                   "green"
             ],
+            "openMelds": [],
             "winningTile": "green",
             "winType": "tsumo",
             "roundWind": "north",
@@ -5458,6 +5537,7 @@ window.MAHJONG_QUESTIONS = [
                   "white",
                   "white"
             ],
+            "openMelds": [],
             "winningTile": "4m",
             "winType": "ron",
             "roundWind": "west",
@@ -5529,6 +5609,7 @@ window.MAHJONG_QUESTIONS = [
                   "red",
                   "red"
             ],
+            "openMelds": [],
             "winningTile": "9p",
             "winType": "ron",
             "roundWind": "west",
@@ -5602,6 +5683,7 @@ window.MAHJONG_QUESTIONS = [
                   "west",
                   "west"
             ],
+            "openMelds": [],
             "winningTile": "2m",
             "winType": "ron",
             "roundWind": "south",
@@ -5669,6 +5751,7 @@ window.MAHJONG_QUESTIONS = [
                   "red",
                   "red"
             ],
+            "openMelds": [],
             "winningTile": "7m",
             "winType": "ron",
             "roundWind": "north",
@@ -5746,6 +5829,7 @@ window.MAHJONG_QUESTIONS = [
                   "red",
                   "red"
             ],
+            "openMelds": [],
             "winningTile": "2s",
             "winType": "ron",
             "roundWind": "north",
@@ -5823,6 +5907,7 @@ window.MAHJONG_QUESTIONS = [
                   "green",
                   "green"
             ],
+            "openMelds": [],
             "winningTile": "5m",
             "winType": "ron",
             "roundWind": "south",
@@ -5896,6 +5981,7 @@ window.MAHJONG_QUESTIONS = [
                   "red",
                   "red"
             ],
+            "openMelds": [],
             "winningTile": "9s",
             "winType": "ron",
             "roundWind": "west",
@@ -5969,6 +6055,7 @@ window.MAHJONG_QUESTIONS = [
                   "west",
                   "west"
             ],
+            "openMelds": [],
             "winningTile": "2p",
             "winType": "ron",
             "roundWind": "south",
@@ -6036,6 +6123,7 @@ window.MAHJONG_QUESTIONS = [
                   "red",
                   "red"
             ],
+            "openMelds": [],
             "winningTile": "7p",
             "winType": "ron",
             "roundWind": "north",
@@ -6113,6 +6201,7 @@ window.MAHJONG_QUESTIONS = [
                   "red",
                   "red"
             ],
+            "openMelds": [],
             "winningTile": "2m",
             "winType": "ron",
             "roundWind": "north",
@@ -6190,6 +6279,7 @@ window.MAHJONG_QUESTIONS = [
                   "green",
                   "green"
             ],
+            "openMelds": [],
             "winningTile": "5p",
             "winType": "ron",
             "roundWind": "south",
@@ -6263,6 +6353,7 @@ window.MAHJONG_QUESTIONS = [
                   "red",
                   "red"
             ],
+            "openMelds": [],
             "winningTile": "9m",
             "winType": "ron",
             "roundWind": "west",
@@ -6336,6 +6427,7 @@ window.MAHJONG_QUESTIONS = [
                   "west",
                   "west"
             ],
+            "openMelds": [],
             "winningTile": "2p",
             "winType": "ron",
             "roundWind": "south",
@@ -6403,6 +6495,7 @@ window.MAHJONG_QUESTIONS = [
                   "red",
                   "red"
             ],
+            "openMelds": [],
             "winningTile": "7p",
             "winType": "ron",
             "roundWind": "north",
@@ -6480,6 +6573,7 @@ window.MAHJONG_QUESTIONS = [
                   "red",
                   "red"
             ],
+            "openMelds": [],
             "winningTile": "2s",
             "winType": "ron",
             "roundWind": "north",
@@ -6557,6 +6651,7 @@ window.MAHJONG_QUESTIONS = [
                   "green",
                   "green"
             ],
+            "openMelds": [],
             "winningTile": "5p",
             "winType": "ron",
             "roundWind": "south",
@@ -6630,6 +6725,7 @@ window.MAHJONG_QUESTIONS = [
                   "red",
                   "red"
             ],
+            "openMelds": [],
             "winningTile": "9p",
             "winType": "ron",
             "roundWind": "west",
@@ -6703,6 +6799,7 @@ window.MAHJONG_QUESTIONS = [
                   "west",
                   "west"
             ],
+            "openMelds": [],
             "winningTile": "2s",
             "winType": "ron",
             "roundWind": "south",
@@ -6770,6 +6867,7 @@ window.MAHJONG_QUESTIONS = [
                   "red",
                   "red"
             ],
+            "openMelds": [],
             "winningTile": "7s",
             "winType": "ron",
             "roundWind": "north",
@@ -6847,6 +6945,7 @@ window.MAHJONG_QUESTIONS = [
                   "red",
                   "red"
             ],
+            "openMelds": [],
             "winningTile": "2m",
             "winType": "ron",
             "roundWind": "north",
@@ -6924,6 +7023,7 @@ window.MAHJONG_QUESTIONS = [
                   "green",
                   "green"
             ],
+            "openMelds": [],
             "winningTile": "5s",
             "winType": "ron",
             "roundWind": "south",
@@ -6997,6 +7097,7 @@ window.MAHJONG_QUESTIONS = [
                   "6s",
                   "7s"
             ],
+            "openMelds": [],
             "winningTile": "8s",
             "winType": "tsumo",
             "roundWind": "east",
@@ -7075,6 +7176,7 @@ window.MAHJONG_QUESTIONS = [
                   "east",
                   "east"
             ],
+            "openMelds": [],
             "winningTile": "3s",
             "winType": "ron",
             "roundWind": "south",
@@ -7146,6 +7248,7 @@ window.MAHJONG_QUESTIONS = [
                   "8s",
                   "9s"
             ],
+            "openMelds": [],
             "winningTile": "3p",
             "winType": "ron",
             "roundWind": "east",
@@ -7211,6 +7314,7 @@ window.MAHJONG_QUESTIONS = [
                   "7s",
                   "7s"
             ],
+            "openMelds": [],
             "winningTile": "6p",
             "winType": "ron",
             "roundWind": "south",
@@ -7281,6 +7385,7 @@ window.MAHJONG_QUESTIONS = [
                   "8m",
                   "9m"
             ],
+            "openMelds": [],
             "winningTile": "9m",
             "winType": "ron",
             "roundWind": "west",
@@ -7348,6 +7453,7 @@ window.MAHJONG_QUESTIONS = [
                   "red",
                   "red"
             ],
+            "openMelds": [],
             "winningTile": "6p",
             "winType": "ron",
             "roundWind": "south",
@@ -7424,6 +7530,7 @@ window.MAHJONG_QUESTIONS = [
                   "white",
                   "red"
             ],
+            "openMelds": [],
             "winningTile": "red",
             "winType": "ron",
             "roundWind": "south",
@@ -7491,6 +7598,7 @@ window.MAHJONG_QUESTIONS = [
                   "east",
                   "east"
             ],
+            "openMelds": [],
             "winningTile": "3m",
             "winType": "ron",
             "roundWind": "south",
@@ -7557,6 +7665,7 @@ window.MAHJONG_QUESTIONS = [
             "concealedKans": [
                   "9m"
             ],
+            "openMelds": [],
             "winningTile": "3m",
             "winType": "ron",
             "roundWind": "east",
@@ -7628,6 +7737,7 @@ window.MAHJONG_QUESTIONS = [
             "concealedKans": [
                   "5p"
             ],
+            "openMelds": [],
             "winningTile": "8s",
             "winType": "tsumo",
             "roundWind": "east",
@@ -7698,6 +7808,7 @@ window.MAHJONG_QUESTIONS = [
             "concealedKans": [
                   "white"
             ],
+            "openMelds": [],
             "winningTile": "4m",
             "winType": "ron",
             "roundWind": "south",
@@ -7763,6 +7874,7 @@ window.MAHJONG_QUESTIONS = [
             "concealedKans": [
                   "1s"
             ],
+            "openMelds": [],
             "winningTile": "9m",
             "winType": "tsumo",
             "roundWind": "south",
@@ -7831,6 +7943,7 @@ window.MAHJONG_QUESTIONS = [
                   "6p",
                   "9m"
             ],
+            "openMelds": [],
             "winningTile": "4m",
             "winType": "ron",
             "roundWind": "south",
@@ -7898,6 +8011,7 @@ window.MAHJONG_QUESTIONS = [
                   "5s",
                   "5s"
             ],
+            "openMelds": [],
             "winningTile": "8s",
             "winType": "ron",
             "roundWind": "east",
@@ -7963,6 +8077,7 @@ window.MAHJONG_QUESTIONS = [
                   "9m",
                   "9m"
             ],
+            "openMelds": [],
             "winningTile": "8s",
             "winType": "tsumo",
             "roundWind": "south",
@@ -8034,6 +8149,7 @@ window.MAHJONG_QUESTIONS = [
                   "5m",
                   "5m"
             ],
+            "openMelds": [],
             "winningTile": "3m",
             "winType": "ron",
             "roundWind": "south",
@@ -8105,6 +8221,7 @@ window.MAHJONG_QUESTIONS = [
                   "5s",
                   "5s"
             ],
+            "openMelds": [],
             "winningTile": "8s",
             "winType": "tsumo",
             "roundWind": "east",
@@ -8161,6 +8278,222 @@ window.MAHJONG_QUESTIONS = [
             ],
             "uraDoraIndicators": [
                   "4s"
+            ]
+      },
+      {
+            "id": "q118",
+            "concealedTiles": [
+                  "3p",
+                  "4p",
+                  "6p",
+                  "7p",
+                  "8p",
+                  "2s",
+                  "3s",
+                  "4s",
+                  "5s",
+                  "5s"
+            ],
+            "openMelds": [
+                  {
+                        "type": "chi",
+                        "tiles": [
+                              "2m",
+                              "3m",
+                              "4m"
+                        ]
+                  }
+            ],
+            "winningTile": "5p",
+            "winType": "ron",
+            "roundWind": "east",
+            "seatWind": "south",
+            "riichi": false,
+            "menzen": false,
+            "answer": {
+                  "yaku": [
+                        {
+                              "name": "断么九",
+                              "han": 1
+                        }
+                  ],
+                  "totalHan": 1,
+                  "fu": 30,
+                  "score": {
+                        "display": "1000点",
+                        "pointText": "1000点",
+                        "category": "通常",
+                        "basePoints": 240,
+                        "kiriageMangan": false
+                  },
+                  "fuBreakdown": [
+                        "副底：20符",
+                        "副露した平和形のロン和了：30符",
+                        "合計：30符"
+                  ]
+            },
+            "management": {
+                  "fu": 30,
+                  "han": 1,
+                  "scoreCategory": "通常",
+                  "playerType": "子",
+                  "winType": "ロン",
+                  "waitType": "両面待ち",
+                  "mainYaku": [
+                        "断么九"
+                  ],
+                  "kiriageMangan": false
+            },
+            "doraIndicators": [
+                  "9m"
+            ],
+            "uraDoraIndicators": [
+                  "1m"
+            ]
+      },
+      {
+            "id": "q119",
+            "concealedTiles": [
+                  "2m",
+                  "3m",
+                  "4m",
+                  "6p",
+                  "7p",
+                  "8p",
+                  "3s",
+                  "4s",
+                  "7s",
+                  "7s"
+            ],
+            "openMelds": [
+                  {
+                        "type": "pon",
+                        "tiles": [
+                              "white",
+                              "white",
+                              "white"
+                        ]
+                  }
+            ],
+            "winningTile": "5s",
+            "winType": "tsumo",
+            "roundWind": "east",
+            "seatWind": "south",
+            "riichi": false,
+            "menzen": false,
+            "answer": {
+                  "yaku": [
+                        {
+                              "name": "役牌 白",
+                              "han": 1
+                        }
+                  ],
+                  "totalHan": 1,
+                  "fu": 30,
+                  "score": {
+                        "display": "300点／500点",
+                        "pointText": "300点／500点",
+                        "category": "通常",
+                        "basePoints": 240,
+                        "kiriageMangan": false
+                  },
+                  "fuBreakdown": [
+                        "副底：20符",
+                        "ツモ：2符",
+                        "白の明刻：4符",
+                        "合計：26符 → 30符"
+                  ]
+            },
+            "management": {
+                  "fu": 30,
+                  "han": 1,
+                  "scoreCategory": "通常",
+                  "playerType": "子",
+                  "winType": "ツモ",
+                  "waitType": "両面待ち",
+                  "mainYaku": [
+                        "役牌 白"
+                  ],
+                  "kiriageMangan": false
+            },
+            "doraIndicators": [
+                  "9p"
+            ],
+            "uraDoraIndicators": [
+                  "1p"
+            ]
+      },
+      {
+            "id": "q120",
+            "concealedTiles": [
+                  "1m",
+                  "2m",
+                  "3m",
+                  "4p",
+                  "5p",
+                  "6p",
+                  "7s",
+                  "8s",
+                  "east",
+                  "east"
+            ],
+            "openMelds": [
+                  {
+                        "type": "kan-open",
+                        "tiles": [
+                              "red",
+                              "red",
+                              "red",
+                              "red"
+                        ]
+                  }
+            ],
+            "winningTile": "9s",
+            "winType": "ron",
+            "roundWind": "east",
+            "seatWind": "south",
+            "riichi": false,
+            "menzen": false,
+            "answer": {
+                  "yaku": [
+                        {
+                              "name": "役牌 中",
+                              "han": 1
+                        }
+                  ],
+                  "totalHan": 1,
+                  "fu": 40,
+                  "score": {
+                        "display": "1300点",
+                        "pointText": "1300点",
+                        "category": "通常",
+                        "basePoints": 320,
+                        "kiriageMangan": false
+                  },
+                  "fuBreakdown": [
+                        "副底：20符",
+                        "中の明槓：16符",
+                        "場風 東の雀頭：2符",
+                        "合計：38符 → 40符"
+                  ]
+            },
+            "management": {
+                  "fu": 40,
+                  "han": 1,
+                  "scoreCategory": "通常",
+                  "playerType": "子",
+                  "winType": "ロン",
+                  "waitType": "両面待ち",
+                  "mainYaku": [
+                        "役牌 中"
+                  ],
+                  "kiriageMangan": false
+            },
+            "doraIndicators": [
+                  "1s"
+            ],
+            "uraDoraIndicators": [
+                  "2p"
             ]
       }
 ];

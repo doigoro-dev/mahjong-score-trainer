@@ -270,6 +270,76 @@ Ver1.1 問題管理情報
       white-space: nowrap;
     }
 
+
+    #completeHandContainer.has-open-melds {
+      --tile-size: clamp(13px, calc((100cqw - 96px) * var(--layout-scale)), 66px);
+      --tile-gap: clamp(0px, 0.22cqw, 4px);
+      --winning-gap: clamp(3px, 0.85cqw, 12px);
+    }
+
+    .open-meld-section {
+      display: flex;
+      flex: 0 0 auto;
+      gap: var(--winning-gap);
+      align-items: flex-end;
+      margin-left: var(--winning-gap);
+    }
+
+    .open-meld-group {
+      display: flex;
+      flex: 0 0 auto;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .open-meld-tiles {
+	  display: flex;
+	  align-items: flex-end;
+	  gap: 0;
+	  white-space: nowrap;
+	}
+
+    .open-meld-label {
+      margin-top: clamp(3px, 0.7cqw, 8px);
+      color: #475569;
+      font-size: var(--winning-label-size);
+      line-height: 1.35;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    /*
+      副露は「面前牌3枚（明槓は4枚）」と見た目の全体幅が近くなるよう調整する。
+      横向き牌を少し大きく見せ、その分だけ同じ副露内の縦向き牌を細めることで、
+      グループ全体の横幅を増やしすぎず、縦牌・横牌の存在感を均等にする。
+    */
+    .open-meld-tiles .tile-wrapper:not(.is-sideways) {
+	  flex-basis: calc(var(--tile-size) * 0.78);
+	  width: calc(var(--tile-size) * 0.78);
+	  margin-right: calc(var(--tile-size) * -0.08);
+	}
+
+    .open-meld-tiles .tile-wrapper:not(.is-sideways) .tile-svg {
+      width: calc(var(--tile-size) * 0.78);
+    }
+
+    .tile-wrapper.is-sideways {
+	  flex-basis: calc(var(--tile-size) * 1.44);
+	  width: calc(var(--tile-size) * 1.44);
+	  height: calc(var(--tile-size) * 1.02);
+	  margin-left: calc(var(--tile-size) * -0.20);
+	  margin-right: calc(var(--tile-size) * -0.30);
+	  justify-content: center;
+	  overflow: visible;
+	}
+
+    .tile-wrapper.is-sideways .tile-svg {
+      width: calc(var(--tile-size) * 1.02);
+      max-width: none;
+      transform: rotate(-90deg);
+      transform-origin: center center;
+    }
+
     .winning-tile-area {
       display: flex;
       flex: 0 0 auto;

@@ -648,11 +648,40 @@ function normalizeConcealedKanTileCode(concealedKan, index) {
   );
 }
 
+
+function normalizeOpenMeld(openMeld, index) {
+  const allowedTypes = new Set(["chi", "pon", "kan-open"]);
+
+  if (!openMeld || typeof openMeld !== "object") {
+    throw new Error(`openMelds[${index}]には副露オブジェクトを指定してください。`);
+  }
+
+  if (!allowedTypes.has(openMeld.type)) {
+    throw new Error(`openMelds[${index}].typeはchi、pon、kan-openのいずれかを指定してください。`);
+  }
+
+  const expectedTileCount = openMeld.type === "kan-open" ? 4 : 3;
+  if (!Array.isArray(openMeld.tiles) || openMeld.tiles.length !== expectedTileCount) {
+    throw new Error(`openMelds[${index}].tilesには${expectedTileCount}枚の牌を指定してください。`);
+  }
+
+  return { type: openMeld.type, tiles: [...openMeld.tiles] };
+}
+
+function createOpenMeldTile(tileCode, isSideways) {
+  const tile = createTile(tileCode);
+  if (isSideways) {
+    tile.classList.add("is-sideways");
+  }
+  return tile;
+}
+
 function displayCompleteHand(
   concealedTiles,
   winningTile,
   container,
-  concealedKans = []
+  concealedKans = [],
+  openMelds = []
 ) {
   if (!Array.isArray(concealedTiles)) {
     throw new Error("concealedTilesには配列を指定してください。");
@@ -662,6 +691,12 @@ function displayCompleteHand(
     throw new Error("concealedKansには配列を指定してください。");
   }
 
+  if (!Array.isArray(openMelds)) {
+    throw new Error("openMeldsには配列を指定してください。");
+  }
+
+  const normalizedOpenMelds = openMelds.map(normalizeOpenMeld);
+
   const normalizedConcealedKans = concealedKans.map(
     normalizeConcealedKanTileCode
   );
@@ -669,11 +704,13 @@ function displayCompleteHand(
   // 暗槓は物理的には4枚だが、手牌構成上は刻子と同じ3枚分として数える。
   // 例：暗槓1組なら concealedTiles 10枚 + 暗槓1組（3枚分） = 13枚分。
   const structuralTileCount =
-    concealedTiles.length + normalizedConcealedKans.length * 3;
+    concealedTiles.length +
+    normalizedConcealedKans.length * 3 +
+    normalizedOpenMelds.length * 3;
 
   if (structuralTileCount !== 13) {
     throw new Error(
-      "concealedTilesの枚数とconcealedKansの組数は、合計13枚分になるよう指定してください。"
+      "concealedTiles、concealedKans、openMeldsは、合計13枚分になるよう指定してください。"
     );
   }
 
@@ -682,6 +719,13 @@ function displayCompleteHand(
   for (let count = 1; count <= 4; count += 1) {
     container.classList.remove(`has-concealed-kans-${count}`);
   }
+  container.classList.toggle("has-open-melds", normalizedOpenMelds.length > 0);
+  const sidewaysTileCount = normalizedOpenMelds.length;
+  const physicalTileCount = concealedTiles.length + normalizedConcealedKans.length * 4
+    + normalizedOpenMelds.reduce((total, meld) => total + meld.tiles.length, 0)
+    + (winningTile ? 1 : 0);
+  const layoutUnits = physicalTileCount + sidewaysTileCount * 0.42;
+  container.style.setProperty("--layout-scale", String(1 / Math.max(layoutUnits, 14)));
 
   if (normalizedConcealedKans.length > 0) {
     const layoutKanCount = Math.min(normalizedConcealedKans.length, 4);
@@ -734,6 +778,34 @@ function displayCompleteHand(
     }
 
     concealedHand.appendChild(concealedKanSection);
+  }
+
+  if (normalizedOpenMelds.length > 0) {
+    const openMeldSection = document.createElement("div");
+    openMeldSection.className = "open-meld-section";
+
+    const labels = { chi: "チー", pon: "ポン", "kan-open": "明槓" };
+    normalizedOpenMelds.forEach((meld) => {
+      const meldGroup = document.createElement("div");
+      meldGroup.className = `open-meld-group open-meld-${meld.type}`;
+
+      const meldTiles = document.createElement("div");
+      meldTiles.className = "open-meld-tiles";
+      meldTiles.setAttribute("aria-label", `${labels[meld.type]}：${meld.tiles.join("、")}`);
+
+      meld.tiles.forEach((tileCode, tileIndex) => {
+        const sidewaysIndex = meld.type === "chi" ? 0 : 1;
+        meldTiles.appendChild(createOpenMeldTile(tileCode, tileIndex === sidewaysIndex));
+      });
+
+      const meldLabel = document.createElement("div");
+      meldLabel.className = "open-meld-label";
+      meldLabel.textContent = labels[meld.type];
+      meldGroup.append(meldTiles, meldLabel);
+      openMeldSection.appendChild(meldGroup);
+    });
+
+    concealedHand.appendChild(openMeldSection);
   }
 
   row.appendChild(concealedHand);
@@ -950,7 +1022,13 @@ function validateQuestionData() {
       const concealedKans = Array.isArray(question.concealedKans)
         ? question.concealedKans
         : [];
-      const structuralTileCount = question.concealedTiles.length + concealedKans.length * 3;
+      const openMelds = Array.isArray(question.openMelds)
+        ? question.openMelds
+        : [];
+      const structuralTileCount =
+        question.concealedTiles.length +
+        concealedKans.length * 3 +
+        openMelds.length * 3;
 
       if (structuralTileCount !== 13) {
         errors.push(
@@ -964,6 +1042,14 @@ function validateQuestionData() {
         ...concealedKans.flatMap(kan => {
           const tileCode = normalizeConcealedKanTileCode(kan, 0);
           return [tileCode, tileCode, tileCode, tileCode];
+        }),
+        ...openMelds.flatMap((meld, meldIndex) => {
+          try {
+            return normalizeOpenMeld(meld, meldIndex).tiles;
+          } catch (error) {
+            errors.push(`${location}：${error.message}`);
+            return [];
+          }
         })
       ];
       const tileCounts = new Map();
@@ -1139,7 +1225,7 @@ function calculateScoreFromFuHan(
   };
 }
 
-function buildAdditionalConditions(extraHan, patternIndex) {
+function buildAdditionalConditions(extraHan, patternIndex, allowRiichi = true) {
   const patternsByHan = {
     1: [
       [{ name: "立直", han: 1 }],
@@ -1192,7 +1278,18 @@ function buildAdditionalConditions(extraHan, patternIndex) {
 
   const patterns = patternsByHan[extraHan];
   if (patterns) {
-    return patterns[patternIndex % patterns.length].map(condition => ({ ...condition }));
+    const usablePatterns = allowRiichi
+      ? patterns
+      : patterns.filter(pattern =>
+          pattern.every(condition =>
+            !["立直", "一発", "裏ドラ"].some(name => condition.name.includes(name))
+          )
+        );
+
+    if (usablePatterns.length > 0) {
+      return usablePatterns[patternIndex % usablePatterns.length]
+        .map(condition => ({ ...condition }));
+    }
   }
 
   return [{ name: `ドラ${extraHan}`, han: extraHan }];
@@ -1224,7 +1321,11 @@ function createVariationPatternsForQuestion(question) {
 
   return extraCandidates.map((extraHan, index) => {
     const totalHan = question.answer.totalHan + extraHan;
-    const conditions = buildAdditionalConditions(extraHan, question.id.length + index);
+    const conditions = buildAdditionalConditions(
+      extraHan,
+      question.id.length + index,
+      (question.openMelds ?? []).length === 0
+    );
     const score = calculateScoreFromFuHan(question, totalHan);
 
     return {
@@ -1276,6 +1377,12 @@ function getPhysicalWinningTiles(question) {
       tiles.push(concealedKan, concealedKan, concealedKan, concealedKan);
     } else if (Array.isArray(concealedKan.tiles)) {
       tiles.push(...concealedKan.tiles);
+    }
+  }
+
+  for (const openMeld of question.openMelds ?? []) {
+    if (Array.isArray(openMeld?.tiles)) {
+      tiles.push(...openMeld.tiles);
     }
   }
 
@@ -1928,6 +2035,10 @@ function advancePracticalStep(nextStep) {
   renderPracticalStep();
 }
 
+function hasOpenMelds(question) {
+  return Array.isArray(question?.openMelds) && question.openMelds.length > 0;
+}
+
 function selectPracticalRiichi(shouldRiichi) {
   practicalRiichiSelected = shouldRiichi;
   practicalWinType = resolvePracticalWinType(
@@ -1967,6 +2078,12 @@ function renderPracticalStep() {
   const gradeButton = document.getElementById("showAnswerButton");
   const doraArea = document.getElementById("practicalDoraArea");
 
+  if (practicalStep === PRACTICAL_STEP_RIICHI && hasOpenMelds(currentQuestion)) {
+    practicalRiichiSelected = false;
+    practicalWinType = currentQuestion.winType;
+    practicalStep = PRACTICAL_STEP_AGARI;
+  }
+
   panel.hidden = false;
   actions.replaceChildren();
   result.hidden = true;
@@ -1990,7 +2107,8 @@ function renderPracticalStep() {
       currentQuestion.concealedTiles,
       null,
       document.getElementById("completeHandContainer"),
-      currentQuestion.concealedKans ?? []
+      currentQuestion.concealedKans ?? [],
+      currentQuestion.openMelds ?? []
     );
     document.getElementById("thinkingMessage").textContent =
       "表ドラを含めた聴牌時点の役・符・最低点を考えて、立直判断をしてください。";
@@ -2002,16 +2120,22 @@ function renderPracticalStep() {
     currentQuestion.concealedTiles,
     currentQuestion.winningTile,
     document.getElementById("completeHandContainer"),
-    currentQuestion.concealedKans ?? []
+    currentQuestion.concealedKans ?? [],
+    currentQuestion.openMelds ?? []
   );
 
   if (practicalStep === PRACTICAL_STEP_AGARI) {
-    stepLabel.textContent = "STEP 2 / 3　和了";
+    const openHand = hasOpenMelds(currentQuestion);
+    stepLabel.textContent = openHand ? "STEP 1 / 2　和了" : "STEP 2 / 3　和了";
     title.textContent = `和了結果：${WIN_TYPE_LABELS[getEffectiveWinType(currentQuestion)]}`;
-    message.textContent = "和了牌と和了方法が確定しました。符やツモ役の変化を考えてください。";
+    message.textContent = openHand
+      ? "副露しているため立直はできません。和了牌と和了方法から符・翻を考えてください。"
+      : "和了牌と和了方法が確定しました。符やツモ役の変化を考えてください。";
     renderPracticalDoraArea(false);
     result.hidden = false;
-    result.textContent = `立直判断：${practicalRiichiSelected ? "立直する" : "立直しない"} ／ 和了方法：${WIN_TYPE_LABELS[getEffectiveWinType(currentQuestion)]}`;
+    result.textContent = hasOpenMelds(currentQuestion)
+      ? `副露あり（立直不可） ／ 和了方法：${WIN_TYPE_LABELS[getEffectiveWinType(currentQuestion)]}`
+      : `立直判断：${practicalRiichiSelected ? "立直する" : "立直しない"} ／ 和了方法：${WIN_TYPE_LABELS[getEffectiveWinType(currentQuestion)]}`;
     actions.append(createPracticalButton("ドラ確認へ", () => advancePracticalStep(PRACTICAL_STEP_DORA)));
     document.getElementById("thinkingMessage").textContent =
       "和了方法を反映した最終形を確認し、ドラ確認前の点数を考えてください。";
@@ -2019,7 +2143,9 @@ function renderPracticalStep() {
   }
 
   if (practicalStep === PRACTICAL_STEP_DORA) {
-    stepLabel.textContent = "STEP 3 / 3　ドラ確認・点数入力";
+    stepLabel.textContent = hasOpenMelds(currentQuestion)
+      ? "STEP 2 / 2　ドラ確認・点数入力"
+      : "STEP 3 / 3　ドラ確認・点数入力";
     title.textContent = practicalRiichiSelected
       ? "裏ドラを確認して最終点数を入力"
       : "表ドラを確認して最終点数を入力";
@@ -2218,7 +2344,8 @@ function displayQuestion(question) {
       question.concealedTiles,
       question.winningTile,
       document.getElementById("completeHandContainer"),
-      question.concealedKans ?? []
+      question.concealedKans ?? [],
+      question.openMelds ?? []
     );
     document.getElementById("scoreResponsePanel").hidden = false;
     document.getElementById("showAnswerButton").hidden = false;
