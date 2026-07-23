@@ -1,0 +1,1283 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>麻雀点数計算トレーナー Version 2 取扱説明書</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f4f7fb;
+      --surface: #ffffff;
+      --surface-soft: #f8fafc;
+      --text: #1f2937;
+      --muted: #64748b;
+      --border: #dbe4ee;
+      --primary: #166534;
+      --primary-soft: #dcfce7;
+      --accent: #1d4ed8;
+      --accent-soft: #dbeafe;
+      --warning: #9a3412;
+      --warning-soft: #fff7ed;
+      --danger: #991b1b;
+      --danger-soft: #fee2e2;
+      --shadow: 0 14px 34px rgba(15, 23, 42, 0.08);
+      --radius: 18px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      background:
+        radial-gradient(circle at top right, rgba(219, 234, 254, 0.7), transparent 35%),
+        radial-gradient(circle at top left, rgba(220, 252, 231, 0.75), transparent 32%),
+        var(--bg);
+      color: var(--text);
+      font-family:
+        "Yu Gothic UI",
+        "Yu Gothic",
+        "Hiragino Kaku Gothic ProN",
+        "Meiryo",
+        sans-serif;
+      line-height: 1.8;
+    }
+
+    a {
+      color: var(--accent);
+      text-underline-offset: 3px;
+    }
+
+    code {
+      padding: 0.12em 0.35em;
+      border-radius: 6px;
+      background: #eef2f7;
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 0.92em;
+    }
+
+    .page-header {
+      padding: 42px 20px 30px;
+    }
+
+    .header-inner,
+    .layout {
+      width: min(1120px, calc(100% - 32px));
+      margin: 0 auto;
+    }
+
+    .header-card {
+      padding: clamp(24px, 5vw, 46px);
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      border-radius: 24px;
+      background: rgba(255, 255, 255, 0.92);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+    }
+
+    .badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 30px;
+      padding: 4px 11px;
+      border-radius: 999px;
+      background: var(--primary-soft);
+      color: var(--primary);
+      font-size: 0.84rem;
+      font-weight: 700;
+    }
+
+    .badge.version {
+      background: var(--accent-soft);
+      color: var(--accent);
+    }
+
+    h1 {
+      margin: 0;
+      color: #0f172a;
+      font-size: clamp(1.7rem, 4.5vw, 3rem);
+      line-height: 1.35;
+    }
+
+    .lead {
+      margin: 18px 0 0;
+      max-width: 850px;
+      color: #475569;
+      font-size: clamp(1rem, 2vw, 1.12rem);
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 250px minmax(0, 1fr);
+      gap: 24px;
+      padding-bottom: 60px;
+    }
+
+    .toc {
+      position: sticky;
+      top: 18px;
+      align-self: start;
+      padding: 20px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.94);
+      box-shadow: var(--shadow);
+    }
+
+    .toc h2 {
+      margin: 0 0 12px;
+      font-size: 1rem;
+    }
+
+    .toc ul {
+      display: grid;
+      gap: 4px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .toc a {
+      display: block;
+      padding: 7px 9px;
+      border-radius: 8px;
+      color: #334155;
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+
+    .toc a:hover,
+    .toc a:focus-visible {
+      background: var(--accent-soft);
+      color: var(--accent);
+      outline: none;
+    }
+
+    main {
+      min-width: 0;
+    }
+
+    section {
+      margin-bottom: 22px;
+      padding: clamp(22px, 4vw, 34px);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      box-shadow: var(--shadow);
+    }
+
+    section h2 {
+      margin: 0 0 16px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #e2e8f0;
+      color: #0f172a;
+      font-size: clamp(1.25rem, 3vw, 1.65rem);
+    }
+
+    section h3 {
+      margin: 26px 0 8px;
+      color: #1e293b;
+      font-size: 1.08rem;
+    }
+
+    section h4 {
+      margin: 20px 0 6px;
+      color: #334155;
+      font-size: 1rem;
+    }
+
+    p {
+      margin: 10px 0;
+    }
+
+    ul,
+    ol {
+      padding-left: 1.35rem;
+    }
+
+    li + li {
+      margin-top: 7px;
+    }
+
+    .notice,
+    .tip,
+    .warning {
+      margin: 18px 0;
+      padding: 15px 17px;
+      border-radius: 12px;
+    }
+
+    .notice {
+      border-left: 5px solid var(--accent);
+      background: var(--accent-soft);
+    }
+
+    .tip {
+      border-left: 5px solid var(--primary);
+      background: var(--primary-soft);
+    }
+
+    .warning {
+      border-left: 5px solid var(--warning);
+      background: var(--warning-soft);
+    }
+
+    .steps {
+      counter-reset: step;
+      display: grid;
+      gap: 14px;
+      margin: 18px 0 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .steps li {
+      position: relative;
+      min-height: 54px;
+      padding: 14px 16px 14px 64px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--surface-soft);
+    }
+
+    .steps li::before {
+      counter-increment: step;
+      content: counter(step);
+      position: absolute;
+      top: 13px;
+      left: 15px;
+      display: grid;
+      width: 34px;
+      height: 34px;
+      place-items: center;
+      border-radius: 50%;
+      background: #0f766e;
+      color: #ffffff;
+      font-weight: 800;
+    }
+
+    .mode-grid,
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 16px;
+    }
+
+    .mode-card,
+    .info-card {
+      padding: 17px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: var(--surface-soft);
+    }
+
+    .mode-card h3,
+    .info-card h3 {
+      margin: 0 0 7px;
+    }
+
+    .mode-card p,
+    .info-card p {
+      margin: 0;
+      color: #475569;
+    }
+
+    .flow {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin: 18px 0;
+    }
+
+    .flow-step {
+      padding: 9px 13px;
+      border: 1px solid #bfdbfe;
+      border-radius: 999px;
+      background: #eff6ff;
+      color: #1e40af;
+      font-weight: 700;
+    }
+
+    .flow-arrow {
+      color: #64748b;
+      font-weight: 800;
+    }
+
+    .rule-table {
+      width: 100%;
+      margin-top: 14px;
+      border-collapse: separate;
+      border-spacing: 0;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+    }
+
+    .rule-table th,
+    .rule-table td {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+      text-align: left;
+    }
+
+    .rule-table th {
+      width: 30%;
+      background: #f1f5f9;
+      color: #334155;
+    }
+
+    .rule-table tr:last-child th,
+    .rule-table tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .check-list {
+      display: grid;
+      gap: 8px;
+      padding-left: 0;
+      list-style: none;
+    }
+
+    .check-list li {
+      position: relative;
+      padding-left: 28px;
+    }
+
+    .check-list li::before {
+      content: "✓";
+      position: absolute;
+      left: 3px;
+      color: var(--primary);
+      font-weight: 900;
+    }
+
+    .faq-item {
+      padding: 15px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .faq-item:last-child {
+      border-bottom: 0;
+    }
+
+    .faq-item h3 {
+      margin: 0 0 6px;
+      color: #0f172a;
+    }
+
+    .faq-item p {
+      margin: 0;
+    }
+
+    .back-top {
+      display: inline-block;
+      margin-top: 20px;
+      font-weight: 700;
+    }
+
+    .footer {
+      padding: 24px 16px 36px;
+      color: var(--muted);
+      text-align: center;
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 900px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .toc {
+        position: static;
+      }
+
+      .toc ul {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 620px) {
+      .page-header {
+        padding: 18px 8px 14px;
+      }
+
+      .header-inner,
+      .layout {
+        width: min(100% - 16px, 1120px);
+      }
+
+      .header-card {
+        padding: 22px 18px;
+        border-radius: 18px;
+      }
+
+      .layout {
+        gap: 14px;
+        padding-bottom: 30px;
+      }
+
+      section,
+      .toc {
+        padding: 18px 15px;
+        border-radius: 14px;
+      }
+
+      .toc ul,
+      .mode-grid,
+      .info-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .rule-table,
+      .rule-table tbody,
+      .rule-table tr,
+      .rule-table th,
+      .rule-table td {
+        display: block;
+        width: 100%;
+      }
+
+      .rule-table tr {
+        border-bottom: 1px solid var(--border);
+      }
+
+      .rule-table tr:last-child {
+        border-bottom: 0;
+      }
+
+      .rule-table th {
+        border-bottom: 0;
+      }
+
+      .steps li {
+        padding-left: 58px;
+      }
+
+      .flow {
+        display: grid;
+      }
+
+      .flow-arrow {
+        text-align: center;
+        transform: rotate(90deg);
+      }
+    }
+
+    @media print {
+      body {
+        background: #ffffff;
+      }
+
+      .page-header {
+        padding-top: 0;
+      }
+
+      .header-card,
+      .toc,
+      section {
+        box-shadow: none;
+      }
+
+      .layout {
+        display: block;
+        width: 100%;
+      }
+
+      .toc {
+        position: static;
+        margin-bottom: 20px;
+      }
+
+      section {
+        break-inside: avoid;
+      }
+    }
+  </style>
+</head>
+
+<body id="top">
+  <header class="page-header">
+    <div class="header-inner">
+      <div class="header-card">
+        <div class="badge-row">
+          <span class="badge version">Version 2</span>
+          <span class="badge">正式版</span>
+          <span class="badge">全117問</span>
+          <span class="badge">レスポンシブ対応</span>
+        </div>
+
+        <h1>麻雀点数計算トレーナー<br>取扱説明書</h1>
+
+        <p class="lead">
+          表示された牌姿から、役・翻・符・点数を考え、
+          実戦に近い思考順序で点数計算を練習するためのWebアプリです。
+          本書では、Version 2の学習方法、各モードの操作、保存・復習機能、
+          対応ルールおよび注意事項を説明します。
+        </p>
+      </div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <nav class="toc" aria-label="目次">
+      <h2>目次</h2>
+      <ul>
+        <li><a href="#overview">1. アプリの概要</a></li>
+        <li><a href="#start">2. 利用開始方法</a></li>
+        <li><a href="#learning">3. 学習の進め方</a></li>
+        <li><a href="#modes">4. 学習モード</a></li>
+        <li><a href="#practical">5. 実戦モード</a></li>
+        <li><a href="#review">6. 問題選択・復習</a></li>
+        <li><a href="#answer">7. 解答・採点の見方</a></li>
+        <li><a href="#session">8. 保存・再開</a></li>
+        <li><a href="#responsive">9. スマホでの利用</a></li>
+        <li><a href="#rules">10. 対応ルール</a></li>
+        <li><a href="#faq">11. FAQ</a></li>
+        <li><a href="#limitations">12. 注意事項</a></li>
+        <li><a href="#feedback">13. 不具合報告</a></li>
+        <li><a href="#version">14. バージョン情報</a></li>
+      </ul>
+    </nav>
+
+    <main>
+      <section id="overview">
+        <h2>1. アプリの概要</h2>
+
+        <p>
+          麻雀点数計算トレーナーは、牌のイラストを見ながら、
+          役・翻数・符数・最終的な点数を自分で判断するための学習アプリです。
+        </p>
+
+        <p>
+          Version 2では、通常の問題演習に加えて、
+          立直判断、和了方法、ドラ表示、裏ドラ確認を順に進める
+          <strong>実戦モード</strong>を利用できます。
+        </p>
+
+        <div class="notice">
+          本アプリで特に重視しているのは、
+          答えだけを覚えることではなく、
+          <strong>実戦に近い思考順序で点数を考えること</strong>です。
+        </div>
+
+        <h3>主な機能</h3>
+
+        <ul class="check-list">
+          <li>全117問を収録</li>
+          <li>通常モード</li>
+          <li>翻数変化モード</li>
+          <li>実戦モード</li>
+          <li>問題選択・復習モード</li>
+          <li>タイマーによる解答時間の計測</li>
+          <li>入力した点数の自動採点</li>
+          <li>役・翻・符・点数の解説表示</li>
+          <li>セッションの保存と再開</li>
+          <li>復習中の進行状況保持</li>
+          <li>PC・スマートフォン対応</li>
+        </ul>
+
+        <h3>学習対象</h3>
+
+        <div class="info-grid">
+          <div class="info-card">
+            <h3>役判定</h3>
+            <p>牌姿と条件を見て、成立している役を確認します。</p>
+          </div>
+
+          <div class="info-card">
+            <h3>翻数計算</h3>
+            <p>基本役、立直、ドラ、裏ドラなどを合計します。</p>
+          </div>
+
+          <div class="info-card">
+            <h3>符計算</h3>
+            <p>副底、和了方法、面子、雀頭、待ちなどを確認します。</p>
+          </div>
+
+          <div class="info-card">
+            <h3>点数計算</h3>
+            <p>親・子、ロン・ツモ、符・翻数から最終点数を求めます。</p>
+          </div>
+        </div>
+
+        <a class="back-top" href="#top">ページ上部へ戻る</a>
+      </section>
+
+      <section id="start">
+        <h2>2. 利用開始方法</h2>
+
+        <h3>GitHub Pagesから利用する場合</h3>
+
+        <p>
+          公開ページのURLへアクセスすると、そのまま利用できます。
+          インストールやアカウント登録は不要です。
+        </p>
+
+        <h3>ローカル環境で利用する場合</h3>
+
+        <ol class="steps">
+          <li>プロジェクトをPCへ保存します。</li>
+          <li><code>app/index.html</code>をブラウザで開きます。</li>
+          <li>画面上部から利用するモードを選択します。</li>
+          <li>表示された問題を解きます。</li>
+        </ol>
+
+        <div class="tip">
+          通常の利用には、アプリのビルドやサーバー起動は必要ありません。
+        </div>
+
+        <h3>推奨ブラウザ</h3>
+
+        <ul>
+          <li>Google Chrome</li>
+          <li>Microsoft Edge</li>
+        </ul>
+
+        <p>
+          その他のブラウザでも利用できる場合がありますが、
+          表示や保存機能の動作が異なる可能性があります。
+        </p>
+
+        <a class="back-top" href="#top">ページ上部へ戻る</a>
+      </section>
+
+      <section id="learning">
+        <h2>3. 学習の進め方</h2>
+
+        <p>
+          初めて利用する場合は、次の順番で進めると、
+          基本から実戦形式まで段階的に練習できます。
+        </p>
+
+        <ol class="steps">
+          <li>
+            <strong>通常モード</strong><br>
+            手牌、親子、ロン・ツモなどの基本条件から、
+            役・翻・符・点数を計算します。
+          </li>
+          <li>
+            <strong>翻数変化モード</strong><br>
+            立直、一発、ドラ、赤ドラ、裏ドラなどの付加条件を含めて計算します。
+          </li>
+          <li>
+            <strong>実戦モード</strong><br>
+            表ドラを確認し、立直判断、和了結果、裏ドラ確認を経て最終点数を入力します。
+          </li>
+          <li>
+            <strong>問題選択・復習モード</strong><br>
+            間違えた問題や確認したい問題を選び、繰り返し練習します。
+          </li>
+        </ol>
+
+        <h3>問題を解く時の基本順序</h3>
+
+        <div class="flow" aria-label="基本的な点数計算の順序">
+          <span class="flow-step">牌姿・条件を確認</span>
+          <span class="flow-arrow">→</span>
+          <span class="flow-step">成立役を確認</span>
+          <span class="flow-arrow">→</span>
+          <span class="flow-step">翻数を合計</span>
+          <span class="flow-arrow">→</span>
+          <span class="flow-step">符を計算</span>
+          <span class="flow-arrow">→</span>
+          <span class="flow-step">点数を決定</span>
+        </div>
+
+        <div class="tip">
+          慣れるまでは時間を気にせず、役と符の根拠を確認してください。
+          慣れてきたらタイマーを目安に、判断時間を短くしていきます。
+        </div>
+
+        <a class="back-top" href="#top">ページ上部へ戻る</a>
+      </section>
+
+      <section id="modes">
+        <h2>4. 学習モード</h2>
+
+        <div class="mode-grid">
+          <article class="mode-card">
+            <h3>通常モード</h3>
+            <p>
+              手牌と基本条件から、役・翻・符・点数を計算します。
+              点数計算の基本練習に適しています。
+            </p>
+          </article>
+
+          <article class="mode-card">
+            <h3>翻数変化モード</h3>
+            <p>
+              基本の牌姿へ立直、一発、ドラ、赤ドラ、裏ドラなどの条件を追加し、
+              翻数と点数の変化を練習します。
+            </p>
+          </article>
+
+          <article class="mode-card">
+            <h3>実戦モード</h3>
+            <p>
+              表ドラ確認、立直判断、和了結果、裏ドラ確認という順序で進み、
+              実戦に近い流れで最終点数を計算します。
+            </p>
+          </article>
+
+          <article class="mode-card">
+            <h3>問題選択・復習モード</h3>
+            <p>
+              問題一覧から任意の問題を選択したり、
+              復習対象の問題を続けて解いたりできます。
+            </p>
+          </article>
+        </div>
+
+        <h3>モード切替時の注意</h3>
+
+        <p>
+          モードを切り替えると、現在の通常セッションを破棄して
+          第1問から開始する旨の確認ダイアログが表示される場合があります。
+          継続中の問題がある場合は、切り替える前に内容を確認してください。
+        </p>
+
+        <a class="back-top" href="#top">ページ上部へ戻る</a>
+      </section>
+
+      <section id="practical">
+        <h2>5. 実戦モード</h2>
+
+        <p>
+          実戦モードは、Version 2の中心となる学習モードです。
+          最初から全条件を表示するのではなく、
+          実際の対局で情報を確認する順序に近い形で進みます。
+        </p>
+
+        <h3>基本フロー</h3>
+
+        <div class="flow" aria-label="実戦モードの流れ">
+          <span class="flow-step">牌姿・表ドラを確認</span>
+          <span class="flow-arrow">→</span>
+          <span class="flow-step">立直するか選択</span>
+          <span class="flow-arrow">→</span>
+          <span class="flow-step">ツモ・ロンを確認</span>
+          <span class="flow-arrow">→</span>
+          <span class="flow-step">裏ドラを確認</span>
+          <span class="flow-arrow">→</span>
+          <span class="flow-step">最終点数を入力</span>
+          <span class="flow-arrow">→</span>
+          <span class="flow-step">自動採点・解説</span>
+        </div>
+
+        <h3>操作手順</h3>
+
+        <ol class="steps">
+          <li>
+            手牌、場風、自風、親子、表ドラ表示牌など、
+            画面に表示された情報を確認します。
+          </li>
+          <li>
+            現在の牌姿と打点を考え、立直するかどうかを選択します。
+          </li>
+          <li>
+            画面の案内に従って、ツモまたはロンの和了結果を確認します。
+          </li>
+          <li>
+            立直して和了した場合は、裏ドラ表示牌を確認します。
+          </li>
+          <li>
+            役、翻、符を考え、最終的な点数を入力します。
+          </li>
+          <li>
+            採点結果と解説を確認し、次の問題へ進みます。
+          </li>
+        </ol>
+
+        <h3>立直・ドラの扱い</h3>
+
+        <ul>
+          <li>立直を選択した場合、立直は最終的な翻数へ反映されます。</li>
+          <li>表ドラは、立直の有無にかかわらず確認します。</li>
+          <li>裏ドラは、立直して和了した場合に確認します。</li>
+          <li>ドラおよび裏ドラは、表示牌そのものではなく次の牌がドラです。</li>
+        </ul>
+
+        <h3>役なしロンの扱い</h3>
+
+        <p>
+          立直しない状態でロンすると役が成立しない問題では、
+          実戦モードの進行を成立させるため、
+          和了方法がツモへ自動変換される場合があります。
+        </p>
+
+        <div class="warning">
+          Version 2では、暗槓を含む問題でも、
+          表ドラ表示牌および裏ドラ表示牌は各1枚固定です。
+          槓子数に応じた槓ドラ・槓裏ドラの追加表示は対象外です。
+        </div>
+
+        <a class="back-top" href="#top">ページ上部へ戻る</a>
+      </section>
+
+      <section id="review">
+        <h2>6. 問題選択・復習モード</h2>
+
+        <p>
+          問題選択・復習モードでは、
+          全問題を順番に解く方法とは別に、
+          必要な問題へ直接移動して練習できます。
+        </p>
+
+        <h3>問題選択</h3>
+
+        <ul>
+          <li>問題一覧から任意の問題を選択できます。</li>
+          <li>特定の役・符・翻数を含む問題を後から確認する用途に利用できます。</li>
+          <li>一度解いた問題を再確認する場合にも利用できます。</li>
+        </ul>
+
+        <h3>復習モード</h3>
+
+        <ul>
+          <li>採点で間違えた問題を復習対象として扱います。</li>
+          <li>復習対象の問題だけを続けて解くことができます。</li>
+          <li>復習中の進行状況は保持されます。</li>
+        </ul>
+
+        <h3>おすすめの使い方</h3>
+
+        <ol class="steps">
+          <li>通常モードまたは実戦モードで問題を解きます。</li>
+          <li>間違えた問題では、役・符・点数の解説を確認します。</li>
+          <li>学習後に復習モードを開きます。</li>
+          <li>同じ問題を、自分で説明できる状態になるまで解き直します。</li>
+        </ol>
+
+        <div class="tip">
+          正解の点数だけでなく、
+          「どの役が成立し、どこで符が増えたか」を説明できるか確認すると、
+          実戦で再現しやすくなります。
+        </div>
+
+        <a class="back-top" href="#top">ページ上部へ戻る</a>
+      </section>
+
+      <section id="answer">
+        <h2>7. 解答・採点の見方</h2>
+
+        <h3>点数入力</h3>
+
+        <p>
+          回答欄へ自分が計算した点数を入力し、採点ボタンを押します。
+          ツモ問題では、親・子または子・子の支払額を画面の形式に合わせて入力します。
+        </p>
+
+        <h3>採点結果</h3>
+
+        <table class="rule-table">
+          <tbody>
+            <tr>
+              <th>正解</th>
+              <td>入力した点数と登録された正解が一致しています。</td>
+            </tr>
+            <tr>
+              <th>不正解</th>
+              <td>正解の点数と異なります。表示された解説を確認します。</td>
+            </tr>
+            <tr>
+              <th>未入力・形式エラー</th>
+              <td>必要な欄が空欄、または数値として扱えない場合に案内が表示されます。</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>解説で確認できる内容</h3>
+
+        <table class="rule-table">
+          <tbody>
+            <tr>
+              <th>成立役</th>
+              <td>牌姿と条件から成立する役、および各役の翻数</td>
+            </tr>
+            <tr>
+              <th>合計翻数</th>
+              <td>基本役、立直、ドラ、裏ドラなどを合計した翻数</td>
+            </tr>
+            <tr>
+              <th>符数</th>
+              <td>最終的な符数</td>
+            </tr>
+            <tr>
+              <th>符の内訳</th>
+              <td>副底、門前ロン、ツモ、雀頭、待ち、刻子、暗槓など</td>
+            </tr>
+            <tr>
+              <th>点数</th>
+              <td>親・子、ロン・ツモを反映した最終点数</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>タイマー</h3>
+
+        <p>
+          問題画面には経過時間が表示されます。
+          タイマーは、正解・不正解を決めるものではなく、
+          判断速度を確認するための目安です。
+        </p>
+
+        <div class="tip">
+          最初は正確さを優先し、
+          計算方法が安定してから時間短縮を意識してください。
+        </div>
+
+        <a class="back-top" href="#top">ページ上部へ戻る</a>
+      </section>
+
+      <section id="session">
+        <h2>8. 保存・再開</h2>
+
+        <h3>通常セッションの復元</h3>
+
+        <p>
+          問題の出題順、現在位置、回答表示状態、利用モード、
+          実戦モードの進行状態などがブラウザ内へ保存されます。
+          同じブラウザ環境で再度開くと、途中から再開できます。
+        </p>
+
+        <h3>復習進行状況の保持</h3>
+
+        <p>
+          復習モードで現在どの問題まで進んでいるかも保持されます。
+          一度にすべて解けない場合でも、後から続きを進められます。
+        </p>
+
+        <h3>最初からやり直す</h3>
+
+        <p>
+          「最初からやり直す」操作を行うと、
+          現在の通常セッションを破棄し、
+          問題順を改めて設定して第1問から開始します。
+          実行前に確認ダイアログが表示されます。
+        </p>
+
+        <div class="warning">
+          ブラウザのサイトデータ、ストレージ、閲覧データを削除すると、
+          保存されたセッションや復習情報が失われる場合があります。
+          別のブラウザや別の端末へ自動的には引き継がれません。
+        </div>
+
+        <a class="back-top" href="#top">ページ上部へ戻る</a>
+      </section>
+
+      <section id="responsive">
+        <h2>9. スマホでの利用</h2>
+
+        <p>
+          Version 2はレスポンシブ表示に対応しています。
+          PC、タブレット、スマートフォンの画面幅に合わせて、
+          牌や操作領域の大きさが調整されます。
+        </p>
+
+        <h3>牌表示</h3>
+
+        <ul>
+          <li>通常の牌姿は、画面幅に合わせて自動的に縮小されます。</li>
+          <li>暗槓を含む問題では、暗槓の組数に応じて牌サイズが調整されます。</li>
+          <li>横スクロールを極力使わず、問題全体を確認できるようにしています。</li>
+        </ul>
+
+        <h3>操作上の注意</h3>
+
+        <ul>
+          <li>画面を横向きにすると、牌や解説を見やすくなる場合があります。</li>
+          <li>ブラウザの文字サイズを大きくしている場合、表示が折り返されることがあります。</li>
+          <li>入力欄では、端末によって数値キーボードの表示が異なります。</li>
+        </ul>
+
+        <a class="back-top" href="#top">ページ上部へ戻る</a>
+      </section>
+
+      <section id="rules">
+        <h2>10. 対応ルール</h2>
+
+        <p>
+          Version 2で扱う主な条件と役は次のとおりです。
+          全問題にすべての役が含まれるわけではありません。
+        </p>
+
+        <table class="rule-table">
+          <tbody>
+            <tr>
+              <th>和了方法</th>
+              <td>ロン、ツモ</td>
+            </tr>
+            <tr>
+              <th>親子</th>
+              <td>親、子</td>
+            </tr>
+            <tr>
+              <th>風</th>
+              <td>場風、自風</td>
+            </tr>
+            <tr>
+              <th>基本役</th>
+              <td>
+                立直、門前清自摸和、平和、断么九、一盃口、二盃口、
+                役牌、七対子、対々和、三暗刻など
+              </td>
+            </tr>
+            <tr>
+              <th>順子系・色系など</th>
+              <td>
+                三色同順、一気通貫、混全帯么九、純全帯么九、
+                混一色、清一色、小三元、混老頭、三色同刻など
+              </td>
+            </tr>
+            <tr>
+              <th>ドラ関連</th>
+              <td>ドラ、赤ドラ、裏ドラ</td>
+            </tr>
+            <tr>
+              <th>槓</th>
+              <td>暗槓、複数暗槓</td>
+            </tr>
+            <tr>
+              <th>符計算</th>
+              <td>
+                基本符、門前ロン、ツモ符、雀頭、待ち、刻子、暗槓、
+                平和ツモ、七対子25符、10符単位への切り上げ
+              </td>
+            </tr>
+            <tr>
+              <th>点数区分</th>
+              <td>
+                通常、切り上げ満貫、満貫、跳満、倍満、三倍満、数え役満
+              </td>
+            </tr>
+            <tr>
+              <th>切り上げ満貫</th>
+              <td>30符4翻、60符3翻を満貫として扱います。</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Version 2での槓の扱い</h3>
+
+        <p>
+          暗槓および複数暗槓を含む問題を収録しています。
+          暗槓による符は合算して採点されます。
+        </p>
+
+        <p>
+          一方で、槓子数に応じた表ドラ表示牌・裏ドラ表示牌の追加は行いません。
+          Version 2では各1枚固定です。
+        </p>
+
+        <a class="back-top" href="#top">ページ上部へ戻る</a>
+      </section>
+
+      <section id="faq">
+        <h2>11. FAQ</h2>
+
+        <div class="faq-item">
+          <h3>Q. 途中でブラウザを閉じても続きから再開できますか。</h3>
+          <p>
+            同じブラウザ環境で保存情報が残っていれば、途中から再開できます。
+          </p>
+        </div>
+
+        <div class="faq-item">
+          <h3>Q. 1回のセッション中に同じ問題は何度も出ますか。</h3>
+          <p>
+            通常セッションでは、全117問を一巡するまで、
+            同じ問題を重複なく出題します。
+          </p>
+        </div>
+
+        <div class="faq-item">
+          <h3>Q. 間違えた問題だけを解き直せますか。</h3>
+          <p>
+            問題選択・復習モードから復習できます。
+          </p>
+        </div>
+
+        <div class="faq-item">
+          <h3>Q. スマートフォンでも利用できますか。</h3>
+          <p>
+            利用できます。画面幅に合わせて牌と操作領域が調整されます。
+          </p>
+        </div>
+
+        <div class="faq-item">
+          <h3>Q. 表ドラ表示牌とドラは同じ牌ですか。</h3>
+          <p>
+            同じ牌ではありません。基本的には、表示牌の次の牌がドラです。
+          </p>
+        </div>
+
+        <div class="faq-item">
+          <h3>Q. 実戦モードで立直しなかったのに、ロンがツモへ変わりました。</h3>
+          <p>
+            立直なしのロンでは役が成立しない問題について、
+            和了を成立させるためにツモへ自動変換される場合があります。
+          </p>
+        </div>
+
+        <div class="faq-item">
+          <h3>Q. 暗槓があるのにドラ表示牌が増えないのはなぜですか。</h3>
+          <p>
+            Version 2では、暗槓問題でも表ドラ・裏ドラ表示牌を各1枚固定としています。
+          </p>
+        </div>
+
+        <div class="faq-item">
+          <h3>Q. 学習データはサーバーへ送信されますか。</h3>
+          <p>
+            セッションや復習情報は、基本的に利用しているブラウザ内へ保存されます。
+          </p>
+        </div>
+
+        <a class="back-top" href="#top">ページ上部へ戻る</a>
+      </section>
+
+      <section id="limitations">
+        <h2>12. 対象外・注意事項</h2>
+
+        <h3>Version 2で対象外の主な機能</h3>
+
+        <ul>
+          <li>チー、ポン、大明槓、加槓などの副露問題</li>
+          <li>副露による食い下がりの判定</li>
+          <li>槓子数に応じた槓ドラ・槓裏ドラの複数表示</li>
+          <li>実際の対局画像やスクリーンショットの自動認識</li>
+          <li>外部麻雀アプリからの画像読み込み</li>
+          <li>クラウドへの学習データ同期</li>
+          <li>オンラインランキング</li>
+          <li>すべてのローカルルールへの対応</li>
+        </ul>
+
+        <div class="warning">
+          麻雀の役、符、点数計算には、
+          競技団体、雀荘、ゲーム、地域によるルール差があります。
+          本アプリの結果と、普段利用しているルールが異なる場合があります。
+        </div>
+
+        <h3>学習上の注意</h3>
+
+        <p>
+          本アプリは点数計算の練習用です。
+          実際の対局では、供託、積み棒、責任払い、ローカル役など、
+          本アプリで扱っていない条件が加わる場合があります。
+        </p>
+
+        <a class="back-top" href="#top">ページ上部へ戻る</a>
+      </section>
+
+      <section id="feedback">
+        <h2>13. 感想・不具合報告</h2>
+
+        <p>
+          表示、採点、問題データ、操作方法などに不具合がある場合は、
+          再現に必要な情報を添えて報告してください。
+        </p>
+
+        <h3>報告時にあると分かりやすい情報</h3>
+
+        <ul>
+          <li><strong>問題番号：</strong>例「第35問」「q035」</li>
+          <li><strong>利用モード：</strong>通常、翻数変化、実戦、問題選択・復習</li>
+          <li><strong>利用端末：</strong>PC、iPhone、Androidなど</li>
+          <li><strong>利用ブラウザ：</strong>Chrome、Edge、Safariなど</li>
+          <li><strong>操作手順：</strong>どの操作をした時に発生したか</li>
+          <li><strong>実際の結果：</strong>何が表示・実行されたか</li>
+          <li><strong>期待する結果：</strong>本来どうなると考えたか</li>
+          <li><strong>スクリーンショット：</strong>可能な場合のみ</li>
+        </ul>
+
+        <h3>問題内容の報告</h3>
+
+        <p>
+          役、符、翻数、点数、ドラ、解説に誤りがあると思われる場合は、
+          問題番号と、誤りと思われる箇所を記載してください。
+        </p>
+
+        <a class="back-top" href="#top">ページ上部へ戻る</a>
+      </section>
+
+      <section id="version">
+        <h2>14. バージョン情報</h2>
+
+        <table class="rule-table">
+          <tbody>
+            <tr>
+              <th>対象アプリ</th>
+              <td>麻雀点数計算トレーナー 117問版</td>
+            </tr>
+            <tr>
+              <th>対象バージョン</th>
+              <td>Version 2 正式版（Ver2.10.5時点）</td>
+            </tr>
+            <tr>
+              <th>取扱説明書形式</th>
+              <td>レスポンシブHTML</td>
+            </tr>
+            <tr>
+              <th>出題モード</th>
+              <td>通常、翻数変化、実戦、問題選択・復習</td>
+            </tr>
+            <tr>
+              <th>主な学習機能</th>
+              <td>
+                タイマー、自動採点、解説表示、ドラ・裏ドラ、
+                セッション復元、復習進行状況保持
+              </td>
+            </tr>
+            <tr>
+              <th>収録問題数</th>
+              <td>117問</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Version 2の主な追加内容</h3>
+
+        <ul class="check-list">
+          <li>実戦モード</li>
+          <li>問題選択・復習モード</li>
+          <li>タイマー</li>
+          <li>点数入力と自動採点</li>
+          <li>ドラ・裏ドラ</li>
+          <li>一気通貫、三色同順などの役追加</li>
+          <li>場風・自風</li>
+          <li>暗槓・複数暗槓</li>
+          <li>役なしロンからツモへの自動変換</li>
+          <li>セッションおよび復習進行状況の保持</li>
+        </ul>
+
+        <p>
+          本書はVersion 2正式版を基準に作成しています。
+          今後のアップデートにより、画面、操作方法、対応ルールが変更される場合があります。
+        </p>
+
+        <a class="back-top" href="#top">ページ上部へ戻る</a>
+      </section>
+    </main>
+  </div>
+
+  <footer class="footer">
+    麻雀点数計算トレーナー Version 2 取扱説明書
+  </footer>
+</body>
+</html>
