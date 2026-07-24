@@ -668,6 +668,556 @@ function normalizeOpenMeld(openMeld, index) {
   return { type: openMeld.type, tiles: [...openMeld.tiles] };
 }
 
+/**
+ * 問題データに含まれるすべての面子情報を返す。
+ *
+ * 現時点では、問題データ上で独立した面子として管理されている
+ * 暗槓と副露のみを対象とする。concealedTiles 内の通常面子の分解は、
+ * 今後の役判定ロジックで別途追加する。
+ */
+function getAllMelds(question) {
+  if (!question || typeof question !== "object") {
+    throw new Error("問題データにはオブジェクトを指定してください。");
+  }
+
+  const concealedKans = Array.isArray(question.concealedKans)
+    ? question.concealedKans
+    : [];
+  const openMelds = Array.isArray(question.openMelds)
+    ? question.openMelds
+    : [];
+
+  const normalizedConcealedKans = concealedKans.map((concealedKan, index) => {
+    const tileCode = normalizeConcealedKanTileCode(concealedKan, index);
+    return {
+      type: "kan-concealed",
+      tiles: [tileCode, tileCode, tileCode, tileCode],
+      isOpen: false
+    };
+  });
+
+  const normalizedOpenMelds = openMelds.map((openMeld, index) => ({
+    ...normalizeOpenMeld(openMeld, index),
+    isOpen: true
+  }));
+
+  return [...normalizedConcealedKans, ...normalizedOpenMelds];
+}
+
+/**
+ * 手牌・和了牌・暗槓・副露を含む、物理的な全牌を返す。
+ * ドラ枚数、牌の重複検証、将来の役判定で共通利用する。
+ */
+function getAllTiles(question) {
+  if (!question || typeof question !== "object") {
+    throw new Error("問題データにはオブジェクトを指定してください。");
+  }
+
+  if (!Array.isArray(question.concealedTiles)) {
+    throw new Error("concealedTilesには配列を指定してください。");
+  }
+
+  const tiles = [...question.concealedTiles];
+
+  if (typeof question.winningTile === "string" && question.winningTile.trim() !== "") {
+    tiles.push(question.winningTile);
+  }
+
+  for (const meld of getAllMelds(question)) {
+    tiles.push(...meld.tiles);
+  }
+
+  return tiles;
+}
+
+/**
+ * 手牌構成上の牌数を返す。槓子は物理的には4枚だが、構成上は3枚分。
+ */
+function getKanCount(question) {
+  return getAllMelds(question).filter(meld => isKanMeld(meld)).length;
+}
+
+function getExpectedDoraIndicatorCount(question) {
+  return 1 + getKanCount(question);
+}
+
+function getStructuralTileCount(question) {
+  if (!question || !Array.isArray(question.concealedTiles)) {
+    return 0;
+  }
+
+  return question.concealedTiles.length + getAllMelds(question).length * 3;
+}
+
+/**
+ * 副露がなく門前であるかを返す。暗槓は門前を崩さない。
+ */
+function isMenzen(question) {
+  return getAllMelds(question).every(meld => !meld.isOpen);
+}
+
+
+const DRAGON_TILES = new Set(["white", "green", "red"]);
+const WIND_TILES = new Set(["east", "south", "west", "north"]);
+const TERMINAL_NUMBERS = new Set([1, 9]);
+
+function isHonorTile(tileCode) {
+  return Object.prototype.hasOwnProperty.call(HONOR_TILES, tileCode);
+}
+
+function parseSuitedTile(tileCode) {
+  const match = /^(\d)([mps])$/.exec(tileCode);
+  if (!match) {
+    return null;
+  }
+
+  return { number: Number(match[1]), suit: match[2] };
+}
+
+function isTerminalTile(tileCode) {
+  const tile = parseSuitedTile(tileCode);
+  return Boolean(tile && TERMINAL_NUMBERS.has(tile.number));
+}
+
+function isTerminalOrHonor(tileCode) {
+  return isHonorTile(tileCode) || isTerminalTile(tileCode);
+}
+
+function isSimpleTile(tileCode) {
+  const tile = parseSuitedTile(tileCode);
+  return Boolean(tile && tile.number >= 2 && tile.number <= 8);
+}
+
+function cloneTileCounts(tileCodes) {
+  const counts = new Map();
+  for (const tileCode of tileCodes) {
+    counts.set(tileCode, (counts.get(tileCode) || 0) + 1);
+  }
+  return counts;
+}
+
+function getFirstRemainingTile(counts) {
+  return [...counts.keys()]
+    .filter(tileCode => (counts.get(tileCode) || 0) > 0)
+    .sort((left, right) => getTileSortValue(left) - getTileSortValue(right))[0] || null;
+}
+
+function removeTilesFromCounts(counts, tileCodes) {
+  for (const tileCode of tileCodes) {
+    const count = counts.get(tileCode) || 0;
+    if (count <= 0) {
+      return false;
+    }
+    counts.set(tileCode, count - 1);
+  }
+  return true;
+}
+
+function addTilesToCounts(counts, tileCodes) {
+  for (const tileCode of tileCodes) {
+    counts.set(tileCode, (counts.get(tileCode) || 0) + 1);
+  }
+}
+
+function findConcealedHandDecompositions(question) {
+  const fixedMeldCount = getAllMelds(question).length;
+  const neededMeldCount = 4 - fixedMeldCount;
+  if (neededMeldCount < 0) {
+    return [];
+  }
+
+  const concealedWinningTiles = [
+    ...(question.concealedTiles || []),
+    question.winningTile
+  ];
+  const counts = cloneTileCounts(concealedWinningTiles);
+  const decompositions = [];
+
+  const pairCandidates = [...counts.entries()]
+    .filter(([, count]) => count >= 2)
+    .map(([tileCode]) => tileCode)
+    .sort((left, right) => getTileSortValue(left) - getTileSortValue(right));
+
+  for (const pairTile of pairCandidates) {
+    removeTilesFromCounts(counts, [pairTile, pairTile]);
+    const melds = [];
+
+    const search = () => {
+      const firstTile = getFirstRemainingTile(counts);
+      if (!firstTile) {
+        if (melds.length === neededMeldCount) {
+          decompositions.push({
+            pairTile,
+            concealedMelds: melds.map(meld => ({
+              ...meld,
+              tiles: [...meld.tiles],
+              isOpen: false
+            }))
+          });
+        }
+        return;
+      }
+
+      if (melds.length >= neededMeldCount) {
+        return;
+      }
+
+      if ((counts.get(firstTile) || 0) >= 3) {
+        const tripletTiles = [firstTile, firstTile, firstTile];
+        removeTilesFromCounts(counts, tripletTiles);
+        melds.push({ type: "pon", tiles: tripletTiles });
+        search();
+        melds.pop();
+        addTilesToCounts(counts, tripletTiles);
+      }
+
+      const parsed = parseSuitedTile(firstTile);
+      if (parsed && parsed.number <= 7) {
+        const sequenceTiles = [
+          firstTile,
+          `${parsed.number + 1}${parsed.suit}`,
+          `${parsed.number + 2}${parsed.suit}`
+        ];
+        if (sequenceTiles.every(tileCode => (counts.get(tileCode) || 0) > 0)) {
+          removeTilesFromCounts(counts, sequenceTiles);
+          melds.push({ type: "chi", tiles: sequenceTiles });
+          search();
+          melds.pop();
+          addTilesToCounts(counts, sequenceTiles);
+        }
+      }
+    };
+
+    search();
+    addTilesToCounts(counts, [pairTile, pairTile]);
+  }
+
+  return decompositions;
+}
+
+function getMeldBaseTile(meld) {
+  return meld.tiles[0];
+}
+
+function isSequenceMeld(meld) {
+  return meld.type === "chi";
+}
+
+function isTripletMeld(meld) {
+  return meld.type === "pon";
+}
+
+function isKanMeld(meld) {
+  return meld.type === "kan-open" || meld.type === "kan-concealed";
+}
+
+function getSequenceSignature(meld) {
+  if (!isSequenceMeld(meld)) {
+    return null;
+  }
+  const sorted = sortTilesForDisplay(meld.tiles);
+  const first = parseSuitedTile(sorted[0]);
+  return first ? `${first.number}${first.suit}` : null;
+}
+
+function getValuePairFu(question, pairTile) {
+  let fu = 0;
+  if (DRAGON_TILES.has(pairTile)) {
+    fu += 2;
+  }
+  if (pairTile === question.roundWind) {
+    fu += 2;
+  }
+  if (pairTile === question.seatWind) {
+    fu += 2;
+  }
+  return fu;
+}
+
+function getWaitFu(question, decomposition) {
+  const winningTile = question.winningTile;
+  if (decomposition.pairTile === winningTile) {
+    return 2;
+  }
+
+  for (const meld of decomposition.concealedMelds) {
+    if (!isSequenceMeld(meld) || !meld.tiles.includes(winningTile)) {
+      continue;
+    }
+
+    const sorted = sortTilesForDisplay(meld.tiles);
+    const winningIndex = sorted.indexOf(winningTile);
+    const first = parseSuitedTile(sorted[0]);
+    if (!first) {
+      continue;
+    }
+
+    if (winningIndex === 1) {
+      return 2;
+    }
+    if (first.number === 1 && winningIndex === 2) {
+      return 2;
+    }
+    if (first.number === 7 && winningIndex === 0) {
+      return 2;
+    }
+  }
+
+  return 0;
+}
+
+function getMeldFu(question, meld, decomposition) {
+  if (isSequenceMeld(meld)) {
+    return 0;
+  }
+
+  const terminalOrHonor = isTerminalOrHonor(getMeldBaseTile(meld));
+  let openForFu = meld.isOpen;
+
+  if (
+    question.winType === "ron" &&
+    !meld.isOpen &&
+    isTripletMeld(meld) &&
+    meld.tiles.includes(question.winningTile)
+  ) {
+    openForFu = true;
+  }
+
+  if (isKanMeld(meld)) {
+    if (openForFu) {
+      return terminalOrHonor ? 16 : 8;
+    }
+    return terminalOrHonor ? 32 : 16;
+  }
+
+  if (openForFu) {
+    return terminalOrHonor ? 4 : 2;
+  }
+  return terminalOrHonor ? 8 : 4;
+}
+
+function countConcealedTriplets(question, melds) {
+  return melds.filter(meld => {
+    if (isSequenceMeld(meld) || meld.isOpen) {
+      return false;
+    }
+    if (
+      question.winType === "ron" &&
+      isTripletMeld(meld) &&
+      meld.tiles.includes(question.winningTile)
+    ) {
+      return false;
+    }
+    return true;
+  }).length;
+}
+
+function getTileSuitSet(tileCodes) {
+  const suits = new Set();
+  let hasHonor = false;
+  for (const tileCode of tileCodes) {
+    const parsed = parseSuitedTile(tileCode);
+    if (parsed) {
+      suits.add(parsed.suit);
+    } else if (isHonorTile(tileCode)) {
+      hasHonor = true;
+    }
+  }
+  return { suits, hasHonor };
+}
+
+function createYaku(name, han) {
+  return { name, han };
+}
+
+function detectOpenHandYaku(question, decomposition) {
+  const fixedMelds = getAllMelds(question);
+  const melds = [...decomposition.concealedMelds, ...fixedMelds];
+  const allTiles = getAllTiles(question);
+  const yaku = [];
+  const menzen = isMenzen(question);
+
+  if (allTiles.every(isSimpleTile)) {
+    yaku.push(createYaku("断么九", 1));
+  }
+
+  const tripletLikeMelds = melds.filter(meld => !isSequenceMeld(meld));
+  const tripletTiles = new Set(tripletLikeMelds.map(getMeldBaseTile));
+  const valueHonorDefinitions = [
+    ["white", "役牌 白"],
+    ["green", "役牌 發"],
+    ["red", "役牌 中"],
+    [question.roundWind, `場風（${WIND_LABELS[question.roundWind]}）`],
+    [question.seatWind, `自風（${WIND_LABELS[question.seatWind]}）`]
+  ];
+  for (const [tileCode, name] of valueHonorDefinitions) {
+    if (tripletTiles.has(tileCode)) {
+      yaku.push(createYaku(name, 1));
+    }
+  }
+
+  if (melds.every(meld => !isSequenceMeld(meld))) {
+    yaku.push(createYaku("対々和", 2));
+  }
+
+  if (countConcealedTriplets(question, melds) >= 3) {
+    yaku.push(createYaku("三暗刻", 2));
+  }
+
+  if (melds.filter(isKanMeld).length >= 3) {
+    yaku.push(createYaku("三槓子", 2));
+  }
+
+  for (const number of Array.from({ length: 9 }, (_, index) => index + 1)) {
+    if (["m", "p", "s"].every(suit => tripletTiles.has(`${number}${suit}`))) {
+      yaku.push(createYaku("三色同刻", 2));
+      break;
+    }
+  }
+
+  const sequenceSignatures = new Set(melds.map(getSequenceSignature).filter(Boolean));
+  for (let start = 1; start <= 7; start += 1) {
+    if (["m", "p", "s"].every(suit => sequenceSignatures.has(`${start}${suit}`))) {
+      yaku.push(createYaku("三色同順", menzen ? 2 : 1));
+      break;
+    }
+  }
+
+  for (const suit of ["m", "p", "s"]) {
+    if ([1, 4, 7].every(start => sequenceSignatures.has(`${start}${suit}`))) {
+      yaku.push(createYaku("一気通貫", menzen ? 2 : 1));
+      break;
+    }
+  }
+
+  const eachGroupHasTerminalOrHonor = [
+    decomposition.pairTile,
+    ...melds.map(meld => meld.tiles)
+  ].every(group => {
+    const tiles = Array.isArray(group) ? group : [group];
+    return tiles.some(isTerminalOrHonor);
+  });
+  const hasSequence = melds.some(isSequenceMeld);
+  const hasHonor = allTiles.some(isHonorTile);
+  if (eachGroupHasTerminalOrHonor && hasSequence) {
+    if (hasHonor) {
+      yaku.push(createYaku("混全帯么九", menzen ? 2 : 1));
+    } else {
+      yaku.push(createYaku("純全帯么九", menzen ? 3 : 2));
+    }
+  }
+
+  if (allTiles.every(isTerminalOrHonor)) {
+    yaku.push(createYaku("混老頭", 2));
+  }
+
+  const dragonTripletCount = ["white", "green", "red"]
+    .filter(tileCode => tripletTiles.has(tileCode)).length;
+  if (dragonTripletCount === 2 && DRAGON_TILES.has(decomposition.pairTile)) {
+    yaku.push(createYaku("小三元", 2));
+  }
+
+  const { suits, hasHonor: containsHonor } = getTileSuitSet(allTiles);
+  if (suits.size === 1) {
+    if (containsHonor) {
+      yaku.push(createYaku("混一色", menzen ? 3 : 2));
+    } else {
+      yaku.push(createYaku("清一色", menzen ? 6 : 5));
+    }
+  }
+
+  return yaku;
+}
+
+function calculateOpenHandFu(question, decomposition) {
+  const melds = [...decomposition.concealedMelds, ...getAllMelds(question)];
+  const components = [{ label: "副底", fu: 20 }];
+
+  if (question.winType === "tsumo") {
+    components.push({ label: "ツモ", fu: 2 });
+  } else if (isMenzen(question)) {
+    components.push({ label: "門前ロン", fu: 10 });
+  }
+
+  const pairFu = getValuePairFu(question, decomposition.pairTile);
+  if (pairFu > 0) {
+    components.push({ label: "役牌の雀頭", fu: pairFu });
+  }
+
+  const waitFu = getWaitFu(question, decomposition);
+  if (waitFu > 0) {
+    components.push({ label: "待ち", fu: waitFu });
+  }
+
+  for (const meld of melds) {
+    const fu = getMeldFu(question, meld, decomposition);
+    if (fu <= 0) {
+      continue;
+    }
+    const tileLabel = HONOR_TILES[getMeldBaseTile(meld)]?.label || getMeldBaseTile(meld);
+    const meldLabel = isKanMeld(meld)
+      ? (meld.isOpen ? "明槓" : "暗槓")
+      : (meld.isOpen ? "明刻" : "暗刻");
+    components.push({ label: `${tileLabel}の${meldLabel}`, fu });
+  }
+
+  const rawFu = components.reduce((sum, component) => sum + component.fu, 0);
+  const isOpenPinfuShape = !isMenzen(question) && question.winType === "ron" && rawFu === 20;
+  const roundedFu = isOpenPinfuShape ? 30 : roundFuToTen(rawFu);
+  const fuBreakdown = components.map(component => `${component.label}：${component.fu}符`);
+
+  if (isOpenPinfuShape) {
+    fuBreakdown.push("副露した平和形のロン和了：30符固定（加算ではありません）");
+    fuBreakdown.push("最終符：30符");
+  } else if (rawFu === roundedFu) {
+    fuBreakdown.push(`合計：${roundedFu}符`);
+  } else {
+    fuBreakdown.push(`合計：${rawFu}符 → ${roundedFu}符`);
+  }
+
+  return { fu: roundedFu, fuBreakdown };
+}
+
+function calculateOpenHandAnswer(question) {
+  const decompositions = findConcealedHandDecompositions(question);
+  if (decompositions.length === 0) {
+    throw new Error(`${question.id}：副露を含む手牌を面子へ分解できません。`);
+  }
+
+  const candidates = decompositions.map(decomposition => {
+    const yaku = detectOpenHandYaku(question, decomposition);
+    const totalHan = yaku.reduce((sum, item) => sum + item.han, 0);
+    const { fu, fuBreakdown } = calculateOpenHandFu(question, decomposition);
+    const score = calculateScoreFromFuHan(question, totalHan, fu, question.winType);
+    return { yaku, totalHan, fu, score, fuBreakdown, decomposition };
+  });
+
+  candidates.sort((left, right) => {
+    if (right.score.basePoints !== left.score.basePoints) {
+      return right.score.basePoints - left.score.basePoints;
+    }
+    if (right.totalHan !== left.totalHan) {
+      return right.totalHan - left.totalHan;
+    }
+    return right.fu - left.fu;
+  });
+
+  return candidates[0];
+}
+
+const calculatedOpenHandAnswerCache = new Map();
+
+function getBaseAnswer(question) {
+  if (isMenzen(question)) {
+    return question.answer;
+  }
+
+  if (!calculatedOpenHandAnswerCache.has(question.id)) {
+    calculatedOpenHandAnswerCache.set(question.id, calculateOpenHandAnswer(question));
+  }
+  return calculatedOpenHandAnswerCache.get(question.id);
+}
+
 function createOpenMeldTile(tileCode, isSideways) {
   const tile = createTile(tileCode);
   if (isSideways) {
@@ -1018,48 +1568,41 @@ function validateQuestionData() {
       errors.push(`${location}：uraDoraIndicatorsが配列ではありません`);
     }
 
-    if (Array.isArray(question.concealedTiles) && typeof question.winningTile === "string") {
-      const concealedKans = Array.isArray(question.concealedKans)
-        ? question.concealedKans
-        : [];
-      const openMelds = Array.isArray(question.openMelds)
-        ? question.openMelds
-        : [];
-      const structuralTileCount =
-        question.concealedTiles.length +
-        concealedKans.length * 3 +
-        openMelds.length * 3;
-
-      if (structuralTileCount !== 13) {
-        errors.push(
-          `${location}：手牌構成が13枚分ではありません（${structuralTileCount}枚分）`
-        );
-      }
-
-      const physicalTiles = [
-        ...question.concealedTiles,
-        question.winningTile,
-        ...concealedKans.flatMap(kan => {
-          const tileCode = normalizeConcealedKanTileCode(kan, 0);
-          return [tileCode, tileCode, tileCode, tileCode];
-        }),
-        ...openMelds.flatMap((meld, meldIndex) => {
-          try {
-            return normalizeOpenMeld(meld, meldIndex).tiles;
-          } catch (error) {
-            errors.push(`${location}：${error.message}`);
-            return [];
-          }
-        })
-      ];
-      const tileCounts = new Map();
-      for (const tileCode of physicalTiles) {
-        tileCounts.set(tileCode, (tileCounts.get(tileCode) ?? 0) + 1);
-      }
-      for (const [tileCode, count] of tileCounts) {
-        if (count > 4) {
-          errors.push(`${location}：${tileCode}が${count}枚あります`);
+    if (Array.isArray(question.doraIndicators) && Array.isArray(question.uraDoraIndicators)) {
+      try {
+        const expectedIndicatorCount = getExpectedDoraIndicatorCount(question);
+        if (question.doraIndicators.length !== expectedIndicatorCount) {
+          errors.push(`${location}：doraIndicatorsは槓数に応じて${expectedIndicatorCount}枚必要です`);
         }
+        if (question.uraDoraIndicators.length !== expectedIndicatorCount) {
+          errors.push(`${location}：uraDoraIndicatorsは槓数に応じて${expectedIndicatorCount}枚必要です`);
+        }
+      } catch (error) {
+        errors.push(`${location}：ドラ表示牌枚数の検証に失敗しました（${error.message}）`);
+      }
+    }
+
+    if (Array.isArray(question.concealedTiles) && typeof question.winningTile === "string") {
+      try {
+        const structuralTileCount = getStructuralTileCount(question);
+
+        if (structuralTileCount !== 13) {
+          errors.push(
+            `${location}：手牌構成が13枚分ではありません（${structuralTileCount}枚分）`
+          );
+        }
+
+        const tileCounts = new Map();
+        for (const tileCode of getAllTiles(question)) {
+          tileCounts.set(tileCode, (tileCounts.get(tileCode) ?? 0) + 1);
+        }
+        for (const [tileCode, count] of tileCounts) {
+          if (count > 4) {
+            errors.push(`${location}：${tileCode}が${count}枚あります`);
+          }
+        }
+      } catch (error) {
+        errors.push(`${location}：${error.message}`);
       }
     }
 
@@ -1296,7 +1839,7 @@ function buildAdditionalConditions(extraHan, patternIndex, allowRiichi = true) {
 }
 
 function getTargetExtraHanCandidates(question) {
-  const baseHan = question.answer.totalHan;
+  const baseHan = getBaseAnswer(question).totalHan;
   const targetTotals = [baseHan + 1, 4, 5, 6, 8, 11, 13];
   const uniqueExtras = [];
 
@@ -1320,13 +1863,14 @@ function createVariationPatternsForQuestion(question) {
   const extraCandidates = getTargetExtraHanCandidates(question);
 
   return extraCandidates.map((extraHan, index) => {
-    const totalHan = question.answer.totalHan + extraHan;
+    const baseAnswer = getBaseAnswer(question);
+    const totalHan = baseAnswer.totalHan + extraHan;
     const conditions = buildAdditionalConditions(
       extraHan,
       question.id.length + index,
-      (question.openMelds ?? []).length === 0
+      isMenzen(question)
     );
-    const score = calculateScoreFromFuHan(question, totalHan);
+    const score = calculateScoreFromFuHan(question, totalHan, baseAnswer.fu);
 
     return {
       patternId: `${question.id}-p${index + 1}`,
@@ -1370,23 +1914,8 @@ function getNextDoraTile(indicator) {
 }
 
 function getPhysicalWinningTiles(question) {
-  const tiles = [...question.concealedTiles, question.winningTile];
-
-  for (const concealedKan of question.concealedKans ?? []) {
-    if (typeof concealedKan === "string") {
-      tiles.push(concealedKan, concealedKan, concealedKan, concealedKan);
-    } else if (Array.isArray(concealedKan.tiles)) {
-      tiles.push(...concealedKan.tiles);
-    }
-  }
-
-  for (const openMeld of question.openMelds ?? []) {
-    if (Array.isArray(openMeld?.tiles)) {
-      tiles.push(...openMeld.tiles);
-    }
-  }
-
-  return tiles;
+  // 既存の関数名は互換性のため残し、共通取得処理へ委譲する。
+  return getAllTiles(question);
 }
 
 function countDoraFromIndicators(question, indicators) {
@@ -1401,8 +1930,9 @@ function countDoraFromIndicators(question, indicators) {
 }
 
 function hasYakuWithoutTsumo(question) {
-  const yakuList = Array.isArray(question?.answer?.yaku)
-    ? question.answer.yaku
+  const baseAnswer = question ? getBaseAnswer(question) : null;
+  const yakuList = Array.isArray(baseAnswer?.yaku)
+    ? baseAnswer.yaku
     : [];
 
   return yakuList.some(yaku => {
@@ -1438,8 +1968,9 @@ function roundFuToTen(fu) {
 }
 
 function calculateRolelessTsumoFu(question) {
-  const breakdown = Array.isArray(question?.answer?.fuBreakdown)
-    ? question.answer.fuBreakdown
+  const baseAnswer = getBaseAnswer(question);
+  const breakdown = Array.isArray(baseAnswer?.fuBreakdown)
+    ? baseAnswer.fuBreakdown
     : [];
 
   let rawFu = 0;
@@ -1474,7 +2005,7 @@ function calculateRolelessTsumoFu(question) {
     return roundFuToTen(Math.max(rawFu, 20));
   }
 
-  return question.answer.fu;
+  return baseAnswer.fu;
 }
 
 function getPracticalDoraSummary(question) {
@@ -1533,6 +2064,8 @@ function renderPracticalDoraArea(showUraDora) {
 }
 
 function getActiveAnswer(question) {
+  const baseAnswer = getBaseAnswer(question);
+
   if (!isReviewMode && currentMode === MODE_PRACTICAL) {
     const doraSummary = getPracticalDoraSummary(question);
     const effectiveWinType = getEffectiveWinType(question);
@@ -1543,7 +2076,7 @@ function getActiveAnswer(question) {
       !hasYakuWithoutTsumo(question);
     const effectiveFu = isConvertedRolelessTsumo
       ? calculateRolelessTsumoFu(question)
-      : question.answer.fu;
+      : baseAnswer.fu;
     const additionalYaku = [];
 
     if (isConvertedRolelessTsumo) {
@@ -1572,7 +2105,7 @@ function getActiveAnswer(question) {
       (total, yaku) => total + yaku.han,
       0
     );
-    const totalHan = question.answer.totalHan + extraHan;
+    const totalHan = baseAnswer.totalHan + extraHan;
     const score = calculateScoreFromFuHan(
       question,
       totalHan,
@@ -1581,15 +2114,15 @@ function getActiveAnswer(question) {
     );
 
     return {
-      yaku: [...question.answer.yaku, ...additionalYaku],
+      yaku: [...baseAnswer.yaku, ...additionalYaku],
       totalHan,
       fu: effectiveFu,
       score,
       fuBreakdown: [
-        ...question.answer.fuBreakdown.filter(
+        ...baseAnswer.fuBreakdown.filter(
           item => !item.includes("切り上げ満貫を適用")
         ),
-        `基本${question.answer.totalHan}翻＋実戦条件${extraHan}翻＝合計${totalHan}翻`,
+        `基本${baseAnswer.totalHan}翻＋実戦条件${extraHan}翻＝合計${totalHan}翻`,
         isConvertedRolelessTsumo
           ? `役なし・非立直のためツモへ変更し、門前清自摸和1翻を追加（${effectiveFu}符）`
           : `和了方法：${WIN_TYPE_LABELS[effectiveWinType]}`,
@@ -1607,11 +2140,11 @@ function getActiveAnswer(question) {
 
   if (isReviewMode || currentMode !== MODE_HAN_VARIATION) {
     return {
-      yaku: question.answer.yaku,
-      totalHan: question.answer.totalHan,
-      fu: question.answer.fu,
-      score: question.answer.score,
-      fuBreakdown: question.answer.fuBreakdown,
+      yaku: baseAnswer.yaku,
+      totalHan: baseAnswer.totalHan,
+      fu: baseAnswer.fu,
+      score: baseAnswer.score,
+      fuBreakdown: baseAnswer.fuBreakdown,
       conditions: []
     };
   }
@@ -1625,15 +2158,15 @@ function getActiveAnswer(question) {
   }));
 
   return {
-    yaku: [...question.answer.yaku, ...conditionYaku],
+    yaku: [...baseAnswer.yaku, ...conditionYaku],
     totalHan: variation.totalHan,
-    fu: question.answer.fu,
+    fu: baseAnswer.fu,
     score: variation.score,
     fuBreakdown: [
-      ...question.answer.fuBreakdown.filter(
+      ...baseAnswer.fuBreakdown.filter(
         item => !item.includes("切り上げ満貫を適用")
       ),
-      `基本${question.answer.totalHan}翻＋付加条件${variation.extraHan}翻＝合計${variation.totalHan}翻`,
+      `基本${baseAnswer.totalHan}翻＋付加条件${variation.extraHan}翻＝合計${variation.totalHan}翻`,
       variation.score.kiriageMangan
         ? "30符4翻または60符3翻のため、切り上げ満貫を適用"
         : `合計${variation.totalHan}翻として点数を計算`
@@ -1809,6 +2342,7 @@ function createNewSession() {
   submittedAnswer = null;
   practicalStep = PRACTICAL_STEP_RIICHI;
   practicalRiichiSelected = null;
+  practicalWinType = null;
   createSessionVariations();
   saveSessionState();
 }
@@ -2036,7 +2570,7 @@ function advancePracticalStep(nextStep) {
 }
 
 function hasOpenMelds(question) {
-  return Array.isArray(question?.openMelds) && question.openMelds.length > 0;
+  return !isMenzen(question);
 }
 
 function selectPracticalRiichi(shouldRiichi) {
@@ -2052,7 +2586,12 @@ function selectPracticalRiichi(shouldRiichi) {
 function renderPracticalQuestionInfo(showWinType) {
   const cards = [];
   if (showWinType) {
-    cards.push(createInfoCard("和了方法", WIN_TYPE_LABELS[currentQuestion.winType]));
+    cards.push(
+      createInfoCard(
+        "和了方法",
+        WIN_TYPE_LABELS[getEffectiveWinType(currentQuestion)]
+      )
+    );
   }
   cards.push(
     createInfoCard("場風", WIND_LABELS[currentQuestion.roundWind]),
@@ -2082,6 +2621,7 @@ function renderPracticalStep() {
     practicalRiichiSelected = false;
     practicalWinType = currentQuestion.winType;
     practicalStep = PRACTICAL_STEP_AGARI;
+    displayScoreInputs(currentQuestion);
   }
 
   panel.hidden = false;
@@ -2165,12 +2705,13 @@ function renderPracticalStep() {
 
 
 function createQuestionSelectLabel(question) {
-  const yakuNames = Array.isArray(question.answer?.yaku)
-    ? question.answer.yaku.map(yaku => yaku.name).join("・")
+  const baseAnswer = getBaseAnswer(question);
+  const yakuNames = Array.isArray(baseAnswer?.yaku)
+    ? baseAnswer.yaku.map(yaku => yaku.name).join("・")
     : "役情報なし";
-  const fu = Number.isFinite(question.answer?.fu) ? `${question.answer.fu}符` : "符不明";
-  const han = Number.isFinite(question.answer?.totalHan)
-    ? `${question.answer.totalHan}翻`
+  const fu = Number.isFinite(baseAnswer?.fu) ? `${baseAnswer.fu}符` : "符不明";
+  const han = Number.isFinite(baseAnswer?.totalHan)
+    ? `${baseAnswer.totalHan}翻`
     : "翻不明";
 
   return `${question.id}｜${fu}${han}｜${yakuNames}`;
@@ -2463,8 +3004,8 @@ function summarizeVariationPatterns() {
     const patterns = createVariationPatternsForQuestion(question);
     return {
       id: question.id,
-      baseFu: question.answer.fu,
-      baseHan: question.answer.totalHan,
+      baseFu: getBaseAnswer(question).fu,
+      baseHan: getBaseAnswer(question).totalHan,
       patternCount: patterns.length,
       targetTotals: patterns.map(pattern => pattern.totalHan),
       categories: patterns.map(pattern => pattern.score.category)

@@ -725,6 +725,27 @@ function checkDoraIndicatorFormat(questions) {
       "uraDoraIndicators",
       question?.uraDoraIndicators
     );
+
+    const kanCount =
+      (Array.isArray(question?.concealedKans) ? question.concealedKans.length : 0) +
+      (Array.isArray(question?.openMelds)
+        ? question.openMelds.filter(meld => meld?.type === "kan-open").length
+        : 0);
+    const expectedIndicatorCount = 1 + kanCount;
+
+    if (Array.isArray(question?.doraIndicators) &&
+        question.doraIndicators.length !== expectedIndicatorCount) {
+      errors.push(
+        `${questionLabel}: doraIndicatorsは槓数に応じて${expectedIndicatorCount}枚必要です。`
+      );
+    }
+
+    if (Array.isArray(question?.uraDoraIndicators) &&
+        question.uraDoraIndicators.length !== expectedIndicatorCount) {
+      errors.push(
+        `${questionLabel}: uraDoraIndicatorsは槓数に応じて${expectedIndicatorCount}枚必要です。`
+      );
+    }
   });
 
   return createAuditResult("ドラ・裏ドラ形式チェック", errors);

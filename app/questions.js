@@ -7714,10 +7714,12 @@ window.MAHJONG_QUESTIONS = [
                   "kiriageMangan": false
             },
             "doraIndicators": [
-                  "8s"
+                  "8s",
+                  "3m"
             ],
             "uraDoraIndicators": [
-                  "6m"
+                  "6m",
+                  "3m"
             ]
       },
       {
@@ -7785,10 +7787,12 @@ window.MAHJONG_QUESTIONS = [
                   "kiriageMangan": false
             },
             "doraIndicators": [
-                  "2m"
+                  "2m",
+                  "5m"
             ],
             "uraDoraIndicators": [
-                  "4m"
+                  "4m",
+                  "5m"
             ]
       },
       {
@@ -7851,10 +7855,12 @@ window.MAHJONG_QUESTIONS = [
                   "kiriageMangan": false
             },
             "doraIndicators": [
-                  "1m"
+                  "1m",
+                  "4m"
             ],
             "uraDoraIndicators": [
-                  "3p"
+                  "3p",
+                  "4m"
             ]
       },
       {
@@ -7924,10 +7930,12 @@ window.MAHJONG_QUESTIONS = [
                   "kiriageMangan": true
             },
             "doraIndicators": [
-                  "1m"
+                  "1m",
+                  "1p"
             ],
             "uraDoraIndicators": [
-                  "5s"
+                  "5s",
+                  "1p"
             ]
       },
       {
@@ -7988,10 +7996,16 @@ window.MAHJONG_QUESTIONS = [
                   "kiriageMangan": false
             },
             "doraIndicators": [
-                  "7m"
+                  "7m",
+                  "4m",
+                  "5m",
+                  "6m"
             ],
             "uraDoraIndicators": [
-                  "2m"
+                  "2m",
+                  "4m",
+                  "5m",
+                  "6m"
             ]
       },
       {
@@ -8490,10 +8504,444 @@ window.MAHJONG_QUESTIONS = [
                   "kiriageMangan": false
             },
             "doraIndicators": [
-                  "1s"
+                  "1s",
+                  "3m"
             ],
             "uraDoraIndicators": [
-                  "2p"
+                  "2p",
+                  "3m"
+            ]
+      },
+      {
+            "id": "q121",
+            "concealedTiles": [
+                  "2p",
+                  "3p",
+                  "1s",
+                  "2s",
+                  "3s",
+                  "7m",
+                  "8m",
+                  "9m",
+                  "5p",
+                  "5p"
+            ],
+            "openMelds": [
+                  {
+                        "type": "chi",
+                        "tiles": [
+                              "1m",
+                              "2m",
+                              "3m"
+                        ]
+                  }
+            ],
+            "winningTile": "1p",
+            "winType": "ron",
+            "roundWind": "east",
+            "seatWind": "south",
+            "riichi": false,
+            "menzen": false,
+            "answer": {
+                  "yaku": [
+                        {
+                              "name": "三色同順",
+                              "han": 1
+                        }
+                  ],
+                  "totalHan": 1,
+                  "fu": 30,
+                  "score": {
+                        "display": "1000点",
+                        "pointText": "1000点",
+                        "category": "通常",
+                        "basePoints": 240,
+                        "kiriageMangan": false
+                  },
+                  "fuBreakdown": [
+                        "副底：20符",
+                        "待ち：2符",
+                        "合計：22符 → 30符"
+                  ]
+            },
+            "management": {
+                  "fu": 30,
+                  "han": 1,
+                  "scoreCategory": "通常",
+                  "playerType": "子",
+                  "winType": "ロン",
+                  "waitType": "辺張待ち",
+                  "mainYaku": [
+                        "三色同順"
+                  ],
+                  "kiriageMangan": false
+            },
+            "doraIndicators": [
+                  "9s"
+            ],
+            "uraDoraIndicators": [
+                  "1s"
+            ]
+      },
+      {
+            "id": "q122",
+            "concealedTiles": [
+                  "4m",
+                  "5m",
+                  "6m",
+                  "7m",
+                  "8m",
+                  "2p",
+                  "3p",
+                  "4p",
+                  "6s",
+                  "6s"
+            ],
+            "openMelds": [
+                  {
+                        "type": "chi",
+                        "tiles": [
+                              "1m",
+                              "2m",
+                              "3m"
+                        ]
+                  }
+            ],
+            "winningTile": "9m",
+            "winType": "ron",
+            "roundWind": "east",
+            "seatWind": "south",
+            "riichi": false,
+            "menzen": false,
+            "answer": {
+                  "yaku": [
+                        {
+                              "name": "一気通貫",
+                              "han": 1
+                        }
+                  ],
+                  "totalHan": 1,
+                  "fu": 30,
+                  "score": {
+                        "display": "1000点",
+                        "pointText": "1000点",
+                        "category": "通常",
+                        "basePoints": 240,
+                        "kiriageMangan": false
+                  },
+                  "fuBreakdown": [
+                        "副底：20符",
+                        "待ち：2符",
+                        "合計：22符 → 30符"
+                  ]
+            },
+            "management": {
+                  "fu": 30,
+                  "han": 1,
+                  "scoreCategory": "通常",
+                  "playerType": "子",
+                  "winType": "ロン",
+                  "waitType": "辺張待ち",
+                  "mainYaku": [
+                        "一気通貫"
+                  ],
+                  "kiriageMangan": false
+            },
+            "doraIndicators": [
+                  "9p"
+            ],
+            "uraDoraIndicators": [
+                  "1p"
+            ]
+      },
+      {
+            "id": "q123",
+            "concealedTiles": [
+                  "7p",
+                  "8p",
+                  "9s",
+                  "9s",
+                  "9s",
+                  "1s",
+                  "2s",
+                  "3s",
+                  "east",
+                  "east"
+            ],
+            "openMelds": [
+                  {
+                        "type": "chi",
+                        "tiles": [
+                              "1m",
+                              "2m",
+                              "3m"
+                        ]
+                  }
+            ],
+            "winningTile": "9p",
+            "winType": "ron",
+            "roundWind": "east",
+            "seatWind": "south",
+            "riichi": false,
+            "menzen": false,
+            "answer": {
+                  "yaku": [
+                        {
+                              "name": "混全帯么九",
+                              "han": 1
+                        }
+                  ],
+                  "totalHan": 1,
+                  "fu": 40,
+                  "score": {
+                        "display": "1300点",
+                        "pointText": "1300点",
+                        "category": "通常",
+                        "basePoints": 320,
+                        "kiriageMangan": false
+                  },
+                  "fuBreakdown": [
+                        "副底：20符",
+                        "場風 東の雀頭：2符",
+                        "待ち：2符",
+                        "9sの暗刻：8符",
+                        "合計：32符 → 40符"
+                  ]
+            },
+            "management": {
+                  "fu": 40,
+                  "han": 1,
+                  "scoreCategory": "通常",
+                  "playerType": "子",
+                  "winType": "ロン",
+                  "waitType": "辺張待ち",
+                  "mainYaku": [
+                        "混全帯么九"
+                  ],
+                  "kiriageMangan": false
+            },
+            "doraIndicators": [
+                  "4m"
+            ],
+            "uraDoraIndicators": [
+                  "5m"
+            ]
+      },
+      {
+            "id": "q124",
+            "concealedTiles": [
+                  "7p",
+                  "8p",
+                  "9p",
+                  "1s",
+                  "1s",
+                  "1s",
+                  "7s",
+                  "8s",
+                  "9m",
+                  "9m"
+            ],
+            "openMelds": [
+                  {
+                        "type": "chi",
+                        "tiles": [
+                              "1m",
+                              "2m",
+                              "3m"
+                        ]
+                  }
+            ],
+            "winningTile": "9s",
+            "winType": "ron",
+            "roundWind": "east",
+            "seatWind": "south",
+            "riichi": false,
+            "menzen": false,
+            "answer": {
+                  "yaku": [
+                        {
+                              "name": "純全帯么九",
+                              "han": 2
+                        }
+                  ],
+                  "totalHan": 2,
+                  "fu": 30,
+                  "score": {
+                        "display": "2000点",
+                        "pointText": "2000点",
+                        "category": "通常",
+                        "basePoints": 480,
+                        "kiriageMangan": false
+                  },
+                  "fuBreakdown": [
+                        "副底：20符",
+                        "待ち：2符",
+                        "1sの暗刻：8符",
+                        "合計：30符"
+                  ]
+            },
+            "management": {
+                  "fu": 30,
+                  "han": 2,
+                  "scoreCategory": "通常",
+                  "playerType": "子",
+                  "winType": "ロン",
+                  "waitType": "辺張待ち",
+                  "mainYaku": [
+                        "純全帯么九"
+                  ],
+                  "kiriageMangan": false
+            },
+            "doraIndicators": [
+                  "4p"
+            ],
+            "uraDoraIndicators": [
+                  "5p"
+            ]
+      },
+      {
+            "id": "q125",
+            "concealedTiles": [
+                  "3m",
+                  "4m",
+                  "5m",
+                  "6m",
+                  "7m",
+                  "8m",
+                  "9m",
+                  "9m",
+                  "9m",
+                  "north"
+            ],
+            "openMelds": [
+                  {
+                        "type": "pon",
+                        "tiles": [
+                              "2m",
+                              "2m",
+                              "2m"
+                        ]
+                  }
+            ],
+            "winningTile": "north",
+            "winType": "ron",
+            "roundWind": "east",
+            "seatWind": "south",
+            "riichi": false,
+            "menzen": false,
+            "answer": {
+                  "yaku": [
+                        {
+                              "name": "混一色",
+                              "han": 2
+                        }
+                  ],
+                  "totalHan": 2,
+                  "fu": 40,
+                  "score": {
+                        "display": "2600点",
+                        "pointText": "2600点",
+                        "category": "通常",
+                        "basePoints": 640,
+                        "kiriageMangan": false
+                  },
+                  "fuBreakdown": [
+                        "副底：20符",
+                        "待ち：2符",
+                        "9mの暗刻：8符",
+                        "2mの明刻：2符",
+                        "合計：32符 → 40符"
+                  ]
+            },
+            "management": {
+                  "fu": 40,
+                  "han": 2,
+                  "scoreCategory": "通常",
+                  "playerType": "子",
+                  "winType": "ロン",
+                  "waitType": "単騎待ち",
+                  "mainYaku": [
+                        "混一色"
+                  ],
+                  "kiriageMangan": false
+            },
+            "doraIndicators": [
+                  "3p"
+            ],
+            "uraDoraIndicators": [
+                  "4p"
+            ]
+      },
+      {
+            "id": "q126",
+            "concealedTiles": [
+                  "3p",
+                  "4p",
+                  "5p",
+                  "6p",
+                  "7p",
+                  "8p",
+                  "9p",
+                  "9p",
+                  "9p",
+                  "5p"
+            ],
+            "openMelds": [
+                  {
+                        "type": "chi",
+                        "tiles": [
+                              "1p",
+                              "2p",
+                              "3p"
+                        ]
+                  }
+            ],
+            "winningTile": "5p",
+            "winType": "ron",
+            "roundWind": "east",
+            "seatWind": "south",
+            "riichi": false,
+            "menzen": false,
+            "answer": {
+                  "yaku": [
+                        {
+                              "name": "清一色",
+                              "han": 5
+                        }
+                  ],
+                  "totalHan": 5,
+                  "fu": 30,
+                  "score": {
+                        "display": "8000点",
+                        "pointText": "8000点",
+                        "category": "満貫",
+                        "basePoints": 2000,
+                        "kiriageMangan": false
+                  },
+                  "fuBreakdown": [
+                        "副底：20符",
+                        "待ち：2符",
+                        "9pの暗刻：8符",
+                        "合計：30符"
+                  ]
+            },
+            "management": {
+                  "fu": 30,
+                  "han": 5,
+                  "scoreCategory": "満貫",
+                  "playerType": "子",
+                  "winType": "ロン",
+                  "waitType": "単騎待ち",
+                  "mainYaku": [
+                        "清一色"
+                  ],
+                  "kiriageMangan": false
+            },
+            "doraIndicators": [
+                  "east"
+            ],
+            "uraDoraIndicators": [
+                  "south"
             ]
       }
 ];
