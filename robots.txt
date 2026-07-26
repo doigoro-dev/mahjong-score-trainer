@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://doigoro-dev.github.io/mahjong-score-trainer/sitemap.xml

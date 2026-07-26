@@ -2,7 +2,7 @@
 
 # Mahjong Score Trainer Project Handbook
 
-> Last Updated: 2026-07-25
+> Last Updated: 2026-07-26
 
 ---
 
@@ -177,6 +177,65 @@ mahjong-score-trainer/
 - UI改善
 - 保守性向上
 - Version 3.0.0 正式リリース
+
+## Version 3.0.1
+
+### テーマ
+
+検索エンジンやSNSから見つけやすいWebアプリへ改善する。
+
+### 目的
+
+GitHub Pagesで公開している麻雀点数計算トレーナーについて、
+検索エンジン向けの基本情報を整備し、検索結果やSNS共有時に
+アプリの内容が適切に伝わる状態を作る。
+
+### 公開URL
+
+https://doigoro-dev.github.io/mahjong-score-trainer/
+
+### 対応予定
+
+1. title最適化
+2. meta description追加
+3. canonical追加
+4. OGP対応
+5. favicon追加
+6. robots.txt追加
+7. sitemap.xml追加
+8. Google Search Console登録
+
+### 対象範囲
+
+- `index.html` のSEO関連メタ情報
+- GitHub Pages公開用の静的ファイル
+- Google Search Consoleへの登録と確認
+
+### 対象外
+
+- 問題データや採点ロジックの変更
+- 実戦モードなど既存機能の仕様変更
+- 大規模なUI変更
+- 広告やアクセス解析機能の導入
+
+### Git運用
+
+- 作業ブランチ：`feature/seo-v3.0.1`
+- 各対応を小さな単位で実施する
+- 動作確認後にPull Requestを作成する
+- レビュー後に`main`へマージする
+- `main`へのマージ後、GitHub Pagesへの反映を確認する
+
+### 完了条件
+
+- HTMLのSEOメタ情報がVersion 3.0.1の内容に更新されている
+- canonical URLが公開URLと一致している
+- OGP情報が設定されている
+- faviconがブラウザで表示される
+- robots.txtとsitemap.xmlへ公開URLからアクセスできる
+- Google Search Consoleでサイト所有権を確認できる
+- sitemap.xmlをGoogle Search Consoleへ送信できる
+- 既存の点数計算機能に影響がない
 
 ---
 
