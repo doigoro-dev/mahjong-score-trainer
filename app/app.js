@@ -21,7 +21,16 @@ const {
   isSequenceMeld,
   isTripletMeld,
   isKanMeld,
-  getSequenceSignature
+  getSequenceSignature,
+  getValuePairFu,
+	getWaitFu,
+	getMeldFu,
+	countConcealedTriplets,
+	getTileSuitSet,
+	createYaku,
+	detectOpenHandYaku,
+	roundFuToTen,
+	calculateOpenHandFu
 } = window.MahjongEngine;
 
 const SVG_NS = "http://www.w3.org/2000/svg";
@@ -639,267 +648,6 @@ function getExpectedDoraIndicatorCount(question) {
   return 1 + getKanCount(question);
 }
 
-const DRAGON_TILES = new Set(["white", "green", "red"]);
-const WIND_TILES = new Set(["east", "south", "west", "north"]);
-
-
-function getValuePairFu(question, pairTile) {
-  let fu = 0;
-  if (DRAGON_TILES.has(pairTile)) {
-    fu += 2;
-  }
-  if (pairTile === question.roundWind) {
-    fu += 2;
-  }
-  if (pairTile === question.seatWind) {
-    fu += 2;
-  }
-  return fu;
-}
-
-function getWaitFu(question, decomposition) {
-  const winningTile = question.winningTile;
-  if (decomposition.pairTile === winningTile) {
-    return 2;
-  }
-
-  for (const meld of decomposition.concealedMelds) {
-    if (!isSequenceMeld(meld) || !meld.tiles.includes(winningTile)) {
-      continue;
-    }
-
-    const sorted = sortTilesForDisplay(meld.tiles);
-    const winningIndex = sorted.indexOf(winningTile);
-    const first = parseSuitedTile(sorted[0]);
-    if (!first) {
-      continue;
-    }
-
-    if (winningIndex === 1) {
-      return 2;
-    }
-    if (first.number === 1 && winningIndex === 2) {
-      return 2;
-    }
-    if (first.number === 7 && winningIndex === 0) {
-      return 2;
-    }
-  }
-
-  return 0;
-}
-
-function getMeldFu(question, meld, decomposition) {
-  if (isSequenceMeld(meld)) {
-    return 0;
-  }
-
-  const terminalOrHonor = isTerminalOrHonor(getMeldBaseTile(meld));
-  let openForFu = meld.isOpen;
-
-  if (
-    question.winType === "ron" &&
-    !meld.isOpen &&
-    isTripletMeld(meld) &&
-    meld.tiles.includes(question.winningTile)
-  ) {
-    openForFu = true;
-  }
-
-  if (isKanMeld(meld)) {
-    if (openForFu) {
-      return terminalOrHonor ? 16 : 8;
-    }
-    return terminalOrHonor ? 32 : 16;
-  }
-
-  if (openForFu) {
-    return terminalOrHonor ? 4 : 2;
-  }
-  return terminalOrHonor ? 8 : 4;
-}
-
-function countConcealedTriplets(question, melds) {
-  return melds.filter(meld => {
-    if (isSequenceMeld(meld) || meld.isOpen) {
-      return false;
-    }
-    if (
-      question.winType === "ron" &&
-      isTripletMeld(meld) &&
-      meld.tiles.includes(question.winningTile)
-    ) {
-      return false;
-    }
-    return true;
-  }).length;
-}
-
-function getTileSuitSet(tileCodes) {
-  const suits = new Set();
-  let hasHonor = false;
-  for (const tileCode of tileCodes) {
-    const parsed = parseSuitedTile(tileCode);
-    if (parsed) {
-      suits.add(parsed.suit);
-    } else if (isHonorTile(tileCode)) {
-      hasHonor = true;
-    }
-  }
-  return { suits, hasHonor };
-}
-
-function createYaku(name, han) {
-  return { name, han };
-}
-
-function detectOpenHandYaku(question, decomposition) {
-  const fixedMelds = getAllMelds(question);
-  const melds = [...decomposition.concealedMelds, ...fixedMelds];
-  const allTiles = getAllTiles(question);
-  const yaku = [];
-  const menzen = isMenzen(question);
-
-  if (allTiles.every(isSimpleTile)) {
-    yaku.push(createYaku("断么九", 1));
-  }
-
-  const tripletLikeMelds = melds.filter(meld => !isSequenceMeld(meld));
-  const tripletTiles = new Set(tripletLikeMelds.map(getMeldBaseTile));
-  const valueHonorDefinitions = [
-    ["white", "役牌 白"],
-    ["green", "役牌 發"],
-    ["red", "役牌 中"],
-    [question.roundWind, `場風（${WIND_LABELS[question.roundWind]}）`],
-    [question.seatWind, `自風（${WIND_LABELS[question.seatWind]}）`]
-  ];
-  for (const [tileCode, name] of valueHonorDefinitions) {
-    if (tripletTiles.has(tileCode)) {
-      yaku.push(createYaku(name, 1));
-    }
-  }
-
-  if (melds.every(meld => !isSequenceMeld(meld))) {
-    yaku.push(createYaku("対々和", 2));
-  }
-
-  if (countConcealedTriplets(question, melds) >= 3) {
-    yaku.push(createYaku("三暗刻", 2));
-  }
-
-  if (melds.filter(isKanMeld).length >= 3) {
-    yaku.push(createYaku("三槓子", 2));
-  }
-
-  for (const number of Array.from({ length: 9 }, (_, index) => index + 1)) {
-    if (["m", "p", "s"].every(suit => tripletTiles.has(`${number}${suit}`))) {
-      yaku.push(createYaku("三色同刻", 2));
-      break;
-    }
-  }
-
-  const sequenceSignatures = new Set(melds.map(getSequenceSignature).filter(Boolean));
-  for (let start = 1; start <= 7; start += 1) {
-    if (["m", "p", "s"].every(suit => sequenceSignatures.has(`${start}${suit}`))) {
-      yaku.push(createYaku("三色同順", menzen ? 2 : 1));
-      break;
-    }
-  }
-
-  for (const suit of ["m", "p", "s"]) {
-    if ([1, 4, 7].every(start => sequenceSignatures.has(`${start}${suit}`))) {
-      yaku.push(createYaku("一気通貫", menzen ? 2 : 1));
-      break;
-    }
-  }
-
-  const eachGroupHasTerminalOrHonor = [
-    decomposition.pairTile,
-    ...melds.map(meld => meld.tiles)
-  ].every(group => {
-    const tiles = Array.isArray(group) ? group : [group];
-    return tiles.some(isTerminalOrHonor);
-  });
-  const hasSequence = melds.some(isSequenceMeld);
-  const hasHonor = allTiles.some(isHonorTile);
-  if (eachGroupHasTerminalOrHonor && hasSequence) {
-    if (hasHonor) {
-      yaku.push(createYaku("混全帯么九", menzen ? 2 : 1));
-    } else {
-      yaku.push(createYaku("純全帯么九", menzen ? 3 : 2));
-    }
-  }
-
-  if (allTiles.every(isTerminalOrHonor)) {
-    yaku.push(createYaku("混老頭", 2));
-  }
-
-  const dragonTripletCount = ["white", "green", "red"]
-    .filter(tileCode => tripletTiles.has(tileCode)).length;
-  if (dragonTripletCount === 2 && DRAGON_TILES.has(decomposition.pairTile)) {
-    yaku.push(createYaku("小三元", 2));
-  }
-
-  const { suits, hasHonor: containsHonor } = getTileSuitSet(allTiles);
-  if (suits.size === 1) {
-    if (containsHonor) {
-      yaku.push(createYaku("混一色", menzen ? 3 : 2));
-    } else {
-      yaku.push(createYaku("清一色", menzen ? 6 : 5));
-    }
-  }
-
-  return yaku;
-}
-
-function calculateOpenHandFu(question, decomposition) {
-  const melds = [...decomposition.concealedMelds, ...getAllMelds(question)];
-  const components = [{ label: "副底", fu: 20 }];
-
-  if (question.winType === "tsumo") {
-    components.push({ label: "ツモ", fu: 2 });
-  } else if (isMenzen(question)) {
-    components.push({ label: "門前ロン", fu: 10 });
-  }
-
-  const pairFu = getValuePairFu(question, decomposition.pairTile);
-  if (pairFu > 0) {
-    components.push({ label: "役牌の雀頭", fu: pairFu });
-  }
-
-  const waitFu = getWaitFu(question, decomposition);
-  if (waitFu > 0) {
-    components.push({ label: "待ち", fu: waitFu });
-  }
-
-  for (const meld of melds) {
-    const fu = getMeldFu(question, meld, decomposition);
-    if (fu <= 0) {
-      continue;
-    }
-    const tileLabel = HONOR_TILES[getMeldBaseTile(meld)]?.label || getMeldBaseTile(meld);
-    const meldLabel = isKanMeld(meld)
-      ? (meld.isOpen ? "明槓" : "暗槓")
-      : (meld.isOpen ? "明刻" : "暗刻");
-    components.push({ label: `${tileLabel}の${meldLabel}`, fu });
-  }
-
-  const rawFu = components.reduce((sum, component) => sum + component.fu, 0);
-  const isOpenPinfuShape = !isMenzen(question) && question.winType === "ron" && rawFu === 20;
-  const roundedFu = isOpenPinfuShape ? 30 : roundFuToTen(rawFu);
-  const fuBreakdown = components.map(component => `${component.label}：${component.fu}符`);
-
-  if (isOpenPinfuShape) {
-    fuBreakdown.push("副露した平和形のロン和了：30符固定（加算ではありません）");
-    fuBreakdown.push("最終符：30符");
-  } else if (rawFu === roundedFu) {
-    fuBreakdown.push(`合計：${roundedFu}符`);
-  } else {
-    fuBreakdown.push(`合計：${rawFu}符 → ${roundedFu}符`);
-  }
-
-  return { fu: roundedFu, fuBreakdown };
-}
 
 function calculateOpenHandAnswer(question) {
   const decompositions = findConcealedHandDecompositions(question);
@@ -1686,9 +1434,6 @@ function getEffectiveWinType(question) {
   return practicalWinType || question.winType;
 }
 
-function roundFuToTen(fu) {
-  return Math.ceil(fu / 10) * 10;
-}
 
 function calculateRolelessTsumoFu(question) {
   const baseAnswer = getBaseAnswer(question);
