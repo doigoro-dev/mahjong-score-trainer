@@ -427,6 +427,55 @@
 	  return decompositions;
 	}
 
+	function getWinningPlacements(question, decomposition) {
+	  const winningTile = question.winningTile;
+	  const placements = [];
+
+	  // 和了牌を雀頭として使うケース
+	  if (decomposition.pairTile === winningTile) {
+	    placements.push({
+	      type: "pair",
+	      meld: null
+	    });
+	  }
+
+	  // 和了牌を各面子に使うケース
+	  for (const meld of decomposition.concealedMelds) {
+	    if (meld.tiles.includes(winningTile)) {
+	      placements.push({
+	        type: "meld",
+	        meld
+	      });
+	    }
+	  }
+
+	  return placements;
+	}
+
+	function isChiitoitsuHand(question) {
+	  if (!isMenzen(question)) {
+	    return false;
+	  }
+
+	  const tiles = [
+	    ...(question.concealedTiles || []),
+	    question.winningTile
+	  ];
+
+	  if (tiles.length !== 14) {
+	    return false;
+	  }
+
+	  const counts = cloneTileCounts(tiles);
+
+	  if (counts.size !== 7) {
+	    return false;
+	  }
+
+	  return [...counts.values()]
+	    .every(count => count === 2);
+	}
+
 	function getMeldBaseTile(meld) {
 	  return meld.tiles[0];
 	}
@@ -480,46 +529,75 @@
 	  return fu;
 	}
 
-	function getWaitFu(question, decomposition) {
-	  const winningTile = question.winningTile;
+	function getWaitFu(
+	  question,
+	  decomposition,
+	  winningPlacement
+	) {
+	  if (!winningPlacement) {
+	    return 0;
+	  }
 
-	  if (decomposition.pairTile === winningTile) {
+	  // 単騎待ち
+	  if (winningPlacement.type === "pair") {
 	    return 2;
 	  }
 
-	  for (const meld of decomposition.concealedMelds) {
-	    if (
-	      !isSequenceMeld(meld) ||
-	      !meld.tiles.includes(winningTile)
-	    ) {
-	      continue;
-	    }
+	  const meld = winningPlacement.meld;
 
-	    const sorted = sortTilesForDisplay(meld.tiles);
-	    const winningIndex = sorted.indexOf(winningTile);
-	    const first = parseSuitedTile(sorted[0]);
-
-	    if (!first) {
-	      continue;
-	    }
-
-	    if (winningIndex === 1) {
-	      return 2;
-	    }
-
-	    if (first.number === 1 && winningIndex === 2) {
-	      return 2;
-	    }
-
-	    if (first.number === 7 && winningIndex === 0) {
-	      return 2;
-	    }
+	  if (!meld) {
+	    return 0;
 	  }
 
+	  // 双碰待ちは待ち符なし
+	  if (isTripletMeld(meld)) {
+	    return 0;
+	  }
+
+	  if (!isSequenceMeld(meld)) {
+	    return 0;
+	  }
+
+	  const winningTile = question.winningTile;
+	  const sorted = sortTilesForDisplay(meld.tiles);
+	  const winningIndex = sorted.indexOf(winningTile);
+	  const first = parseSuitedTile(sorted[0]);
+
+	  if (!first) {
+	    return 0;
+	  }
+
+	  // 嵌張待ち
+	  if (winningIndex === 1) {
+	    return 2;
+	  }
+
+	  // 12 + 3 の辺張待ち
+	  if (
+	    first.number === 1 &&
+	    winningIndex === 2
+	  ) {
+	    return 2;
+	  }
+
+	  // 89 + 7 の辺張待ち
+	  if (
+	    first.number === 7 &&
+	    winningIndex === 0
+	  ) {
+	    return 2;
+	  }
+
+	  // 両面待ち
 	  return 0;
 	}
 
-	function getMeldFu(question, meld, decomposition) {
+	function getMeldFu(
+	  question,
+	  meld,
+	  decomposition,
+	  winningPlacement
+	) {
 	  if (isSequenceMeld(meld)) {
 	    return 0;
 	  }
@@ -530,13 +608,14 @@
 	  let openForFu = meld.isOpen;
 
 	  if (
-	    question.winType === "ron" &&
-	    !meld.isOpen &&
-	    isTripletMeld(meld) &&
-	    meld.tiles.includes(question.winningTile)
-	  ) {
-	    openForFu = true;
-	  }
+		  question.winType === "ron" &&
+		  !meld.isOpen &&
+		  isTripletMeld(meld) &&
+		  winningPlacement?.type === "meld" &&
+		  winningPlacement.meld === meld
+		) {
+		  openForFu = true;
+		}
 
 	  if (isKanMeld(meld)) {
 	    if (openForFu) {
@@ -553,7 +632,11 @@
 	  return terminalOrHonor ? 8 : 4;
 	}
 
-	function countConcealedTriplets(question, melds) {
+	function countConcealedTriplets(
+	  question,
+	  melds,
+	  winningPlacement
+	) {
 	  return melds.filter(meld => {
 	    if (
 	      isSequenceMeld(meld) ||
@@ -563,12 +646,13 @@
 	    }
 
 	    if (
-	      question.winType === "ron" &&
-	      isTripletMeld(meld) &&
-	      meld.tiles.includes(question.winningTile)
-	    ) {
-	      return false;
-	    }
+		  question.winType === "ron" &&
+		  isTripletMeld(meld) &&
+		  winningPlacement?.type === "meld" &&
+		  winningPlacement.meld === meld
+		) {
+		  return false;
+		}
 
 	    return true;
 	  }).length;
@@ -601,7 +685,11 @@
 	  };
 	}
 
-	function detectOpenHandYaku(question, decomposition) {
+	function detectOpenHandYaku(
+	  question,
+	  decomposition,
+	  winningPlacement
+	) {
 	  const fixedMelds = getAllMelds(question);
 
 	  const melds = [
@@ -612,6 +700,75 @@
 	  const allTiles = getAllTiles(question);
 	  const yaku = [];
 	  const menzen = isMenzen(question);
+	  
+	  if (
+		  menzen &&
+		  question.winType === "tsumo"
+		) {
+		  yaku.push(
+		    createYaku("門前清自摸和", 1)
+		  );
+		}
+	  
+		const allMeldsForYaku = [
+		  ...decomposition.concealedMelds,
+		  ...fixedMelds
+		];
+
+		const isPinfu =
+		  menzen &&
+		  allMeldsForYaku.every(isSequenceMeld) &&
+		  getValuePairFu(question, decomposition.pairTile) === 0 &&
+		  getWaitFu(
+			  question,
+			  decomposition,
+			  winningPlacement
+			) === 0;
+
+		if (isPinfu) {
+		  yaku.push(
+		    createYaku("平和", 1)
+		  );
+		}
+
+		if (menzen) {
+		  const sequenceCounts = new Map();
+
+		  for (const meld of allMeldsForYaku) {
+		    if (!isSequenceMeld(meld)) {
+		      continue;
+		    }
+
+		    const signature = getSequenceSignature(meld);
+
+		    if (!signature) {
+		      continue;
+		    }
+
+		    sequenceCounts.set(
+		      signature,
+		      (sequenceCounts.get(signature) || 0) + 1
+		    );
+		  }
+
+		  const sequencePairCount =
+		    [...sequenceCounts.values()]
+		      .reduce(
+		        (sum, count) =>
+		          sum + Math.floor(count / 2),
+		        0
+		      );
+
+		  if (sequencePairCount >= 2) {
+		    yaku.push(
+		      createYaku("二盃口", 3)
+		    );
+		  } else if (sequencePairCount >= 1) {
+		    yaku.push(
+		      createYaku("一盃口", 1)
+		    );
+		  }
+		}
 
 	  if (allTiles.every(isSimpleTile)) {
 	    yaku.push(
@@ -629,9 +786,9 @@
 	  );
 
 	  const valueHonorDefinitions = [
-	    ["white", "役牌 白"],
-	    ["green", "役牌 發"],
-	    ["red", "役牌 中"],
+	  ["white", "役牌（白）"],
+	  ["green", "役牌（發）"],
+	  ["red", "役牌（中）"],
 	    [
 	      question.roundWind,
 	      `場風（${WIND_LABELS[question.roundWind]}）`
@@ -661,7 +818,11 @@
 	  }
 
 	  if (
-	    countConcealedTriplets(question, melds) >= 3
+	    countConcealedTriplets(
+		  question,
+		  melds,
+		  winningPlacement
+		) >= 3
 	  ) {
 	    yaku.push(
 	      createYaku("三暗刻", 2)
@@ -844,13 +1005,39 @@
 	}
 
 	function calculateOpenHandFu(
-	  question,
-	  decomposition
-	) {
+		  question,
+		  decomposition,
+		  winningPlacement
+		) {
 	  const melds = [
 	    ...decomposition.concealedMelds,
 	    ...getAllMelds(question)
 	  ];
+
+	  const isPinfuShape =
+	    isMenzen(question) &&
+	    melds.every(isSequenceMeld) &&
+	    getValuePairFu(
+	      question,
+	      decomposition.pairTile
+	    ) === 0 &&
+		getWaitFu(
+		  question,
+		  decomposition,
+		  winningPlacement
+		) === 0;
+
+	  if (
+	    isPinfuShape &&
+	    question.winType === "tsumo"
+	  ) {
+	    return {
+	      fu: 20,
+	      fuBreakdown: [
+	        "平和ツモ：20符固定"
+	      ]
+	    };
+	  }
 
 	  const components = [
 	    {
@@ -885,10 +1072,11 @@
 	  }
 
 	  const waitFu =
-	    getWaitFu(
-	      question,
-	      decomposition
-	    );
+		getWaitFu(
+		  question,
+		  decomposition,
+		  winningPlacement
+		);
 
 	  if (waitFu > 0) {
 	    components.push({
@@ -900,10 +1088,11 @@
 	  for (const meld of melds) {
 	    const fu =
 	      getMeldFu(
-	        question,
-	        meld,
-	        decomposition
-	      );
+		  question,
+		  meld,
+		  decomposition,
+		  winningPlacement
+		);
 
 	    if (fu <= 0) {
 	      continue;
@@ -1070,83 +1259,184 @@
 		  };
 		}
 
-		function calculateOpenHandAnswer(question) {
-		  const decompositions =
-		    findConcealedHandDecompositions(question);
+		function calculateChiitoitsuAnswer(question) {
+		  if (!isChiitoitsuHand(question)) {
+		    return null;
+		  }
 
-		  if (decompositions.length === 0) {
-		    throw new Error(
-		      `${question.id}：副露を含む手牌を面子へ分解できません。`
+		  const yaku = [
+		    createYaku("七対子", 2)
+		  ];
+
+		  if (
+		    isMenzen(question) &&
+		    question.winType === "tsumo"
+		  ) {
+		    yaku.push(
+		      createYaku("門前清自摸和", 1)
 		    );
 		  }
 
-		  const candidates =
-		    decompositions.map(decomposition => {
-		      const yaku =
-		        detectOpenHandYaku(
-		          question,
-		          decomposition
-		        );
+		  const allTiles = getAllTiles(question);
 
-		      const totalHan =
-		        yaku.reduce(
-		          (sum, item) =>
-		            sum + item.han,
-		          0
-		        );
+		  if (allTiles.every(isSimpleTile)) {
+		    yaku.push(
+		      createYaku("断么九", 1)
+		    );
+		  }
 
-		      const {
-		        fu,
-		        fuBreakdown
-		      } = calculateOpenHandFu(
-		        question,
-		        decomposition
+		  const {
+		    suits,
+		    hasHonor
+		  } = getTileSuitSet(allTiles);
+
+		  if (suits.size === 1) {
+		    if (hasHonor) {
+		      yaku.push(
+		        createYaku("混一色", 3)
 		      );
-
-		      const score =
-		        calculateScoreFromFuHan(
-		          question,
-		          totalHan,
-		          fu,
-		          question.winType
-		        );
-
-		      return {
-		        yaku,
-		        totalHan,
-		        fu,
-		        score,
-		        fuBreakdown,
-		        decomposition
-		      };
-		    });
-
-		  candidates.sort((left, right) => {
-		    if (
-		      right.score.basePoints !==
-		      left.score.basePoints
-		    ) {
-		      return (
-		        right.score.basePoints -
-		        left.score.basePoints
+		    } else {
+		      yaku.push(
+		        createYaku("清一色", 6)
 		      );
 		    }
+		  }
 
-		    if (
-		      right.totalHan !==
-		      left.totalHan
-		    ) {
-		      return (
-		        right.totalHan -
-		        left.totalHan
-		      );
-		    }
+		  if (
+		    allTiles.every(isTerminalOrHonor)
+		  ) {
+		    yaku.push(
+		      createYaku("混老頭", 2)
+		    );
+		  }
 
-		    return right.fu - left.fu;
-		  });
+		  const totalHan = yaku.reduce(
+		    (sum, item) => sum + item.han,
+		    0
+		  );
 
-		  return candidates[0];
+		  const fu = 25;
+
+		  const score = calculateScoreFromFuHan(
+		    question,
+		    totalHan,
+		    fu,
+		    question.winType
+		  );
+
+		  return {
+		    yaku,
+		    totalHan,
+		    fu,
+		    score,
+		    fuBreakdown: [
+		      "七対子：25符固定"
+		    ],
+		    decomposition: null
+		  };
 		}
+
+	function calculateOpenHandAnswer(question) {
+	  const candidates = [];
+
+	  const chiitoitsuAnswer =
+	    calculateChiitoitsuAnswer(question);
+
+	  if (chiitoitsuAnswer) {
+	    candidates.push(
+	      chiitoitsuAnswer
+	    );
+	  }
+
+	  const decompositions =
+	    findConcealedHandDecompositions(question);
+
+	  for (const decomposition of decompositions) {
+	    const winningPlacements =
+	      getWinningPlacements(
+	        question,
+	        decomposition
+	      );
+
+	    for (
+	      const winningPlacement of
+	      winningPlacements
+	    ) {
+	      const yaku =
+	        detectOpenHandYaku(
+	          question,
+	          decomposition,
+	          winningPlacement
+	        );
+
+	      const totalHan =
+	        yaku.reduce(
+	          (sum, item) =>
+	            sum + item.han,
+	          0
+	        );
+
+	      const {
+	        fu,
+	        fuBreakdown
+	      } = calculateOpenHandFu(
+	        question,
+	        decomposition,
+	        winningPlacement
+	      );
+
+	      const score =
+	        calculateScoreFromFuHan(
+	          question,
+	          totalHan,
+	          fu,
+	          question.winType
+	        );
+
+	      candidates.push({
+	        yaku,
+	        totalHan,
+	        fu,
+	        score,
+	        fuBreakdown,
+	        decomposition,
+	        winningPlacement
+	      });
+	    }
+	  }
+
+	  if (candidates.length === 0) {
+	    throw new Error(
+	      `${question.id}：手牌を面子へ分解できません。`
+	    );
+	  }
+
+	  candidates.sort((left, right) => {
+	    if (
+	      right.score.basePoints !==
+	      left.score.basePoints
+	    ) {
+	      return (
+	        right.score.basePoints -
+	        left.score.basePoints
+	      );
+	    }
+
+	    if (
+	      right.totalHan !==
+	      left.totalHan
+	    ) {
+	      return (
+	        right.totalHan -
+	        left.totalHan
+	      );
+	    }
+
+	    return right.fu - left.fu;
+	  });
+
+	  return candidates[0];
+	}
 
   window.MahjongEngine = {
     normalizeConcealedKanTileCode,
@@ -1183,6 +1473,8 @@
 	calculateOpenHandFu,
 	roundUpToHundred,
 	calculateScoreFromFuHan,
-	calculateOpenHandAnswer
+	calculateOpenHandAnswer,
+	isChiitoitsuHand,
+	calculateChiitoitsuAnswer
   };
 })();

@@ -7605,42 +7605,47 @@ window.MAHJONG_QUESTIONS = [
             "seatWind": "west",
             "riichi": false,
             "menzen": true,
-            "answer": {
-                  "yaku": [
-                        {
-                              "name": "三色同刻",
-                              "han": 2
-                        }
-                  ],
-                  "totalHan": 2,
-                  "fu": 50,
-                  "score": {
-                        "display": "3200点",
-                        "pointText": "3200点",
-                        "category": "通常",
-                        "basePoints": 800,
-                        "kiriageMangan": false
-                  },
-                  "fuBreakdown": [
-                        "副底：20符",
-                        "門前ロン：10符",
-                        "中張牌の暗刻：4符 × 3",
-                        "辺張待ち：2符",
-                        "合計44符を切り上げて50符"
-                  ]
-            },
-            "management": {
-                  "fu": 50,
-                  "han": 2,
-                  "scoreCategory": "通常",
-                  "playerType": "子",
-                  "winType": "ロン",
-                  "waitType": "辺張",
-                  "mainYaku": [
-                        "三色同刻"
-                  ],
-                  "kiriageMangan": false
-            },
+			"answer": {
+			  "yaku": [
+			    {
+			      "name": "三色同刻",
+			      "han": 2
+			    },
+			    {
+			      "name": "三暗刻",
+			      "han": 2
+			    }
+			  ],
+			  "totalHan": 4,
+			  "fu": 50,
+			  "score": {
+			    "display": "8000点",
+			    "pointText": "8000点",
+			    "category": "満貫",
+			    "basePoints": 2000,
+			    "kiriageMangan": false
+			  },
+			  "fuBreakdown": [
+			    "副底：20符",
+			    "門前ロン：10符",
+			    "中張牌の暗刻：4符 × 3",
+			    "辺張待ち：2符",
+			    "合計44符を切り上げて50符"
+			  ]
+			},
+			"management": {
+			  "fu": 50,
+			  "han": 4,
+			  "scoreCategory": "満貫",
+			  "playerType": "子",
+			  "winType": "ロン",
+			  "waitType": "辺張",
+			  "mainYaku": [
+			    "三色同刻",
+			    "三暗刻"
+			  ],
+			  "kiriageMangan": false
+			},
             "doraIndicators": [
                   "4m"
             ],
@@ -7958,43 +7963,48 @@ window.MAHJONG_QUESTIONS = [
             "seatWind": "west",
             "riichi": false,
             "menzen": true,
-            "answer": {
-                  "yaku": [
-                        {
-                              "name": "三槓子",
-                              "han": 2
-                        }
-                  ],
-                  "totalHan": 2,
-                  "fu": 110,
-                  "score": {
-                        "display": "7100点",
-                        "pointText": "7100点",
-                        "category": "通常",
-                        "basePoints": 1760,
-                        "kiriageMangan": false
-                  },
-                  "fuBreakdown": [
-                        "副底：20符",
-                        "門前ロン：10符",
-                        "幺九牌の暗槓（一索）：32符",
-                        "中張牌の暗槓（六筒）：16符",
-                        "幺九牌の暗槓（九萬）：32符",
-                        "合計110符"
-                  ]
-            },
-            "management": {
-                  "fu": 110,
-                  "han": 2,
-                  "scoreCategory": "通常",
-                  "playerType": "子",
-                  "winType": "ロン",
-                  "waitType": "両面",
-                  "mainYaku": [
-                        "三槓子"
-                  ],
-                  "kiriageMangan": false
-            },
+			"answer": {
+			  "yaku": [
+			    {
+			      "name": "三槓子",
+			      "han": 2
+			    },
+			    {
+			      "name": "三暗刻",
+			      "han": 2
+			    }
+			  ],
+			  "totalHan": 4,
+			  "fu": 110,
+			  "score": {
+			    "display": "8000点",
+			    "pointText": "8000点",
+			    "category": "満貫",
+			    "basePoints": 2000,
+			    "kiriageMangan": false
+			  },
+			  "fuBreakdown": [
+			    "副底：20符",
+			    "門前ロン：10符",
+			    "幺九牌の暗槓（一索）：32符",
+			    "中張牌の暗槓（六筒）：16符",
+			    "幺九牌の暗槓（九萬）：32符",
+			    "合計110符"
+			  ]
+			},
+			"management": {
+			  "fu": 110,
+			  "han": 4,
+			  "scoreCategory": "満貫",
+			  "playerType": "子",
+			  "winType": "ロン",
+			  "waitType": "両面",
+			  "mainYaku": [
+			    "三槓子",
+			    "三暗刻"
+			  ],
+			  "kiriageMangan": false
+			},
             "doraIndicators": [
                   "7m",
                   "4m",
@@ -8398,7 +8408,7 @@ window.MAHJONG_QUESTIONS = [
             "answer": {
                   "yaku": [
                         {
-                              "name": "役牌 白",
+                              "name": "役牌（白）",
                               "han": 1
                         }
                   ],
@@ -8426,7 +8436,7 @@ window.MAHJONG_QUESTIONS = [
                   "winType": "ツモ",
                   "waitType": "両面待ち",
                   "mainYaku": [
-                        "役牌 白"
+                        "役牌（白）"
                   ],
                   "kiriageMangan": false
             },
@@ -8471,7 +8481,7 @@ window.MAHJONG_QUESTIONS = [
             "answer": {
                   "yaku": [
                         {
-                              "name": "役牌 中",
+                              "name": "役牌（中）",
                               "han": 1
                         }
                   ],
@@ -8499,7 +8509,7 @@ window.MAHJONG_QUESTIONS = [
                   "winType": "ロン",
                   "waitType": "両面待ち",
                   "mainYaku": [
-                        "役牌 中"
+                        "役牌（中）"
                   ],
                   "kiriageMangan": false
             },
@@ -8692,34 +8702,33 @@ window.MAHJONG_QUESTIONS = [
                         }
                   ],
                   "totalHan": 1,
-                  "fu": 40,
-                  "score": {
-                        "display": "1300点",
-                        "pointText": "1300点",
-                        "category": "通常",
-                        "basePoints": 320,
-                        "kiriageMangan": false
-                  },
-                  "fuBreakdown": [
-                        "副底：20符",
-                        "場風 東の雀頭：2符",
-                        "待ち：2符",
-                        "9sの暗刻：8符",
-                        "合計：32符 → 40符"
-                  ]
+                  "fu": 30,
+				"score": {
+				  "display": "1000点",
+				  "pointText": "1000点",
+				  "category": "通常",
+				  "basePoints": 240,
+				  "kiriageMangan": false
+				},
+				"fuBreakdown": [
+				  "副底：20符",
+				  "場風 東の雀頭：2符",
+				  "9sの暗刻：8符",
+				  "合計：30符"
+				]
             },
-            "management": {
-                  "fu": 40,
-                  "han": 1,
-                  "scoreCategory": "通常",
-                  "playerType": "子",
-                  "winType": "ロン",
-                  "waitType": "辺張待ち",
-                  "mainYaku": [
-                        "混全帯么九"
-                  ],
-                  "kiriageMangan": false
-            },
+			"management": {
+			  "fu": 30,
+			  "han": 1,
+			  "scoreCategory": "通常",
+			  "playerType": "子",
+			  "winType": "ロン",
+			  "waitType": "両面待ち",
+			  "mainYaku": [
+			    "混全帯么九"
+			  ],
+			  "kiriageMangan": false
+			},
             "doraIndicators": [
                   "4m"
             ],

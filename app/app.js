@@ -655,13 +655,13 @@ function getExpectedDoraIndicatorCount(question) {
 const calculatedOpenHandAnswerCache = new Map();
 
 function getBaseAnswer(question) {
-  if (isMenzen(question)) {
-    return question.answer;
+  if (!calculatedOpenHandAnswerCache.has(question.id)) {
+    calculatedOpenHandAnswerCache.set(
+      question.id,
+      calculateOpenHandAnswer(question)
+    );
   }
 
-  if (!calculatedOpenHandAnswerCache.has(question.id)) {
-    calculatedOpenHandAnswerCache.set(question.id, calculateOpenHandAnswer(question));
-  }
   return calculatedOpenHandAnswerCache.get(question.id);
 }
 
@@ -2372,6 +2372,146 @@ function confirmRestartFromBeginning() {
 
   restartSession();
 }
+
+function normalizeYakuForComparison(yakuList) {
+  if (!Array.isArray(yakuList)) {
+    return [];
+  }
+
+  return yakuList
+    .map(yaku => ({
+      name: yaku.name,
+      han: yaku.han
+    }))
+    .sort((left, right) => {
+      const nameCompare =
+        left.name.localeCompare(right.name, "ja");
+
+      if (nameCompare !== 0) {
+        return nameCompare;
+      }
+
+      return left.han - right.han;
+    });
+}
+
+function compareAnswerWithEngine(question) {
+  const existing = question.answer;
+
+  try {
+    const engine =
+      calculateOpenHandAnswer(question);
+
+    const existingYaku =
+      normalizeYakuForComparison(existing.yaku);
+
+    const engineYaku =
+      normalizeYakuForComparison(engine.yaku);
+
+    const differences = [];
+
+    if (existing.fu !== engine.fu) {
+      differences.push(
+        `符: 既存=${existing.fu} / Engine=${engine.fu}`
+      );
+    }
+
+    if (existing.totalHan !== engine.totalHan) {
+      differences.push(
+        `翻: 既存=${existing.totalHan} / Engine=${engine.totalHan}`
+      );
+    }
+
+    if (
+      existing.score?.category !==
+      engine.score?.category
+    ) {
+      differences.push(
+        `点数区分: 既存=${existing.score?.category} / Engine=${engine.score?.category}`
+      );
+    }
+
+    if (
+      existing.score?.pointText !==
+      engine.score?.pointText
+    ) {
+      differences.push(
+        `点数: 既存=${existing.score?.pointText} / Engine=${engine.score?.pointText}`
+      );
+    }
+
+    if (
+      JSON.stringify(existingYaku) !==
+      JSON.stringify(engineYaku)
+    ) {
+      differences.push(
+        `役: 既存=${existingYaku
+          .map(yaku => `${yaku.name}${yaku.han}翻`)
+          .join("・")} / Engine=${engineYaku
+          .map(yaku => `${yaku.name}${yaku.han}翻`)
+          .join("・")}`
+      );
+    }
+
+    return {
+      id: question.id,
+      match: differences.length === 0,
+      differences: differences.join(" / "),
+      existingFu: existing.fu,
+      engineFu: engine.fu,
+      existingHan: existing.totalHan,
+      engineHan: engine.totalHan,
+      existingScore: existing.score?.pointText,
+      engineScore: engine.score?.pointText
+    };
+  } catch (error) {
+    return {
+      id: question.id,
+      match: false,
+      differences: `Engine計算エラー: ${error.message}`,
+      existingFu: existing?.fu,
+      engineFu: "-",
+      existingHan: existing?.totalHan,
+      engineHan: "-",
+      existingScore: existing?.score?.pointText,
+      engineScore: "-"
+    };
+  }
+}
+
+function compareAllAnswersWithEngine() {
+  const results =
+    questions.map(
+      compareAnswerWithEngine
+    );
+
+  const mismatches =
+    results.filter(
+      result => !result.match
+    );
+
+  console.info(
+    `Engine comparison: ${
+      results.length - mismatches.length
+    }/${results.length} matched`
+  );
+
+  if (mismatches.length === 0) {
+    console.info(
+      "既存answerとEngine計算結果は全問一致しました。"
+    );
+  } else {
+    console.warn(
+      `不一致: ${mismatches.length}問`
+    );
+    console.table(mismatches);
+  }
+
+  return results;
+}
+
+window.compareAllAnswersWithEngine =
+  compareAllAnswersWithEngine;
 
 function summarizeVariationPatterns() {
   const summary = questions.map(question => {
