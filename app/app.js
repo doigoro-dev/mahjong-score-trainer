@@ -1,3 +1,17 @@
+const {
+  normalizeConcealedKanTileCode,
+  normalizeOpenMeld,
+  getAllMelds,
+  getAllTiles,
+  getStructuralTileCount,
+  isMenzen,
+  isHonorTile,
+  parseSuitedTile,
+  isTerminalTile,
+  isTerminalOrHonor,
+  isSimpleTile
+} = window.MahjongEngine;
+
 const SVG_NS = "http://www.w3.org/2000/svg";
 
 const KANJI_NUMERALS = {
@@ -630,105 +644,6 @@ function sortTilesForDisplay(tileCodes) {
   );
 }
 
-function normalizeConcealedKanTileCode(concealedKan, index) {
-  if (typeof concealedKan === "string") {
-    return concealedKan;
-  }
-
-  if (
-    concealedKan &&
-    typeof concealedKan === "object" &&
-    typeof concealedKan.tile === "string"
-  ) {
-    return concealedKan.tile;
-  }
-
-  throw new Error(
-    `concealedKans[${index}]には牌コード、または { tile: 牌コード } を指定してください。`
-  );
-}
-
-
-function normalizeOpenMeld(openMeld, index) {
-  const allowedTypes = new Set(["chi", "pon", "kan-open"]);
-
-  if (!openMeld || typeof openMeld !== "object") {
-    throw new Error(`openMelds[${index}]には副露オブジェクトを指定してください。`);
-  }
-
-  if (!allowedTypes.has(openMeld.type)) {
-    throw new Error(`openMelds[${index}].typeはchi、pon、kan-openのいずれかを指定してください。`);
-  }
-
-  const expectedTileCount = openMeld.type === "kan-open" ? 4 : 3;
-  if (!Array.isArray(openMeld.tiles) || openMeld.tiles.length !== expectedTileCount) {
-    throw new Error(`openMelds[${index}].tilesには${expectedTileCount}枚の牌を指定してください。`);
-  }
-
-  return { type: openMeld.type, tiles: [...openMeld.tiles] };
-}
-
-/**
- * 問題データに含まれるすべての面子情報を返す。
- *
- * 現時点では、問題データ上で独立した面子として管理されている
- * 暗槓と副露のみを対象とする。concealedTiles 内の通常面子の分解は、
- * 今後の役判定ロジックで別途追加する。
- */
-function getAllMelds(question) {
-  if (!question || typeof question !== "object") {
-    throw new Error("問題データにはオブジェクトを指定してください。");
-  }
-
-  const concealedKans = Array.isArray(question.concealedKans)
-    ? question.concealedKans
-    : [];
-  const openMelds = Array.isArray(question.openMelds)
-    ? question.openMelds
-    : [];
-
-  const normalizedConcealedKans = concealedKans.map((concealedKan, index) => {
-    const tileCode = normalizeConcealedKanTileCode(concealedKan, index);
-    return {
-      type: "kan-concealed",
-      tiles: [tileCode, tileCode, tileCode, tileCode],
-      isOpen: false
-    };
-  });
-
-  const normalizedOpenMelds = openMelds.map((openMeld, index) => ({
-    ...normalizeOpenMeld(openMeld, index),
-    isOpen: true
-  }));
-
-  return [...normalizedConcealedKans, ...normalizedOpenMelds];
-}
-
-/**
- * 手牌・和了牌・暗槓・副露を含む、物理的な全牌を返す。
- * ドラ枚数、牌の重複検証、将来の役判定で共通利用する。
- */
-function getAllTiles(question) {
-  if (!question || typeof question !== "object") {
-    throw new Error("問題データにはオブジェクトを指定してください。");
-  }
-
-  if (!Array.isArray(question.concealedTiles)) {
-    throw new Error("concealedTilesには配列を指定してください。");
-  }
-
-  const tiles = [...question.concealedTiles];
-
-  if (typeof question.winningTile === "string" && question.winningTile.trim() !== "") {
-    tiles.push(question.winningTile);
-  }
-
-  for (const meld of getAllMelds(question)) {
-    tiles.push(...meld.tiles);
-  }
-
-  return tiles;
-}
 
 /**
  * 手牌構成上の牌数を返す。槓子は物理的には4枚だが、構成上は3枚分。
@@ -741,52 +656,8 @@ function getExpectedDoraIndicatorCount(question) {
   return 1 + getKanCount(question);
 }
 
-function getStructuralTileCount(question) {
-  if (!question || !Array.isArray(question.concealedTiles)) {
-    return 0;
-  }
-
-  return question.concealedTiles.length + getAllMelds(question).length * 3;
-}
-
-/**
- * 副露がなく門前であるかを返す。暗槓は門前を崩さない。
- */
-function isMenzen(question) {
-  return getAllMelds(question).every(meld => !meld.isOpen);
-}
-
-
 const DRAGON_TILES = new Set(["white", "green", "red"]);
 const WIND_TILES = new Set(["east", "south", "west", "north"]);
-const TERMINAL_NUMBERS = new Set([1, 9]);
-
-function isHonorTile(tileCode) {
-  return Object.prototype.hasOwnProperty.call(HONOR_TILES, tileCode);
-}
-
-function parseSuitedTile(tileCode) {
-  const match = /^(\d)([mps])$/.exec(tileCode);
-  if (!match) {
-    return null;
-  }
-
-  return { number: Number(match[1]), suit: match[2] };
-}
-
-function isTerminalTile(tileCode) {
-  const tile = parseSuitedTile(tileCode);
-  return Boolean(tile && TERMINAL_NUMBERS.has(tile.number));
-}
-
-function isTerminalOrHonor(tileCode) {
-  return isHonorTile(tileCode) || isTerminalTile(tileCode);
-}
-
-function isSimpleTile(tileCode) {
-  const tile = parseSuitedTile(tileCode);
-  return Boolean(tile && tile.number >= 2 && tile.number <= 8);
-}
 
 function cloneTileCounts(tileCodes) {
   const counts = new Map();
