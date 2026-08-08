@@ -695,6 +695,28 @@ Ver1.1 問題管理情報
       line-height: 1.6;
     }
 
+  .manual-link {
+	  margin-top: 20px;
+	  text-align: center;
+	}
+
+	.manual-link a {
+	  display: inline-block;
+	  padding: 10px 16px;
+	  border: 1px solid #cbd5e1;
+	  border-radius: 10px;
+	  background: #ffffff;
+	  color: #475569;
+	  font-weight: 700;
+	  text-decoration: none;
+	  transition: background 0.12s ease, color 0.12s ease;
+	}
+
+	.manual-link a:hover {
+	  background: #f1f5f9;
+	  color: #1d4ed8;
+	}
+
     @media (max-width: 560px) {
       .question-select-button {
         width: 100%;
@@ -927,6 +949,7 @@ Ver1.1 問題管理情報
       .winning-label {
         font-size: clamp(0.43rem, 1.7cqw, 0.58rem);
       }
+      
     }
 
   </style>
@@ -1045,6 +1068,12 @@ Ver1.1 問題管理情報
         </p>
       </div>
     </details>
+    
+    <div class="manual-link">
+      <a href="./docs/user-manual-version3.html" target="_blank" rel="noopener noreferrer">
+        📖 ユーザーマニュアル
+      </a>
+    </div>
   </main>
 
   <script src="questions.js"></script>
