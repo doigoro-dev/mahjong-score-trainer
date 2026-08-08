@@ -189,6 +189,256 @@
     );
   }
 
+	function getTileSortValue(tileCode) {
+	  const suitedTile = /^([1-9])([mps])$/.exec(tileCode);
+
+	  if (suitedTile) {
+	    const number = Number(suitedTile[1]);
+	    const suit = suitedTile[2];
+	    const suitOrder = { m: 0, p: 1, s: 2 };
+
+	    return suitOrder[suit] * 10 + number;
+	  }
+
+	  const honorOrder = {
+	    east: 31,
+	    south: 32,
+	    west: 33,
+	    north: 34,
+	    white: 35,
+	    green: 36,
+	    red: 37
+	  };
+
+	  return honorOrder[tileCode] ?? 999;
+	}
+
+	function sortTilesForDisplay(tileCodes) {
+	  return [...tileCodes].sort(
+	    (left, right) => getTileSortValue(left) - getTileSortValue(right)
+	  );
+	}
+
+	function cloneTileCounts(tileCodes) {
+	  const counts = new Map();
+
+	  for (const tileCode of tileCodes) {
+	    counts.set(
+	      tileCode,
+	      (counts.get(tileCode) || 0) + 1
+	    );
+	  }
+
+	  return counts;
+	}
+
+	function getFirstRemainingTile(counts) {
+	  return [...counts.keys()]
+	    .filter(
+	      tileCode => (counts.get(tileCode) || 0) > 0
+	    )
+	    .sort(
+	      (left, right) =>
+	        getTileSortValue(left) -
+	        getTileSortValue(right)
+	    )[0] || null;
+	}
+
+	function removeTilesFromCounts(counts, tileCodes) {
+	  for (const tileCode of tileCodes) {
+	    const count = counts.get(tileCode) || 0;
+
+	    if (count <= 0) {
+	      return false;
+	    }
+
+	    counts.set(tileCode, count - 1);
+	  }
+
+	  return true;
+	}
+
+	function addTilesToCounts(counts, tileCodes) {
+	  for (const tileCode of tileCodes) {
+	    counts.set(
+	      tileCode,
+	      (counts.get(tileCode) || 0) + 1
+	    );
+	  }
+	}
+
+	function findConcealedHandDecompositions(question) {
+	  const fixedMeldCount = getAllMelds(question).length;
+	  const neededMeldCount = 4 - fixedMeldCount;
+
+	  if (neededMeldCount < 0) {
+	    return [];
+	  }
+
+	  const concealedWinningTiles = [
+	    ...(question.concealedTiles || []),
+	    question.winningTile
+	  ];
+
+	  const counts = cloneTileCounts(
+	    concealedWinningTiles
+	  );
+
+	  const decompositions = [];
+
+	  const pairCandidates = [...counts.entries()]
+	    .filter(([, count]) => count >= 2)
+	    .map(([tileCode]) => tileCode)
+	    .sort(
+	      (left, right) =>
+	        getTileSortValue(left) -
+	        getTileSortValue(right)
+	    );
+
+	  for (const pairTile of pairCandidates) {
+	    removeTilesFromCounts(
+	      counts,
+	      [pairTile, pairTile]
+	    );
+
+	    const melds = [];
+
+	    const search = () => {
+	      const firstTile =
+	        getFirstRemainingTile(counts);
+
+	      if (!firstTile) {
+	        if (melds.length === neededMeldCount) {
+	          decompositions.push({
+	            pairTile,
+	            concealedMelds: melds.map(
+	              meld => ({
+	                ...meld,
+	                tiles: [...meld.tiles],
+	                isOpen: false
+	              })
+	            )
+	          });
+	        }
+
+	        return;
+	      }
+
+	      if (melds.length >= neededMeldCount) {
+	        return;
+	      }
+
+	      if ((counts.get(firstTile) || 0) >= 3) {
+	        const tripletTiles = [
+	          firstTile,
+	          firstTile,
+	          firstTile
+	        ];
+
+	        removeTilesFromCounts(
+	          counts,
+	          tripletTiles
+	        );
+
+	        melds.push({
+	          type: "pon",
+	          tiles: tripletTiles
+	        });
+
+	        search();
+
+	        melds.pop();
+
+	        addTilesToCounts(
+	          counts,
+	          tripletTiles
+	        );
+	      }
+
+	      const parsed =
+	        parseSuitedTile(firstTile);
+
+	      if (parsed && parsed.number <= 7) {
+	        const sequenceTiles = [
+	          firstTile,
+	          `${parsed.number + 1}${parsed.suit}`,
+	          `${parsed.number + 2}${parsed.suit}`
+	        ];
+
+	        if (
+	          sequenceTiles.every(
+	            tileCode =>
+	              (counts.get(tileCode) || 0) > 0
+	          )
+	        ) {
+	          removeTilesFromCounts(
+	            counts,
+	            sequenceTiles
+	          );
+
+	          melds.push({
+	            type: "chi",
+	            tiles: sequenceTiles
+	          });
+
+	          search();
+
+	          melds.pop();
+
+	          addTilesToCounts(
+	            counts,
+	            sequenceTiles
+	          );
+	        }
+	      }
+	    };
+
+	    search();
+
+	    addTilesToCounts(
+	      counts,
+	      [pairTile, pairTile]
+	    );
+	  }
+
+	  return decompositions;
+	}
+
+	function getMeldBaseTile(meld) {
+	  return meld.tiles[0];
+	}
+
+	function isSequenceMeld(meld) {
+	  return meld.type === "chi";
+	}
+
+	function isTripletMeld(meld) {
+	  return meld.type === "pon";
+	}
+
+	function isKanMeld(meld) {
+	  return (
+	    meld.type === "kan-open" ||
+	    meld.type === "kan-concealed"
+	  );
+	}
+
+	function getSequenceSignature(meld) {
+	  if (!isSequenceMeld(meld)) {
+	    return null;
+	  }
+
+	  const sorted =
+	    sortTilesForDisplay(meld.tiles);
+
+	  const first =
+	    parseSuitedTile(sorted[0]);
+
+	  return first
+	    ? `${first.number}${first.suit}`
+	    : null;
+	}
+
   window.MahjongEngine = {
     normalizeConcealedKanTileCode,
     normalizeOpenMeld,
@@ -200,6 +450,18 @@
     parseSuitedTile,
     isTerminalTile,
     isTerminalOrHonor,
-    isSimpleTile
+    isSimpleTile,
+    getTileSortValue,
+	sortTilesForDisplay,
+	cloneTileCounts,
+	getFirstRemainingTile,
+	removeTilesFromCounts,
+	addTilesToCounts,
+	findConcealedHandDecompositions,
+	getMeldBaseTile,
+	isSequenceMeld,
+	isTripletMeld,
+	isKanMeld,
+	getSequenceSignature
   };
 })();
