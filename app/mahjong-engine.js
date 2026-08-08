@@ -980,7 +980,173 @@
 	    fu: roundedFu,
 	    fuBreakdown
 	  };
-	}
+	  }
+	  
+	  function roundUpToHundred(value) {
+		  return Math.ceil(value / 100) * 100;
+		}
+
+		function calculateScoreFromFuHan(
+		  question,
+		  totalHan,
+		  fu,
+		  winType = question.winType
+		) {
+		  const dealer = question.seatWind === "east";
+		  const tsumo = winType === "tsumo";
+
+		  let category = "通常";
+		  let basePoints;
+		  let kiriageMangan = false;
+
+		  if (totalHan >= 13) {
+		    category = "数え役満";
+		    basePoints = 8000;
+		  } else if (totalHan >= 11) {
+		    category = "三倍満";
+		    basePoints = 6000;
+		  } else if (totalHan >= 8) {
+		    category = "倍満";
+		    basePoints = 4000;
+		  } else if (totalHan >= 6) {
+		    category = "跳満";
+		    basePoints = 3000;
+		  } else if (totalHan >= 5) {
+		    category = "満貫";
+		    basePoints = 2000;
+		  } else {
+		    const rawBasePoints =
+		      fu * (2 ** (totalHan + 2));
+
+		    const isKiriage =
+		      (fu === 30 && totalHan === 4) ||
+		      (fu === 60 && totalHan === 3);
+
+		    if (isKiriage) {
+		      category = "切り上げ満貫";
+		      basePoints = 2000;
+		      kiriageMangan = true;
+		    } else if (rawBasePoints >= 2000) {
+		      category = "満貫";
+		      basePoints = 2000;
+		    } else {
+		      basePoints = rawBasePoints;
+		    }
+		  }
+
+		  let pointText;
+
+		  if (!tsumo) {
+		    const multiplier =
+		      dealer ? 6 : 4;
+
+		    pointText =
+		      `${roundUpToHundred(
+		        basePoints * multiplier
+		      )}点`;
+		  } else if (dealer) {
+		    pointText =
+		      `${roundUpToHundred(
+		        basePoints * 2
+		      )}点オール`;
+		  } else {
+		    const childPayment =
+		      roundUpToHundred(basePoints);
+
+		    const dealerPayment =
+		      roundUpToHundred(
+		        basePoints * 2
+		      );
+
+		    pointText =
+		      `${childPayment}点／${dealerPayment}点`;
+		  }
+
+		  return {
+		    category,
+		    pointText,
+		    basePoints,
+		    kiriageMangan
+		  };
+		}
+
+		function calculateOpenHandAnswer(question) {
+		  const decompositions =
+		    findConcealedHandDecompositions(question);
+
+		  if (decompositions.length === 0) {
+		    throw new Error(
+		      `${question.id}：副露を含む手牌を面子へ分解できません。`
+		    );
+		  }
+
+		  const candidates =
+		    decompositions.map(decomposition => {
+		      const yaku =
+		        detectOpenHandYaku(
+		          question,
+		          decomposition
+		        );
+
+		      const totalHan =
+		        yaku.reduce(
+		          (sum, item) =>
+		            sum + item.han,
+		          0
+		        );
+
+		      const {
+		        fu,
+		        fuBreakdown
+		      } = calculateOpenHandFu(
+		        question,
+		        decomposition
+		      );
+
+		      const score =
+		        calculateScoreFromFuHan(
+		          question,
+		          totalHan,
+		          fu,
+		          question.winType
+		        );
+
+		      return {
+		        yaku,
+		        totalHan,
+		        fu,
+		        score,
+		        fuBreakdown,
+		        decomposition
+		      };
+		    });
+
+		  candidates.sort((left, right) => {
+		    if (
+		      right.score.basePoints !==
+		      left.score.basePoints
+		    ) {
+		      return (
+		        right.score.basePoints -
+		        left.score.basePoints
+		      );
+		    }
+
+		    if (
+		      right.totalHan !==
+		      left.totalHan
+		    ) {
+		      return (
+		        right.totalHan -
+		        left.totalHan
+		      );
+		    }
+
+		    return right.fu - left.fu;
+		  });
+
+		  return candidates[0];
+		}
 
   window.MahjongEngine = {
     normalizeConcealedKanTileCode,
@@ -1014,6 +1180,9 @@
 	createYaku,
 	detectOpenHandYaku,
 	roundFuToTen,
-	calculateOpenHandFu
+	calculateOpenHandFu,
+	roundUpToHundred,
+	calculateScoreFromFuHan,
+	calculateOpenHandAnswer
   };
 })();
