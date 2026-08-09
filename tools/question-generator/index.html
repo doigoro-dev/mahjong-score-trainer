@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>麻雀問題作成ツール</title>
+
+  <link rel="stylesheet" href="./question-generator.css">
+</head>
+
+<body>
+  <main class="generator-container">
+
+    <header class="generator-header">
+      <h1>麻雀問題作成ツール</h1>
+
+      <p>
+        条件を指定して和了形を生成し、
+        Mahjong Engineで役・符・翻・点数を計算します。
+      </p>
+    </header>
+
+    <!-- 1. 問題条件 -->
+    <section class="generator-section">
+      <h2>1. 問題条件</h2>
+
+      <div class="condition-grid">
+
+        <label>
+          対象役
+          <select id="targetYaku">
+            <option value="">指定なし</option>
+            <option value="tanyao">断么九</option>
+            <option value="pinfu">平和</option>
+            <option value="iipeikou">一盃口</option>
+            <option value="sanshoku">三色同順</option>
+            <option value="ittsu">一気通貫</option>
+            <option value="toitoi">対々和</option>
+            <option value="sanankou">三暗刻</option>
+          </select>
+        </label>
+
+        <label>
+          和了方法
+          <select id="winType">
+            <option value="random">ランダム</option>
+            <option value="ron">ロン</option>
+            <option value="tsumo">ツモ</option>
+          </select>
+        </label>
+
+        <label>
+          親・子
+          <select id="playerType">
+            <option value="random">ランダム</option>
+            <option value="dealer">親</option>
+            <option value="child">子</option>
+          </select>
+        </label>
+
+        <label>
+          門前・副露
+          <select id="handType">
+            <option value="random">ランダム</option>
+            <option value="menzen">門前</option>
+            <option value="open">副露あり</option>
+          </select>
+        </label>
+
+        <label>
+          槓
+          <select id="kanType">
+            <option value="random">ランダム</option>
+            <option value="none">なし</option>
+            <option value="concealed">暗槓あり</option>
+            <option value="open">明槓あり</option>
+          </select>
+        </label>
+
+      </div>
+
+      <div class="button-row">
+        <button id="generateButton" type="button">
+          問題を生成
+        </button>
+      </div>
+    </section>
+
+    <!-- 2. 生成結果 -->
+    <section class="generator-section">
+      <h2>2. 生成結果</h2>
+
+      <div id="generatedQuestion" class="generated-question">
+        <p>
+          「問題を生成」を押すと、
+          ここに生成した問題を表示します。
+        </p>
+      </div>
+
+      <div class="button-row">
+        <button id="retryButton" type="button" disabled>
+          リトライ
+        </button>
+
+        <button id="acceptButton" type="button" disabled>
+          採用
+        </button>
+      </div>
+    </section>
+
+    <!-- 3. 採用問題リスト -->
+    <section class="generator-section">
+      <h2>3. 採用問題リスト</h2>
+
+      <div id="acceptedQuestionList" class="accepted-question-list">
+        <p>採用した問題はまだありません。</p>
+      </div>
+    </section>
+
+    <!-- 4. 出力 -->
+    <section class="generator-section">
+      <h2>4. questions.js形式で出力</h2>
+
+      <div class="button-row">
+        <button id="exportButton" type="button" disabled>
+          出力
+        </button>
+      </div>
+
+      <textarea
+        id="exportOutput"
+        rows="15"
+        readonly
+        placeholder="ここにquestions.jsへ貼り付け可能なデータを出力します。"
+      ></textarea>
+    </section>
+
+  </main>
+
+  <!-- Mahjong Engine -->
+  <script src="../../app/mahjong-engine.js"></script>
+
+  <!-- 問題作成ツール -->
+  <script src="./question-generator.js"></script>
+</body>
+</html>
