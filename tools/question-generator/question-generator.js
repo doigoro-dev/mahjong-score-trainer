@@ -11,8 +11,73 @@
 	  "white", "green", "red"
 	];
 
+	const TERMINAL_HONOR_TILE_CODES = [
+	  "1m", "9m",
+	  "1p", "9p",
+	  "1s", "9s",
+	  "east", "south", "west", "north",
+	  "white", "green", "red"
+	];
+
+	const TERMINAL_TILE_CODES = [
+	  "1m", "9m",
+	  "1p", "9p",
+	  "1s", "9s"
+	];
+
 	function createRandomDoraIndicator() {
 	  return randomItem(ALL_TILE_CODES);
+	}
+
+	function createRandomTerminalHonorTriplet() {
+	  const tile =
+	    randomItem(
+	      TERMINAL_HONOR_TILE_CODES
+	    );
+
+	  return [
+	    tile,
+	    tile,
+	    tile
+	  ];
+	}
+
+	function createRandomTerminalHonorPair() {
+	  const tile =
+	    randomItem(
+	      TERMINAL_HONOR_TILE_CODES
+	    );
+
+	  return [
+	    tile,
+	    tile
+	  ];
+	}
+
+	function createRandomTerminalPair() {
+	  const tile =
+	    randomItem(
+	      TERMINAL_TILE_CODES
+	    );
+
+	  return [
+	    tile,
+	    tile
+	  ];
+	}
+
+	function createRandomChantaSequence() {
+	  const suit =
+	    randomItem(SUITS);
+
+	  const start =
+	    randomItem([1, 7]);
+
+	  return [
+	    `${start}${suit}`,
+	    `${start + 1}${suit}`,
+	    `${start + 2}${suit}`
+	  ];
 	}
 
   let currentGeneratedQuestion = null;
@@ -161,6 +226,32 @@
 	  ];
 	}
 
+	function createRandomTriplet() {
+	  const tile =
+	    randomItem(ALL_TILE_CODES);
+
+	  return [
+	    tile,
+	    tile,
+	    tile
+	  ];
+	}
+
+	function createRandomYakuhaiTile(
+	  roundWind,
+	  seatWind
+	) {
+	  const candidates = [
+	    "white",
+	    "green",
+	    "red",
+	    roundWind,
+	    seatWind
+	  ];
+
+	  return randomItem(candidates);
+	}
+
 	function createPinfuPair(
 	  roundWind,
 	  seatWind
@@ -276,6 +367,84 @@
 	  throw new Error(
 	    "一盃口の和了形を生成できませんでした。"
 	  );
+	}
+
+	function createRyanpeikouCompleteHand(
+	  roundWind,
+	  seatWind
+	) {
+	  for (
+	    let attempt = 0;
+	    attempt < 1000;
+	    attempt += 1
+	  ) {
+	    const repeatedSequence1 =
+	      createRandomSequence();
+
+	    const repeatedSequence2 =
+	      createRandomSequence();
+
+	    const melds = [
+	      [...repeatedSequence1],
+	      [...repeatedSequence1],
+	      [...repeatedSequence2],
+	      [...repeatedSequence2]
+	    ];
+
+	    const pair =
+	      createPinfuPair(
+	        roundWind,
+	        seatWind
+	      );
+
+	    const tiles = [
+	      ...melds.flat(),
+	      ...pair
+	    ];
+
+	    if (
+	      hasMoreThanFourSameTiles(tiles)
+	    ) {
+	      continue;
+	    }
+
+	    return {
+	      melds,
+	      pair,
+	      tiles
+	    };
+	  }
+
+	  throw new Error(
+	    "二盃口の和了形を生成できませんでした。"
+	  );
+	}
+
+	function createChiitoitsuCompleteHand() {
+	  /*
+	   * 七対子は同じ牌を2組の対子として
+	   * 使用しないよう、7種類の異なる牌を選ぶ。
+	   */
+	  const pairTiles =
+	    shuffle(
+	      ALL_TILE_CODES
+	    ).slice(0, 7);
+
+	  const pairs =
+	    pairTiles.map(
+	      tile => [
+	        tile,
+	        tile
+	      ]
+	    );
+
+	  const tiles =
+	    pairs.flat();
+
+	  return {
+	    pairs,
+	    tiles
+	  };
 	}
 
 	function createSanshokuDoujunCompleteHand(
@@ -408,6 +577,793 @@
 	  );
 	}
 
+	function createSanankouCompleteHand(
+	  roundWind,
+	  seatWind
+	) {
+	  for (
+	    let attempt = 0;
+	    attempt < 1000;
+	    attempt += 1
+	  ) {
+	    const melds = [
+	      createRandomTriplet(),
+	      createRandomTriplet(),
+	      createRandomTriplet(),
+	      createRandomSequence()
+	    ];
+
+	    const pair =
+	      createPinfuPair(
+	        roundWind,
+	        seatWind
+	      );
+
+	    const tiles = [
+	      ...melds.flat(),
+	      ...pair
+	    ];
+
+	    if (
+	      hasMoreThanFourSameTiles(tiles)
+	    ) {
+	      continue;
+	    }
+
+	    return {
+	      melds,
+	      pair,
+	      tiles
+	    };
+	  }
+
+	  throw new Error(
+	    "三暗刻の和了形を生成できませんでした。"
+	  );
+	}
+
+	function createToitoiCompleteHand(
+	  roundWind,
+	  seatWind
+	) {
+	  for (
+	    let attempt = 0;
+	    attempt < 1000;
+	    attempt += 1
+	  ) {
+	    const melds = [
+	      createRandomTriplet(),
+	      createRandomTriplet(),
+	      createRandomTriplet(),
+	      createRandomTriplet()
+	    ];
+
+	    const pair =
+	      createPinfuPair(
+	        roundWind,
+	        seatWind
+	      );
+
+	    const tiles = [
+	      ...melds.flat(),
+	      ...pair
+	    ];
+
+	    if (
+	      hasMoreThanFourSameTiles(tiles)
+	    ) {
+	      continue;
+	    }
+
+	    return {
+	      melds,
+	      pair,
+	      tiles
+	    };
+	  }
+
+	  throw new Error(
+	    "対々和の和了形を生成できませんでした。"
+	  );
+	}
+
+	function createHonroutouCompleteHand() {
+	  for (
+	    let attempt = 0;
+	    attempt < 1000;
+	    attempt += 1
+	  ) {
+	    const requiredTerminalTile =
+	      randomItem(
+	        TERMINAL_TILE_CODES
+	      );
+
+	    const requiredTerminalTriplet = [
+	      requiredTerminalTile,
+	      requiredTerminalTile,
+	      requiredTerminalTile
+	    ];
+
+	    const melds = [
+	      requiredTerminalTriplet,
+	      createRandomTerminalHonorTriplet(),
+	      createRandomTerminalHonorTriplet(),
+	      createRandomTerminalHonorTriplet()
+	    ];
+
+	    const pair =
+	      createRandomTerminalHonorPair();
+
+	    const tiles = [
+	      ...melds.flat(),
+	      ...pair
+	    ];
+
+	    if (
+	      hasMoreThanFourSameTiles(tiles)
+	    ) {
+	      continue;
+	    }
+
+	    return {
+	      melds,
+	      pair,
+	      tiles
+	    };
+	  }
+
+	  throw new Error(
+	    "混老頭の和了形を生成できませんでした。"
+	  );
+	}
+
+	function createHonroutouQuestion(
+	  conditions
+	) {
+	  if (
+	    conditions.winType === "tsumo"
+	  ) {
+	    throw new Error(
+	      "現在の門前4面子形では混老頭をツモすると四暗刻になるため、混老頭のツモ問題は生成できません。"
+	    );
+	  }
+
+	  for (
+	    let attempt = 0;
+	    attempt < 1000;
+	    attempt += 1
+	  ) {
+	    const roundWind =
+	      randomItem([
+	        "east",
+	        "south"
+	      ]);
+
+	    const seatWind =
+	      resolveSeatWind(
+	        conditions.playerType
+	      );
+
+	    const handStructure =
+	      createHonroutouCompleteHand();
+
+	    const completeHand = [
+	      ...handStructure.melds.flat(),
+	      ...handStructure.pair
+	    ];
+
+	    const winningIndex =
+	      Math.floor(
+	        Math.random() *
+	        completeHand.length
+	      );
+
+	    const winningTile =
+	      completeHand[
+	        winningIndex
+	      ];
+
+	    const concealedTiles = [
+	      ...completeHand
+	    ];
+
+	    concealedTiles.splice(
+	      winningIndex,
+	      1
+	    );
+
+	    const question = {
+	      id: "generated",
+	      concealedTiles,
+	      winningTile,
+
+	      generatedStructure: {
+	        melds:
+	          handStructure.melds,
+	        pair:
+	          handStructure.pair
+	      },
+
+	      winType:
+	        resolveWinType(
+	          conditions.winType
+	        ),
+
+	      roundWind,
+	      seatWind,
+
+	      riichi: false,
+	      menzen: true,
+	      openMelds: [],
+	      concealedKans: [],
+
+	      doraIndicators: [
+	        createRandomDoraIndicator()
+	      ],
+
+	      uraDoraIndicators: [
+	        createRandomDoraIndicator()
+	      ]
+	    };
+
+	    let answer;
+
+	    try {
+	      answer =
+	        MahjongEngine
+	          .calculateOpenHandAnswer(
+	            question
+	          );
+	    } catch (error) {
+	      continue;
+	    }
+
+	    const hasHonroutou =
+	      answer.yaku.some(
+	        yaku =>
+	          yaku.name === "混老頭"
+	      );
+
+	    if (!hasHonroutou) {
+	      continue;
+	    }
+
+	    return {
+	      ...question,
+	      answer
+	    };
+	  }
+
+	  throw new Error(
+	    "条件を満たす混老頭問題を生成できませんでした。"
+	  );
+	}
+
+	function createSanshokuDoukouCompleteHand(
+	  roundWind,
+	  seatWind
+	) {
+	  for (
+	    let attempt = 0;
+	    attempt < 1000;
+	    attempt += 1
+	  ) {
+	    const number =
+	      randomItem([
+	        1, 2, 3, 4, 5,
+	        6, 7, 8, 9
+	      ]);
+
+	    const sanshokuTriplets = [
+	      [
+	        `${number}m`,
+	        `${number}m`,
+	        `${number}m`
+	      ],
+	      [
+	        `${number}p`,
+	        `${number}p`,
+	        `${number}p`
+	      ],
+	      [
+	        `${number}s`,
+	        `${number}s`,
+	        `${number}s`
+	      ]
+	    ];
+
+	    const melds = [
+	      ...sanshokuTriplets,
+	      createRandomSequence()
+	    ];
+
+	    const pair =
+	      createPinfuPair(
+	        roundWind,
+	        seatWind
+	      );
+
+	    const tiles = [
+	      ...melds.flat(),
+	      ...pair
+	    ];
+
+	    if (
+	      hasMoreThanFourSameTiles(tiles)
+	    ) {
+	      continue;
+	    }
+
+	    return {
+	      melds,
+	      pair,
+	      tiles
+	    };
+	  }
+
+	  throw new Error(
+	    "三色同刻の和了形を生成できませんでした。"
+	  );
+	}
+
+	function createYakuhaiCompleteHand(
+	  roundWind,
+	  seatWind
+	) {
+	  for (
+	    let attempt = 0;
+	    attempt < 1000;
+	    attempt += 1
+	  ) {
+	    const yakuhaiTile =
+	      createRandomYakuhaiTile(
+	        roundWind,
+	        seatWind
+	      );
+
+	    const yakuhaiTriplet = [
+	      yakuhaiTile,
+	      yakuhaiTile,
+	      yakuhaiTile
+	    ];
+
+	    const melds = [
+	      yakuhaiTriplet,
+	      createRandomSequence(),
+	      createRandomSequence(),
+	      createRandomTriplet()
+	    ];
+
+	    const pair =
+	      createPinfuPair(
+	        roundWind,
+	        seatWind
+	      );
+
+	    const tiles = [
+	      ...melds.flat(),
+	      ...pair
+	    ];
+
+	    if (
+	      hasMoreThanFourSameTiles(tiles)
+	    ) {
+	      continue;
+	    }
+
+	    return {
+	      melds,
+	      pair,
+	      tiles
+	    };
+	  }
+
+	  throw new Error(
+	    "役牌の和了形を生成できませんでした。"
+	  );
+	}
+
+	function createShousangenCompleteHand() {
+	  for (
+	    let attempt = 0;
+	    attempt < 1000;
+	    attempt += 1
+	  ) {
+	    const dragonTiles = shuffle([
+	      "white",
+	      "green",
+	      "red"
+	    ]);
+
+	    const tripletTile1 =
+	      dragonTiles[0];
+
+	    const tripletTile2 =
+	      dragonTiles[1];
+
+	    const pairTile =
+	      dragonTiles[2];
+
+	    const melds = [
+	      [
+	        tripletTile1,
+	        tripletTile1,
+	        tripletTile1
+	      ],
+	      [
+	        tripletTile2,
+	        tripletTile2,
+	        tripletTile2
+	      ],
+	      createRandomSequence(),
+	      createRandomSequence()
+	    ];
+
+	    const pair = [
+	      pairTile,
+	      pairTile
+	    ];
+
+	    const tiles = [
+	      ...melds.flat(),
+	      ...pair
+	    ];
+
+	    if (
+	      hasMoreThanFourSameTiles(tiles)
+	    ) {
+	      continue;
+	    }
+
+	    return {
+	      melds,
+	      pair,
+	      tiles
+	    };
+	  }
+
+	  throw new Error(
+	    "小三元の和了形を生成できませんでした。"
+	  );
+	}
+
+	function createChantaCompleteHand() {
+	  for (
+	    let attempt = 0;
+	    attempt < 1000;
+	    attempt += 1
+	  ) {
+	    /*
+	     * 混全帯么九では、
+	     * ・少なくとも1組の順子
+	     * ・少なくとも1枚の字牌
+	     * が必要。
+	     *
+	     * そこで、
+	     * 順子1組と字牌刻子1組を固定する。
+	     */
+	    const honorTile =
+	      randomItem([
+	        "east",
+	        "south",
+	        "west",
+	        "north",
+	        "white",
+	        "green",
+	        "red"
+	      ]);
+
+	    const honorTriplet = [
+	      honorTile,
+	      honorTile,
+	      honorTile
+	    ];
+
+	    const melds = [
+	      createRandomChantaSequence(),
+	      honorTriplet,
+	      Math.random() < 0.5
+	        ? createRandomChantaSequence()
+	        : createRandomTerminalHonorTriplet(),
+	      Math.random() < 0.5
+	        ? createRandomChantaSequence()
+	        : createRandomTerminalHonorTriplet()
+	    ];
+
+	    const pair =
+	      createRandomTerminalHonorPair();
+
+	    const tiles = [
+	      ...melds.flat(),
+	      ...pair
+	    ];
+
+	    if (
+	      hasMoreThanFourSameTiles(tiles)
+	    ) {
+	      continue;
+	    }
+
+	    return {
+	      melds,
+	      pair,
+	      tiles
+	    };
+	  }
+
+	  throw new Error(
+	    "混全帯么九の和了形を生成できませんでした。"
+	  );
+	}
+
+	function createRandomTerminalTriplet() {
+	  const tile =
+	    randomItem(
+	      TERMINAL_TILE_CODES
+	    );
+
+	  return [
+	    tile,
+	    tile,
+	    tile
+	  ];
+	}
+
+	function createJunchanCompleteHand() {
+	  for (
+	    let attempt = 0;
+	    attempt < 1000;
+	    attempt += 1
+	  ) {
+	    const melds = [
+	      createRandomChantaSequence(),
+
+	      Math.random() < 0.5
+	        ? createRandomChantaSequence()
+	        : createRandomTerminalTriplet(),
+
+	      Math.random() < 0.5
+	        ? createRandomChantaSequence()
+	        : createRandomTerminalTriplet(),
+
+	      Math.random() < 0.5
+	        ? createRandomChantaSequence()
+	        : createRandomTerminalTriplet()
+	    ];
+
+	    const pair =
+	      createRandomTerminalPair();
+
+	    const tiles = [
+	      ...melds.flat(),
+	      ...pair
+	    ];
+
+	    if (
+	      hasMoreThanFourSameTiles(tiles)
+	    ) {
+	      continue;
+	    }
+
+	    return {
+	      melds,
+	      pair,
+	      tiles
+	    };
+	  }
+
+	  throw new Error(
+	    "純全帯么九の和了形を生成できませんでした。"
+	  );
+	}
+
+	function createHonitsuCompleteHand() {
+	  for (
+	    let attempt = 0;
+	    attempt < 1000;
+	    attempt += 1
+	  ) {
+	    const suit =
+	      randomItem(SUITS);
+
+	    const createSuitSequence = () => {
+	      const start =
+	        randomItem([
+	          1, 2, 3, 4, 5, 6, 7
+	        ]);
+
+	      return [
+	        `${start}${suit}`,
+	        `${start + 1}${suit}`,
+	        `${start + 2}${suit}`
+	      ];
+	    };
+
+	    const createSuitTriplet = () => {
+	      const number =
+	        randomItem([
+	          1, 2, 3, 4, 5,
+	          6, 7, 8, 9
+	        ]);
+
+	      const tile =
+	        `${number}${suit}`;
+
+	      return [
+	        tile,
+	        tile,
+	        tile
+	      ];
+	    };
+
+	    const honorTile =
+	      randomItem([
+	        "east",
+	        "south",
+	        "west",
+	        "north",
+	        "white",
+	        "green",
+	        "red"
+	      ]);
+
+	    const honorTriplet = [
+	      honorTile,
+	      honorTile,
+	      honorTile
+	    ];
+
+	    const melds = [
+	      honorTriplet,
+
+	      Math.random() < 0.5
+	        ? createSuitSequence()
+	        : createSuitTriplet(),
+
+	      Math.random() < 0.5
+	        ? createSuitSequence()
+	        : createSuitTriplet(),
+
+	      Math.random() < 0.5
+	        ? createSuitSequence()
+	        : createSuitTriplet()
+	    ];
+
+	    const pairTile =
+	      Math.random() < 0.25
+	        ? randomItem([
+	            "east",
+	            "south",
+	            "west",
+	            "north",
+	            "white",
+	            "green",
+	            "red"
+	          ])
+	        : `${randomItem([
+	            1, 2, 3, 4, 5,
+	            6, 7, 8, 9
+	          ])}${suit}`;
+
+	    const pair = [
+	      pairTile,
+	      pairTile
+	    ];
+
+	    const tiles = [
+	      ...melds.flat(),
+	      ...pair
+	    ];
+
+	    if (
+	      hasMoreThanFourSameTiles(tiles)
+	    ) {
+	      continue;
+	    }
+
+	    return {
+	      melds,
+	      pair,
+	      tiles
+	    };
+	  }
+
+	  throw new Error(
+	    "混一色の和了形を生成できませんでした。"
+	  );
+	}
+
+	function createChinitsuCompleteHand() {
+	  for (
+	    let attempt = 0;
+	    attempt < 1000;
+	    attempt += 1
+	  ) {
+	    const suit =
+	      randomItem(SUITS);
+
+	    const createSuitSequence = () => {
+	      const start =
+	        randomItem([
+	          1, 2, 3, 4, 5, 6, 7
+	        ]);
+
+	      return [
+	        `${start}${suit}`,
+	        `${start + 1}${suit}`,
+	        `${start + 2}${suit}`
+	      ];
+	    };
+
+	    const createSuitTriplet = () => {
+	      const number =
+	        randomItem([
+	          1, 2, 3, 4, 5,
+	          6, 7, 8, 9
+	        ]);
+
+	      const tile =
+	        `${number}${suit}`;
+
+	      return [
+	        tile,
+	        tile,
+	        tile
+	      ];
+	    };
+
+	    const melds = [
+	      Math.random() < 0.5
+	        ? createSuitSequence()
+	        : createSuitTriplet(),
+
+	      Math.random() < 0.5
+	        ? createSuitSequence()
+	        : createSuitTriplet(),
+
+	      Math.random() < 0.5
+	        ? createSuitSequence()
+	        : createSuitTriplet(),
+
+	      Math.random() < 0.5
+	        ? createSuitSequence()
+	        : createSuitTriplet()
+	    ];
+
+	    const pairTile =
+	      `${randomItem([
+	        1, 2, 3, 4, 5,
+	        6, 7, 8, 9
+	      ])}${suit}`;
+
+	    const pair = [
+	      pairTile,
+	      pairTile
+	    ];
+
+	    const tiles = [
+	      ...melds.flat(),
+	      ...pair
+	    ];
+
+	    if (
+	      hasMoreThanFourSameTiles(tiles)
+	    ) {
+	      continue;
+	    }
+
+	    return {
+	      melds,
+	      pair,
+	      tiles
+	    };
+	  }
+
+	  throw new Error(
+	    "清一色の和了形を生成できませんでした。"
+	  );
+	}
+
 	function createSanshokuDoujunQuestion(
 	  conditions
 	) {
@@ -522,6 +1478,695 @@
 
 	  throw new Error(
 	    "条件を満たす三色同順問題を生成できませんでした。"
+	  );
+	}
+
+	function createYakuhaiQuestion(
+	  conditions
+	) {
+	  for (
+	    let attempt = 0;
+	    attempt < 1000;
+	    attempt += 1
+	  ) {
+	    const roundWind =
+	      randomItem([
+	        "east",
+	        "south"
+	      ]);
+
+	    const seatWind =
+	      resolveSeatWind(
+	        conditions.playerType
+	      );
+
+	    const handStructure =
+	      createYakuhaiCompleteHand(
+	        roundWind,
+	        seatWind
+	      );
+
+	    const completeHand = [
+	      ...handStructure.melds.flat(),
+	      ...handStructure.pair
+	    ];
+
+	    const winningIndex =
+	      Math.floor(
+	        Math.random() *
+	        completeHand.length
+	      );
+
+	    const winningTile =
+	      completeHand[
+	        winningIndex
+	      ];
+
+	    const concealedTiles = [
+	      ...completeHand
+	    ];
+
+	    concealedTiles.splice(
+	      winningIndex,
+	      1
+	    );
+
+	    const question = {
+	      id: "generated",
+	      concealedTiles,
+	      winningTile,
+
+	      generatedStructure: {
+	        melds:
+	          handStructure.melds,
+	        pair:
+	          handStructure.pair
+	      },
+
+	      winType:
+	        resolveWinType(
+	          conditions.winType
+	        ),
+
+	      roundWind,
+	      seatWind,
+
+	      riichi: false,
+	      menzen: true,
+	      openMelds: [],
+	      concealedKans: [],
+
+	      doraIndicators: [
+	        createRandomDoraIndicator()
+	      ],
+
+	      uraDoraIndicators: [
+	        createRandomDoraIndicator()
+	      ]
+	    };
+
+	    let answer;
+
+	    try {
+	      answer =
+	        MahjongEngine
+	          .calculateOpenHandAnswer(
+	            question
+	          );
+	    } catch (error) {
+	      continue;
+	    }
+
+	    const hasYakuhai =
+	      answer.yaku.some(
+	        yaku =>
+	          yaku.name.startsWith("役牌") ||
+	          yaku.name.startsWith("場風") ||
+	          yaku.name.startsWith("自風")
+	      );
+
+	    if (!hasYakuhai) {
+	      continue;
+	    }
+
+	    return {
+	      ...question,
+	      answer
+	    };
+	  }
+
+	  throw new Error(
+	    "条件を満たす役牌問題を生成できませんでした。"
+	  );
+	}
+
+	function createShousangenQuestion(
+	  conditions
+	) {
+	  for (
+	    let attempt = 0;
+	    attempt < 1000;
+	    attempt += 1
+	  ) {
+	    const roundWind =
+	      randomItem([
+	        "east",
+	        "south"
+	      ]);
+
+	    const seatWind =
+	      resolveSeatWind(
+	        conditions.playerType
+	      );
+
+	    const handStructure =
+	      createShousangenCompleteHand();
+
+	    const completeHand = [
+	      ...handStructure.melds.flat(),
+	      ...handStructure.pair
+	    ];
+
+	    const winningIndex =
+	      Math.floor(
+	        Math.random() *
+	        completeHand.length
+	      );
+
+	    const winningTile =
+	      completeHand[
+	        winningIndex
+	      ];
+
+	    const concealedTiles = [
+	      ...completeHand
+	    ];
+
+	    concealedTiles.splice(
+	      winningIndex,
+	      1
+	    );
+
+	    const question = {
+	      id: "generated",
+	      concealedTiles,
+	      winningTile,
+
+	      generatedStructure: {
+	        melds:
+	          handStructure.melds,
+	        pair:
+	          handStructure.pair
+	      },
+
+	      winType:
+	        resolveWinType(
+	          conditions.winType
+	        ),
+
+	      roundWind,
+	      seatWind,
+
+	      riichi: false,
+	      menzen: true,
+	      openMelds: [],
+	      concealedKans: [],
+
+	      doraIndicators: [
+	        createRandomDoraIndicator()
+	      ],
+
+	      uraDoraIndicators: [
+	        createRandomDoraIndicator()
+	      ]
+	    };
+
+	    let answer;
+
+	    try {
+	      answer =
+	        MahjongEngine
+	          .calculateOpenHandAnswer(
+	            question
+	          );
+	    } catch (error) {
+	      continue;
+	    }
+
+	    const hasShousangen =
+	      answer.yaku.some(
+	        yaku =>
+	          yaku.name === "小三元"
+	      );
+
+	    if (!hasShousangen) {
+	      continue;
+	    }
+
+	    return {
+	      ...question,
+	      answer
+	    };
+	  }
+
+	  throw new Error(
+	    "条件を満たす小三元問題を生成できませんでした。"
+	  );
+	}
+
+	function createChantaQuestion(
+	  conditions
+	) {
+	  for (
+	    let attempt = 0;
+	    attempt < 1000;
+	    attempt += 1
+	  ) {
+	    const roundWind =
+	      randomItem([
+	        "east",
+	        "south"
+	      ]);
+
+	    const seatWind =
+	      resolveSeatWind(
+	        conditions.playerType
+	      );
+
+	    const handStructure =
+	      createChantaCompleteHand();
+
+	    const completeHand = [
+	      ...handStructure.melds.flat(),
+	      ...handStructure.pair
+	    ];
+
+	    const winningIndex =
+	      Math.floor(
+	        Math.random() *
+	        completeHand.length
+	      );
+
+	    const winningTile =
+	      completeHand[
+	        winningIndex
+	      ];
+
+	    const concealedTiles = [
+	      ...completeHand
+	    ];
+
+	    concealedTiles.splice(
+	      winningIndex,
+	      1
+	    );
+
+	    const question = {
+	      id: "generated",
+	      concealedTiles,
+	      winningTile,
+
+	      generatedStructure: {
+	        melds:
+	          handStructure.melds,
+	        pair:
+	          handStructure.pair
+	      },
+
+	      winType:
+	        resolveWinType(
+	          conditions.winType
+	        ),
+
+	      roundWind,
+	      seatWind,
+
+	      riichi: false,
+	      menzen: true,
+	      openMelds: [],
+	      concealedKans: [],
+
+	      doraIndicators: [
+	        createRandomDoraIndicator()
+	      ],
+
+	      uraDoraIndicators: [
+	        createRandomDoraIndicator()
+	      ]
+	    };
+
+	    let answer;
+
+	    try {
+	      answer =
+	        MahjongEngine
+	          .calculateOpenHandAnswer(
+	            question
+	          );
+	    } catch (error) {
+	      continue;
+	    }
+
+	    const hasChanta =
+	      answer.yaku.some(
+	        yaku =>
+	          yaku.name === "混全帯么九"
+	      );
+
+	    if (!hasChanta) {
+	      continue;
+	    }
+
+	    return {
+	      ...question,
+	      answer
+	    };
+	  }
+
+	  throw new Error(
+	    "条件を満たす混全帯么九問題を生成できませんでした。"
+	  );
+	}
+
+	function createJunchanQuestion(
+	  conditions
+	) {
+	  for (
+	    let attempt = 0;
+	    attempt < 1000;
+	    attempt += 1
+	  ) {
+	    const roundWind =
+	      randomItem([
+	        "east",
+	        "south"
+	      ]);
+
+	    const seatWind =
+	      resolveSeatWind(
+	        conditions.playerType
+	      );
+
+	    const handStructure =
+	      createJunchanCompleteHand();
+
+	    const completeHand = [
+	      ...handStructure.melds.flat(),
+	      ...handStructure.pair
+	    ];
+
+	    const winningIndex =
+	      Math.floor(
+	        Math.random() *
+	        completeHand.length
+	      );
+
+	    const winningTile =
+	      completeHand[
+	        winningIndex
+	      ];
+
+	    const concealedTiles = [
+	      ...completeHand
+	    ];
+
+	    concealedTiles.splice(
+	      winningIndex,
+	      1
+	    );
+
+	    const question = {
+	      id: "generated",
+	      concealedTiles,
+	      winningTile,
+
+	      generatedStructure: {
+	        melds:
+	          handStructure.melds,
+	        pair:
+	          handStructure.pair
+	      },
+
+	      winType:
+	        resolveWinType(
+	          conditions.winType
+	        ),
+
+	      roundWind,
+	      seatWind,
+
+	      riichi: false,
+	      menzen: true,
+	      openMelds: [],
+	      concealedKans: [],
+
+	      doraIndicators: [
+	        createRandomDoraIndicator()
+	      ],
+
+	      uraDoraIndicators: [
+	        createRandomDoraIndicator()
+	      ]
+	    };
+
+	    let answer;
+
+	    try {
+	      answer =
+	        MahjongEngine
+	          .calculateOpenHandAnswer(
+	            question
+	          );
+	    } catch (error) {
+	      continue;
+	    }
+
+	    const hasJunchan =
+	      answer.yaku.some(
+	        yaku =>
+	          yaku.name === "純全帯么九"
+	      );
+
+	    if (!hasJunchan) {
+	      continue;
+	    }
+
+	    return {
+	      ...question,
+	      answer
+	    };
+	  }
+
+	  throw new Error(
+	    "条件を満たす純全帯么九問題を生成できませんでした。"
+	  );
+	}
+
+	function createHonitsuQuestion(
+	  conditions
+	) {
+	  for (
+	    let attempt = 0;
+	    attempt < 1000;
+	    attempt += 1
+	  ) {
+	    const roundWind =
+	      randomItem([
+	        "east",
+	        "south"
+	      ]);
+
+	    const seatWind =
+	      resolveSeatWind(
+	        conditions.playerType
+	      );
+
+	    const handStructure =
+	      createHonitsuCompleteHand();
+
+	    const completeHand = [
+	      ...handStructure.melds.flat(),
+	      ...handStructure.pair
+	    ];
+
+	    const winningIndex =
+	      Math.floor(
+	        Math.random() *
+	        completeHand.length
+	      );
+
+	    const winningTile =
+	      completeHand[
+	        winningIndex
+	      ];
+
+	    const concealedTiles = [
+	      ...completeHand
+	    ];
+
+	    concealedTiles.splice(
+	      winningIndex,
+	      1
+	    );
+
+	    const question = {
+	      id: "generated",
+	      concealedTiles,
+	      winningTile,
+
+	      generatedStructure: {
+	        melds:
+	          handStructure.melds,
+	        pair:
+	          handStructure.pair
+	      },
+
+	      winType:
+	        resolveWinType(
+	          conditions.winType
+	        ),
+
+	      roundWind,
+	      seatWind,
+
+	      riichi: false,
+	      menzen: true,
+	      openMelds: [],
+	      concealedKans: [],
+
+	      doraIndicators: [
+	        createRandomDoraIndicator()
+	      ],
+
+	      uraDoraIndicators: [
+	        createRandomDoraIndicator()
+	      ]
+	    };
+
+	    let answer;
+
+	    try {
+	      answer =
+	        MahjongEngine
+	          .calculateOpenHandAnswer(
+	            question
+	          );
+	    } catch (error) {
+	      continue;
+	    }
+
+	    const hasHonitsu =
+	      answer.yaku.some(
+	        yaku =>
+	          yaku.name === "混一色"
+	      );
+
+	    if (!hasHonitsu) {
+	      continue;
+	    }
+
+	    return {
+	      ...question,
+	      answer
+	    };
+	  }
+
+	  throw new Error(
+	    "条件を満たす混一色問題を生成できませんでした。"
+	  );
+	}
+
+	function createChinitsuQuestion(
+	  conditions
+	) {
+	  for (
+	    let attempt = 0;
+	    attempt < 1000;
+	    attempt += 1
+	  ) {
+	    const roundWind =
+	      randomItem([
+	        "east",
+	        "south"
+	      ]);
+
+	    const seatWind =
+	      resolveSeatWind(
+	        conditions.playerType
+	      );
+
+	    const handStructure =
+	      createChinitsuCompleteHand();
+
+	    const completeHand = [
+	      ...handStructure.melds.flat(),
+	      ...handStructure.pair
+	    ];
+
+	    const winningIndex =
+	      Math.floor(
+	        Math.random() *
+	        completeHand.length
+	      );
+
+	    const winningTile =
+	      completeHand[
+	        winningIndex
+	      ];
+
+	    const concealedTiles = [
+	      ...completeHand
+	    ];
+
+	    concealedTiles.splice(
+	      winningIndex,
+	      1
+	    );
+
+	    const question = {
+	      id: "generated",
+	      concealedTiles,
+	      winningTile,
+
+	      generatedStructure: {
+	        melds:
+	          handStructure.melds,
+	        pair:
+	          handStructure.pair
+	      },
+
+	      winType:
+	        resolveWinType(
+	          conditions.winType
+	        ),
+
+	      roundWind,
+	      seatWind,
+
+	      riichi: false,
+	      menzen: true,
+	      openMelds: [],
+	      concealedKans: [],
+
+	      doraIndicators: [
+	        createRandomDoraIndicator()
+	      ],
+
+	      uraDoraIndicators: [
+	        createRandomDoraIndicator()
+	      ]
+	    };
+
+	    let answer;
+
+	    try {
+	      answer =
+	        MahjongEngine
+	          .calculateOpenHandAnswer(
+	            question
+	          );
+	    } catch (error) {
+	      continue;
+	    }
+
+	    const hasChinitsu =
+	      answer.yaku.some(
+	        yaku =>
+	          yaku.name === "清一色"
+	      );
+
+	    if (!hasChinitsu) {
+	      continue;
+	    }
+
+	    return {
+	      ...question,
+	      answer
+	    };
+	  }
+
+	  throw new Error(
+	    "条件を満たす清一色問題を生成できませんでした。"
 	  );
 	}
 
@@ -937,6 +2582,234 @@
 	  );
 	}
 
+	function createRyanpeikouQuestion(
+	  conditions
+	) {
+	  for (
+	    let attempt = 0;
+	    attempt < 1000;
+	    attempt += 1
+	  ) {
+	    const roundWind =
+	      randomItem([
+	        "east",
+	        "south"
+	      ]);
+
+	    const seatWind =
+	      resolveSeatWind(
+	        conditions.playerType
+	      );
+
+	    const handStructure =
+	      createRyanpeikouCompleteHand(
+	        roundWind,
+	        seatWind
+	      );
+
+	    const completeHand = [
+	      ...handStructure.melds.flat(),
+	      ...handStructure.pair
+	    ];
+
+	    const winningIndex =
+	      Math.floor(
+	        Math.random() *
+	        completeHand.length
+	      );
+
+	    const winningTile =
+	      completeHand[
+	        winningIndex
+	      ];
+
+	    const concealedTiles = [
+	      ...completeHand
+	    ];
+
+	    concealedTiles.splice(
+	      winningIndex,
+	      1
+	    );
+
+	    const question = {
+	      id: "generated",
+	      concealedTiles,
+	      winningTile,
+
+	      generatedStructure: {
+	        melds:
+	          handStructure.melds,
+	        pair:
+	          handStructure.pair
+	      },
+
+	      winType:
+	        resolveWinType(
+	          conditions.winType
+	        ),
+
+	      roundWind,
+	      seatWind,
+
+	      riichi: false,
+	      menzen: true,
+	      openMelds: [],
+	      concealedKans: [],
+
+	      doraIndicators: [
+	        createRandomDoraIndicator()
+	      ],
+
+	      uraDoraIndicators: [
+	        createRandomDoraIndicator()
+	      ]
+	    };
+
+	    let answer;
+
+	    try {
+	      answer =
+	        MahjongEngine
+	          .calculateOpenHandAnswer(
+	            question
+	          );
+	    } catch (error) {
+	      continue;
+	    }
+
+	    const hasRyanpeikou =
+	      answer.yaku.some(
+	        yaku =>
+	          yaku.name === "二盃口"
+	      );
+
+	    if (!hasRyanpeikou) {
+	      continue;
+	    }
+
+	    return {
+	      ...question,
+	      answer
+	    };
+	  }
+
+	  throw new Error(
+	    "条件を満たす二盃口問題を生成できませんでした。"
+	  );
+	}
+
+	function createChiitoitsuQuestion(
+	  conditions
+	) {
+	  for (
+	    let attempt = 0;
+	    attempt < 1000;
+	    attempt += 1
+	  ) {
+	    const roundWind =
+	      randomItem([
+	        "east",
+	        "south"
+	      ]);
+
+	    const seatWind =
+	      resolveSeatWind(
+	        conditions.playerType
+	      );
+
+	    const handStructure =
+	      createChiitoitsuCompleteHand();
+
+	    const completeHand = [
+	      ...handStructure.tiles
+	    ];
+
+	    const winningIndex =
+	      Math.floor(
+	        Math.random() *
+	        completeHand.length
+	      );
+
+	    const winningTile =
+	      completeHand[
+	        winningIndex
+	      ];
+
+	    const concealedTiles = [
+	      ...completeHand
+	    ];
+
+	    concealedTiles.splice(
+	      winningIndex,
+	      1
+	    );
+
+	    const question = {
+	      id: "generated",
+	      concealedTiles,
+	      winningTile,
+
+	      generatedStructure: {
+	        pairs:
+	          handStructure.pairs
+	      },
+
+	      winType:
+	        resolveWinType(
+	          conditions.winType
+	        ),
+
+	      roundWind,
+	      seatWind,
+
+	      riichi: false,
+	      menzen: true,
+	      openMelds: [],
+	      concealedKans: [],
+
+	      doraIndicators: [
+	        createRandomDoraIndicator()
+	      ],
+
+	      uraDoraIndicators: [
+	        createRandomDoraIndicator()
+	      ]
+	    };
+
+	    let answer;
+
+	    try {
+	      answer =
+	        MahjongEngine
+	          .calculateOpenHandAnswer(
+	            question
+	          );
+	    } catch (error) {
+	      continue;
+	    }
+
+	    const hasChiitoitsu =
+	      answer.yaku.some(
+	        yaku =>
+	          yaku.name === "七対子"
+	      );
+
+	    if (!hasChiitoitsu) {
+	      continue;
+	    }
+
+	    return {
+	      ...question,
+	      answer
+	    };
+	  }
+
+	  throw new Error(
+	    "条件を満たす七対子問題を生成できませんでした。"
+	  );
+	}
+
 	function createIttsuQuestion(
 	  conditions
 	) {
@@ -1054,6 +2927,365 @@
 	  );
 	}
 
+	function createSanankouQuestion(
+	  conditions
+	) {
+	  for (
+	    let attempt = 0;
+	    attempt < 1000;
+	    attempt += 1
+	  ) {
+	    const roundWind =
+	      randomItem([
+	        "east",
+	        "south"
+	      ]);
+
+	    const seatWind =
+	      resolveSeatWind(
+	        conditions.playerType
+	      );
+
+	    const handStructure =
+	      createSanankouCompleteHand(
+	        roundWind,
+	        seatWind
+	      );
+
+	    const completeHand = [
+	      ...handStructure.melds.flat(),
+	      ...handStructure.pair
+	    ];
+
+	    const winningIndex =
+	      Math.floor(
+	        Math.random() *
+	        completeHand.length
+	      );
+
+	    const winningTile =
+	      completeHand[
+	        winningIndex
+	      ];
+
+	    const concealedTiles = [
+	      ...completeHand
+	    ];
+
+	    concealedTiles.splice(
+	      winningIndex,
+	      1
+	    );
+
+	    const question = {
+	      id: "generated",
+	      concealedTiles,
+	      winningTile,
+
+	      generatedStructure: {
+	        melds:
+	          handStructure.melds,
+	        pair:
+	          handStructure.pair
+	      },
+
+	      winType:
+	        resolveWinType(
+	          conditions.winType
+	        ),
+
+	      roundWind,
+	      seatWind,
+
+	      riichi: false,
+	      menzen: true,
+	      openMelds: [],
+	      concealedKans: [],
+
+	      doraIndicators: [
+	        createRandomDoraIndicator()
+	      ],
+
+	      uraDoraIndicators: [
+	        createRandomDoraIndicator()
+	      ]
+	    };
+
+	    let answer;
+
+	    try {
+	      answer =
+	        MahjongEngine
+	          .calculateOpenHandAnswer(
+	            question
+	          );
+	    } catch (error) {
+	      continue;
+	    }
+
+	    const hasSanankou =
+	      answer.yaku.some(
+	        yaku =>
+	          yaku.name === "三暗刻"
+	      );
+
+	    if (!hasSanankou) {
+	      continue;
+	    }
+
+	    return {
+	      ...question,
+	      answer
+	    };
+	  }
+
+	  throw new Error(
+	    "条件を満たす三暗刻問題を生成できませんでした。"
+	  );
+	}
+
+	function createToitoiQuestion(
+	  conditions
+	) {	
+		if (
+		  conditions.winType === "tsumo"
+		) {
+		  throw new Error(
+		    "門前の対々和をツモすると四暗刻になるため、現在は対々和のツモ問題を生成できません。"
+		  );
+		}
+	
+	  for (
+	    let attempt = 0;
+	    attempt < 1000;
+	    attempt += 1
+	  ) {
+	    const roundWind =
+	      randomItem([
+	        "east",
+	        "south"
+	      ]);
+
+	    const seatWind =
+	      resolveSeatWind(
+	        conditions.playerType
+	      );
+
+	    const handStructure =
+	      createToitoiCompleteHand(
+	        roundWind,
+	        seatWind
+	      );
+
+	    const completeHand = [
+	      ...handStructure.melds.flat(),
+	      ...handStructure.pair
+	    ];
+
+	    const winningIndex =
+	      Math.floor(
+	        Math.random() *
+	        completeHand.length
+	      );
+
+	    const winningTile =
+	      completeHand[
+	        winningIndex
+	      ];
+
+	    const concealedTiles = [
+	      ...completeHand
+	    ];
+
+	    concealedTiles.splice(
+	      winningIndex,
+	      1
+	    );
+
+	    const question = {
+	      id: "generated",
+	      concealedTiles,
+	      winningTile,
+
+	      generatedStructure: {
+	        melds:
+	          handStructure.melds,
+	        pair:
+	          handStructure.pair
+	      },
+
+	      winType:
+	        resolveWinType(
+	          conditions.winType
+	        ),
+
+	      roundWind,
+	      seatWind,
+
+	      riichi: false,
+	      menzen: true,
+	      openMelds: [],
+	      concealedKans: [],
+
+	      doraIndicators: [
+	        createRandomDoraIndicator()
+	      ],
+
+	      uraDoraIndicators: [
+	        createRandomDoraIndicator()
+	      ]
+	    };
+
+	    let answer;
+
+	    try {
+	      answer =
+	        MahjongEngine
+	          .calculateOpenHandAnswer(
+	            question
+	          );
+	    } catch (error) {
+	      continue;
+	    }
+
+	    const hasToitoi =
+	      answer.yaku.some(
+	        yaku =>
+	          yaku.name === "対々和"
+	      );
+
+	    if (!hasToitoi) {
+	      continue;
+	    }
+
+	    return {
+	      ...question,
+	      answer
+	    };
+	  }
+
+	  throw new Error(
+	    "条件を満たす対々和問題を生成できませんでした。"
+	  );
+	}
+
+	function createSanshokuDoukouQuestion(
+	  conditions
+	) {
+	  for (
+	    let attempt = 0;
+	    attempt < 1000;
+	    attempt += 1
+	  ) {
+	    const roundWind =
+	      randomItem([
+	        "east",
+	        "south"
+	      ]);
+
+	    const seatWind =
+	      resolveSeatWind(
+	        conditions.playerType
+	      );
+
+	    const handStructure =
+	      createSanshokuDoukouCompleteHand(
+	        roundWind,
+	        seatWind
+	      );
+
+	    const completeHand = [
+	      ...handStructure.melds.flat(),
+	      ...handStructure.pair
+	    ];
+
+	    const winningIndex =
+	      Math.floor(
+	        Math.random() *
+	        completeHand.length
+	      );
+
+	    const winningTile =
+	      completeHand[
+	        winningIndex
+	      ];
+
+	    const concealedTiles = [
+	      ...completeHand
+	    ];
+
+	    concealedTiles.splice(
+	      winningIndex,
+	      1
+	    );
+
+	    const question = {
+	      id: "generated",
+	      concealedTiles,
+	      winningTile,
+
+	      generatedStructure: {
+	        melds:
+	          handStructure.melds,
+	        pair:
+	          handStructure.pair
+	      },
+
+	      winType:
+	        resolveWinType(
+	          conditions.winType
+	        ),
+
+	      roundWind,
+	      seatWind,
+
+	      riichi: false,
+	      menzen: true,
+	      openMelds: [],
+	      concealedKans: [],
+
+	      doraIndicators: [
+	        createRandomDoraIndicator()
+	      ],
+
+	      uraDoraIndicators: [
+	        createRandomDoraIndicator()
+	      ]
+	    };
+
+	    let answer;
+
+	    try {
+	      answer =
+	        MahjongEngine
+	          .calculateOpenHandAnswer(
+	            question
+	          );
+	    } catch (error) {
+	      continue;
+	    }
+
+	    const hasSanshokuDoukou =
+	      answer.yaku.some(
+	        yaku =>
+	          yaku.name === "三色同刻"
+	      );
+
+	    if (!hasSanshokuDoukou) {
+	      continue;
+	    }
+
+	    return {
+	      ...question,
+	      answer
+	    };
+	  }
+
+	  throw new Error(
+	    "条件を満たす三色同刻問題を生成できませんでした。"
+	  );
+	}
+
   function formatTileList(tiles) {
     return tiles.join(" ");
   }
@@ -1077,6 +3309,21 @@
 	    );
 	  }
 
+	  /*
+	   * 七対子
+	   */
+	  if (structure.pairs) {
+	    return structure.pairs
+	      .map(
+	        pair =>
+	          `[ ${pair.join(" ")} ]`
+	      )
+	      .join("　");
+	  }
+
+	  /*
+	   * 通常の4面子＋雀頭
+	   */
 	  const meldTexts =
 	    structure.melds.map(
 	      meld => meld.join(" ")
@@ -1089,7 +3336,10 @@
 	    ...meldTexts,
 	    pairText
 	  ]
-	    .map(group => `[ ${group} ]`)
+	    .map(
+	      group =>
+	        `[ ${group} ]`
+	    )
 	    .join("　");
 	}
 
@@ -1628,6 +3878,102 @@
 		) {
 		  currentGeneratedQuestion =
 		    createIttsuQuestion(
+		      conditions
+		    );
+		} else if (
+		  conditions.targetYaku ===
+		  "sanankou"
+		) {
+		  currentGeneratedQuestion =
+		    createSanankouQuestion(
+		      conditions
+		    );
+		} else if (
+		  conditions.targetYaku ===
+		  "sanshokuDoukou"
+		) {
+		  currentGeneratedQuestion =
+		    createSanshokuDoukouQuestion(
+		      conditions
+		    );
+		} else if (
+		  conditions.targetYaku ===
+		  "toitoi"
+		) {
+		  currentGeneratedQuestion =
+		    createToitoiQuestion(
+		      conditions
+		    );
+		} else if (
+		  conditions.targetYaku ===
+		  "yakuhai"
+		) {
+		  currentGeneratedQuestion =
+		    createYakuhaiQuestion(
+		      conditions
+		    );
+		} else if (
+		  conditions.targetYaku ===
+		  "shousangen"
+		) {
+		  currentGeneratedQuestion =
+		    createShousangenQuestion(
+		      conditions
+		    );
+		} else if (
+		  conditions.targetYaku ===
+		  "honroutou"
+		) {
+		  currentGeneratedQuestion =
+		    createHonroutouQuestion(
+		      conditions
+		    );
+		} else if (
+		  conditions.targetYaku ===
+		  "chanta"
+		) {
+		  currentGeneratedQuestion =
+		    createChantaQuestion(
+		      conditions
+		    );
+		} else if (
+		  conditions.targetYaku ===
+		  "junchan"
+		) {
+		  currentGeneratedQuestion =
+		    createJunchanQuestion(
+		      conditions
+		    );
+		} else if (
+		  conditions.targetYaku ===
+		  "honitsu"
+		) {
+		  currentGeneratedQuestion =
+		    createHonitsuQuestion(
+		      conditions
+		    );
+		} else if (
+		  conditions.targetYaku ===
+		  "chinitsu"
+		) {
+		  currentGeneratedQuestion =
+		    createChinitsuQuestion(
+		      conditions
+		    );
+		} else if (
+		  conditions.targetYaku ===
+		  "ryanpeikou"
+		) {
+		  currentGeneratedQuestion =
+		    createRyanpeikouQuestion(
+		      conditions
+		    );
+		} else if (
+		  conditions.targetYaku ===
+		  "chiitoitsu"
+		) {
+		  currentGeneratedQuestion =
+		    createChiitoitsuQuestion(
 		      conditions
 		    );
 		} else {

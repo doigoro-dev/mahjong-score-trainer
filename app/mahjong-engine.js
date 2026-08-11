@@ -685,6 +685,14 @@
 	  };
 	}
 
+	function createYakuman(name) {
+	  return {
+	    name,
+	    han: 13,
+	    yakuman: true
+	  };
+	}
+
 	function detectOpenHandYaku(
 	  question,
 	  decomposition,
@@ -714,6 +722,23 @@
 		  ...decomposition.concealedMelds,
 		  ...fixedMelds
 		];
+
+		const concealedTripletCount =
+		  countConcealedTriplets(
+		    question,
+		    melds,
+		    winningPlacement
+		  );
+
+		const isSuuankou =
+		  menzen &&
+		  concealedTripletCount === 4;
+
+		if (isSuuankou) {
+		  return [
+		    createYakuman("四暗刻")
+		  ];
+		}
 
 		const isPinfu =
 		  menzen &&
@@ -817,17 +842,13 @@
 	    );
 	  }
 
-	  if (
-	    countConcealedTriplets(
-		  question,
-		  melds,
-		  winningPlacement
-		) >= 3
-	  ) {
-	    yaku.push(
-	      createYaku("三暗刻", 2)
-	    );
-	  }
+	if (
+	  concealedTripletCount >= 3
+	) {
+	  yaku.push(
+	    createYaku("三暗刻", 2)
+	  );
+	}
 
 	  if (
 	    melds.filter(isKanMeld).length >= 3
@@ -1179,7 +1200,8 @@
 		  question,
 		  totalHan,
 		  fu,
-		  winType = question.winType
+		  winType = question.winType,
+		  yaku = []
 		) {
 		  const dealer = question.seatWind === "east";
 		  const tsumo = winType === "tsumo";
@@ -1188,10 +1210,19 @@
 		  let basePoints;
 		  let kiriageMangan = false;
 
-		  if (totalHan >= 13) {
-		    category = "数え役満";
-		    basePoints = 8000;
-		  } else if (totalHan >= 11) {
+		const hasYakuman =
+		  yaku.some(
+		    item =>
+		      item.yakuman === true
+		  );
+
+		if (hasYakuman) {
+		  category = "役満";
+		  basePoints = 8000;
+		} else if (totalHan >= 13) {
+		  category = "数え役満";
+		  basePoints = 8000;
+		} else if (totalHan >= 11) {
 		    category = "三倍満";
 		    basePoints = 6000;
 		  } else if (totalHan >= 8) {
@@ -1385,13 +1416,14 @@
 	        winningPlacement
 	      );
 
-	      const score =
-	        calculateScoreFromFuHan(
-	          question,
-	          totalHan,
-	          fu,
-	          question.winType
-	        );
+		const score =
+		  calculateScoreFromFuHan(
+		    question,
+		    totalHan,
+		    fu,
+		    question.winType,
+		    yaku
+		  );
 
 	      candidates.push({
 	        yaku,
