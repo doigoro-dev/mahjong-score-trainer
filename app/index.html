@@ -188,7 +188,7 @@ Ver1.1 問題管理情報
     }
 
     .stage {
-      --tile-size: clamp(16px, calc((100vw - 150px) / 14), 74px);
+      --tile-size: clamp(16px, calc((100vw - 150px) / 14), 66px);
       --tile-gap: clamp(1px, 0.45vw, 6px);
       --winning-gap: clamp(5px, 2vw, 26px);
       --winning-label-size: clamp(0.5rem, 1.7vw, 0.78rem);
@@ -206,7 +206,7 @@ Ver1.1 問題管理情報
 
     @supports (width: 1cqw) {
       .stage {
-        --tile-size: clamp(16px, calc((100cqw - 100px) / 14), 74px);
+        --tile-size: clamp(16px, calc((100cqw - 100px) / 14), 66px);
         --tile-gap: clamp(1px, 0.45cqw, 6px);
         --winning-gap: clamp(5px, 2cqw, 26px);
         --winning-label-size: clamp(0.5rem, 1.7cqw, 0.78rem);
@@ -333,32 +333,43 @@ Ver1.1 問題管理情報
       横向き牌を少し大きく見せ、その分だけ同じ副露内の縦向き牌を細めることで、
       グループ全体の横幅を増やしすぎず、縦牌・横牌の存在感を均等にする。
     */
-    .open-meld-tiles .tile-wrapper:not(.is-sideways) {
-	  flex-basis: calc(var(--tile-size) * 0.78);
-	  width: calc(var(--tile-size) * 0.78);
-	  margin-right: calc(var(--tile-size) * -0.08);
+	.open-meld-tiles .tile-wrapper:not(.is-sideways) {
+	  flex-basis: var(--tile-size);
+	  width: var(--tile-size);
+	  margin-right: 0;
+	  background: #fff;
+	  border-radius: 6px;
+	  overflow: hidden;
 	}
 
-    .open-meld-tiles .tile-wrapper:not(.is-sideways) .tile-svg {
-      width: calc(var(--tile-size) * 0.78);
-    }
+	.open-meld-tiles .tile-wrapper:not(.is-sideways) .tile-svg {
+	  width: 100%;
+	}
 
-    .tile-wrapper.is-sideways {
-	  flex-basis: calc(var(--tile-size) * 1.44);
-	  width: calc(var(--tile-size) * 1.44);
-	  height: calc(var(--tile-size) * 1.02);
-	  margin-left: calc(var(--tile-size) * -0.20);
-	  margin-right: calc(var(--tile-size) * -0.30);
+	.tile-wrapper.is-sideways {
+	  flex: 0 0 calc(var(--tile-size) * 1.35);
+	  width: calc(var(--tile-size) * 1.35);
+	  height: var(--tile-size);
+
+	  margin-left: 2px;
+	  margin-right: 2px;
+
+	  display: flex;
+	  align-items: center;
 	  justify-content: center;
-	  overflow: visible;
+
+	  background: #fff;
+	  border-radius: 6px;
 	}
 
-    .tile-wrapper.is-sideways .tile-svg {
-      width: calc(var(--tile-size) * 1.02);
-      max-width: none;
-      transform: rotate(-90deg);
-      transform-origin: center center;
-    }
+	.tile-wrapper.is-sideways .tile-svg {
+	  width: var(--tile-size);
+	  height: auto;
+	  max-width: none;
+
+	  transform: rotate(-90deg);
+	  transform-origin: center center;
+	}
 
     .winning-tile-area {
       display: flex;
@@ -387,6 +398,8 @@ Ver1.1 問題管理情報
       min-width: 0;
       flex-direction: column;
       align-items: center;
+      background: #fff;
+      border-radius: 6px;
     }
 
     .tile-svg {
@@ -807,6 +820,9 @@ Ver1.1 問題管理情報
 
     .practical-dora-tiles .tile-wrapper {
       width: clamp(29px, 4.5vw, 44px);
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      background: #ffffff;
     }
 
     .practical-result {

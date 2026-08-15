@@ -620,22 +620,60 @@ function createHonor(tileCode) {
 }
 
 function createTile(tileCode) {
+  const wrapper = document.createElement("div");
+  wrapper.className = "tile-wrapper";
+
   const suitedTile = /^([1-9])([mps])$/.exec(tileCode);
 
+  let fileName;
+  let label;
+
   if (suitedTile) {
-    const number = Number(suitedTile[1]);
+    const number = suitedTile[1];
     const suit = suitedTile[2];
 
-    if (suit === "m") return createManzu(number);
-    if (suit === "p") return createPinzu(number);
-    if (suit === "s") return createSouzu(number);
+    if (suit === "m") {
+      fileName = `Man${number}.svg`;
+      label = `${number}萬`;
+    } else if (suit === "p") {
+      fileName = `Pin${number}.svg`;
+      label = `${number}筒`;
+    } else if (suit === "s") {
+      fileName = `Sou${number}.svg`;
+      label = `${number}索`;
+    }
+  } else {
+    const honorTiles = {
+      east:  { fileName: "Ton.svg",   label: "東" },
+      south: { fileName: "Nan.svg",   label: "南" },
+      west:  { fileName: "Shaa.svg",  label: "西" },
+      north: { fileName: "Pei.svg",   label: "北" },
+      white: { fileName: "Haku.svg",  label: "白" },
+      green: { fileName: "Hatsu.svg", label: "發" },
+      red:   { fileName: "Chun.svg",  label: "中" }
+    };
+
+    const honorTile = honorTiles[tileCode];
+
+    if (honorTile) {
+      fileName = honorTile.fileName;
+      label = honorTile.label;
+    }
   }
 
-  if (HONOR_TILES[tileCode]) {
-    return createHonor(tileCode);
+  if (!fileName) {
+    throw new Error(`未対応の牌コードです: ${tileCode}`);
   }
 
-  throw new Error(`未対応の牌コードです: ${tileCode}`);
+  const image = document.createElement("img");
+  image.className = "tile-svg";
+  image.src = `assets/tiles/${fileName}`;
+  image.alt = label;
+  image.draggable = false;
+
+  wrapper.appendChild(image);
+
+  return wrapper;
 }
 
 
